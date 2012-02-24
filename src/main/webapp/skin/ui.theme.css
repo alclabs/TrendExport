@@ -1,0 +1,94 @@
+html, body {
+    font-family: sans-serif;
+    color: black;
+    height: 100%;
+    padding: 0;
+    margin: 0;
+}
+
+div.customTabs {
+    min-height: 50%;
+    border: none;
+}
+
+/* DynaTree Related*/
+ul.dynatree-container {
+    border: none;
+    overflow: visible;
+}
+
+span.selectedNode {
+    font-weight: bold;
+}
+
+div.potentialtrends {
+    width: 300px;
+    height: 50%;
+    min-height: 40%;
+    float: left;
+    overflow: auto;
+    /*margin-left: 10%;*/
+}
+
+/*Add Or Remove Buttons*/
+div.addremovebuttons {
+    margin-left: auto;
+    margin-right: auto;
+    width: 35%;
+    padding: 7px;
+
+    /*background: #E0E0E0;*/
+    background: #C8DDFD;
+
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+    border-bottom-left-radius: 10px;
+    border-bottom-right-radius: 10px;
+}
+
+/*<!--Maintenance Page-->*/
+input.smallInput {
+    width: 30px;
+}
+
+div.content_veryPaleBlue {
+    height: 8%;
+    padding: 10px;
+    background-color: #F5F5F5;
+    /*background-color: #EBF1F6;*/
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+    border-bottom-left-radius: 5px;
+    border-bottom-right-radius: 5px;
+}
+
+div.groupTitle {
+    border: 0;
+    font-size: 15px;
+
+    padding-top: 10px;
+    padding-left: 20px;
+    padding-bottom: 10px;
+    /*padding: 10px;*/
+    background: #C8DDFD;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+    border-bottom-left-radius: 5px;
+    border-bottom-right-radius: 5px;
+}
+
+div.groupContent {
+    font-size: 12px;
+
+    position: relative;
+    padding-top: 5px;
+    padding-left: 50px;
+}
+
+button.smallButton {
+    width: 75px;
+}
+
+button.largeButton {
+    width: 150px;
+}

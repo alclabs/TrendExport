@@ -1,0 +1,22 @@
+div {
+    padding-left: 1%;
+}
+
+div.helpTitle {
+    font-weight: bold;
+    background: #C8DDFD;
+    padding-bottom: 2px;
+    padding-top: 2px;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+    border-bottom-left-radius: 5px;
+    border-bottom-right-radius: 5px;
+}
+
+div.helpContent {
+    padding-left: 3%;
+}
+
+div.helpContentList {
+    padding-left: 7%;
+}

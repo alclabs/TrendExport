@@ -1,0 +1,27 @@
+// this bit of complexity is to pull down the main build script from the alclabs maven repository
+// and then apply it.
+configurations { gradleScript }
+repositories { mavenRepo url: 'http://repo.alcshare.com' }
+dependencies { gradleScript group: 'com.alcshare', name: 'alclabs-gradle', ext: 'gradle', version: '1.0.7' }
+apply from: configurations.gradleScript.resolve().iterator().next()
+
+info {
+  name = 'TrendExport'
+  description = 'Something...'
+  version = '1.0'
+  vendor = 'ALC Labs'
+}
+
+dependencies {
+   compile 'jstl:jstl:1.2'
+   compile 'taglibs:standard:1.1.2'
+   compile 'org.json:json:20090211'
+   testCompile 'org.spockframework:spock-core:0.5-groovy-1.8', { exclude(org: 'org.codehaus.groovy', module: 'groovy-all') }
+   testCompile 'org.codehaus.groovy:groovy:1.8.3'
+
+   providedCompile 'com.controlj.green:addonsupport-api-addon:1.2.+'
+   providedCompile 'com.controlj.green:directaccess-api-addon:1.2.+'
+   providedCompile 'com.controlj.green:webaccess-api-addon:1.2.+'
+    providedCompile 'com.controlj.green:xdatabase-api-addon:1.2.+'
+   providedCompile 'javax.servlet:servlet-api:2.5'
+}

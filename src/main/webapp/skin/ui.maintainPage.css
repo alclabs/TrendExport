@@ -1,0 +1,232 @@
+/*
+ * Colour dictionary:
+ *
+ * Table control elements:   #719ba7
+ * Header cells:             #66A9BD
+ * Body header cells:        #91c5d4
+ * Body content cells:       #d5eaf0
+ * Body content cells (alt): #bcd9e1
+ * Footer header:            #b0cc7f
+ * Footer content:           #d7e1c5
+ */
+
+div.collectorStatus {
+    float: right;
+    font: 90%/1.45em Arial, Verdana, Helvetica, sans-serif;
+}
+
+body {
+	font: 80%/1.45em Arial, Verdana, Helvetica, sans-serif;
+	margin: 0;
+	padding: 0;
+	color: #111;
+	background-color: #fff;
+}
+
+#container {
+	margin: 0 auto;
+	width: auto;
+}
+
+h1 {
+	text-align: center;
+	font-size: 1.2em;
+	font-weight: bold;
+	margin: 1em 0;
+}
+
+
+/*
+ * DataTables framework
+ */
+div.dataTables_wrapper {
+	/*background-color: #719ba7;*/
+    /*background-color: #E0E0E0*/
+}
+
+div.dataTables_length {
+	float: left;
+}
+
+div.dataTables_filter {
+	float: right;
+}
+
+div.dataTables_info {
+	padding: 9px 6px 6px 6px;
+	float: left;
+}
+
+div.dataTables_paginate {
+	float: right;
+}
+
+div.dataTables_length,
+div.dataTables_filter,
+div.dataTables_paginate {
+	padding: 6px;
+}
+
+/* Self clearing - http://www.webtoolkit.info/css-clearfix.html */
+.dataTables_wrapper:after {
+	content: ".";
+	display: block;
+	clear: both;
+	visibility: hidden;
+	line-height: 0;
+	height: 0;
+}
+ 
+html[xmlns] .dataTables_wrapper {
+	display: block;
+}
+ 
+* html .dataTables_wrapper {
+	height: 1%;
+}
+
+
+/*
+ * Table styles
+ */
+table.pretty {
+	width: 100%;
+	clear: both;
+}
+
+table.pretty td,
+table.pretty th {
+	padding: 5px;
+	border: 1px solid #fff;
+}
+
+/* Header cells */
+table.pretty thead th {
+	text-align: center;
+	/*background: #66a9bd;*/
+    background-color: #A2B5CD;
+}
+
+/* Body cells */
+table.pretty tbody th {
+	text-align: left;
+	/*background: #91c5d4;*/
+    /*background: #E0E0E0;*/
+}
+	
+table.pretty tbody td {
+	text-align: center;
+	/*background: #d5eaf0;*/
+}
+		
+table.pretty tbody tr.odd td { 
+	/*background: #bcd9e1;*/
+    background: #F0F0F0 ;
+}
+
+table.pretty tbody tr.even td {
+	/*background: #bcd9e1;*/
+    background: #ffffff ;
+}
+
+/* Footer cells */	
+table.pretty tfoot th {
+	background: #b0cc7f;
+	text-align: left;
+}
+	
+table.pretty tfoot td {
+	background: #d7e1c5;
+	text-align: center;
+	font-weight: bold;
+}
+
+/*
+ * Pagination
+ */
+span.paginate_button,
+span.paginate_active {
+	display: inline-block;
+	/*background-color: #608995;*/
+	background-color: #A2B5CD;
+    padding: 2px 6px;
+	margin-left: 2px;
+	cursor: pointer;
+	*cursor: hand;
+}
+
+span.paginate_active {
+	background-color: transparent;
+	border: 1px solid black;
+}
+
+span.paginate_button_disabled {
+	/*color: #3d6672;*/
+    color: #E0E0E0;
+}
+
+div.dataTables_paginate span>span {
+	width: 15px;
+	text-align: center;
+}
+
+/* Selected Colors */
+
+table.pretty tr.even.row_selected td {
+background-color: #D6E9FA;
+	/*background-color: #B0BED9;*/
+}
+
+table.pretty tr.odd.row_selected td {
+    background-color: #C8DEFE;
+    /*background-color: #B9D3EE;*/
+	/*background-color: #9FAFD1;*/
+}
+
+table.KeyTable td {
+	border: 3px solid transparent;
+}
+
+table.KeyTable td.focus {
+	border: 3px solid #3366FF;
+}
+
+.ex_highlight #maintenanceTable tbody tr.even:hover, #maintenanceTable tbody tr.even td.highlighted {
+	background-color: #ECFFB3;
+}
+
+.ex_highlight #maintenanceTable tbody tr.odd:hover, #maintenanceTable tbody tr.odd td.highlighted {
+	background-color: #E6FF99;
+}
+
+.ex_highlight_row #maintenanceTable tr.even:hover {
+	background-color: #ECFFB3;
+}
+
+.ex_highlight_row #maintenanceTable tr.even:hover td.sorting_1 {
+	background-color: #DDFF75;
+}
+
+.ex_highlight_row #maintenanceTable tr.even:hover td.sorting_2 {
+	background-color: #E7FF9E;
+}
+
+.ex_highlight_row #maintenanceTable tr.even:hover td.sorting_3 {
+	background-color: #E2FF89;
+}
+
+.ex_highlight_row #maintenanceTable tr.odd:hover {
+	background-color: #E6FF99;
+}
+
+.ex_highlight_row #maintenanceTable tr.odd:hover td.sorting_1 {
+	background-color: #D6FF5C;
+}
+
+.ex_highlight_row #maintenanceTable tr.odd:hover td.sorting_2 {
+	background-color: #E0FF84;
+}
+
+.ex_highlight_row #maintenanceTable tr.odd:hover td.sorting_3 {
+	background-color: #DBFF70;
+}

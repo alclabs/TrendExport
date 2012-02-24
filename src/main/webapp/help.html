@@ -1,0 +1,129 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+        "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<!--
+~ Copyright (c) 2011 Automated Logic Corporation
+~
+~ Permission is hereby granted, free of charge, to any person obtaining a copy
+~ of this software and associated documentation files (the "Software"), to deal
+~ in the Software without restriction, including without limitation the rights
+~ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+~ copies of the Software, and to permit persons to whom the Software is
+~ furnished to do so, subject to the following conditions:
+~
+~ The above copyright notice and this permission notice shall be included in
+~ all copies or substantial portions of the Software.
+~
+~ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+~ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+~ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+~ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+~ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+~ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+~ THE SOFTWARE.
+-->
+
+<head>
+    <link rel="stylesheet" type='text/css' href='skin/ui.helpPage.css'/>
+</head>
+
+<body>
+<div>
+    The Trend Export add-on is intended to store trends in a secondary database that is available for use outside of
+    WebCTRL. Each trend source has metadata stored in what is aptly named "metadata" and has each trend source's source
+    path,
+    display name, and its type (Analog, Digital, or
+    EquimpentColor - only present in WebCTRLv5.5 and up) as they appear in WebCTRL as well as the table name that is
+    being used by this add-on.
+</div>
+
+<br/>
+
+<div class="helpTitle">
+    Using the Interface
+</div>
+
+<div class="helpContent">
+    On startup, one of the following tabs will be displayed:
+    <li>The 'Settings' tab: The connection settings must be configured to connect to the database where the trend
+        sources
+        will be stored by this add-on.
+    </li>
+    <li>The 'Maintain' tab: A table of the trend sources currently being collected.</li>
+</div>
+
+<br/>
+
+<div class="helpTitle">
+    Maintain Tab
+    <br/>
+</div>
+
+<div class="helpContent">
+    This tab shows what is currently trending and some actions that can be performed on any of the selected row(s).
+    <br/>
+    <li>The "Collect Data Now" allows the add-on to collect data from the WEBCTRL database as soon as possible, but be
+    careful! If a scheduled collection is taking place, this will interrupt the scheduled collection to until
+    the manual collection is complete.</li>
+    <li>Removing a source: This action removes a source from the currently collected items but provides two options.</li>
+    <blockquote>
+        1) Clearing all data and dropping the table wher the data was stored or <br/>
+        2) Not dropping the table and therefore keeping the data in the database.
+    </blockquote>
+</div>
+
+<div class="helpTitle">
+    Add Or Remove Tab
+</div>
+
+<div class="helpContent">
+    On this tab you can add new sources or remove sources currently being collected. On the left of the page is the
+    system tree.
+    This tree is a "thin" tree that only shows zone equipment and their parents (up to the system root).
+    Any equipment whose text is bold in the tree is already being collected.
+    Selecting an item in the tree causes the page to display the the table name and the option
+    to remove the source which provides the same two removal options presented in the Maintain tab's remove button.
+    <br/>
+    The middle of the page contains the data about the selected node - if any. When adding a source, a table name will
+    be automatically generated and present in the text field. The
+    name may be changed if it is not sufficient or verbose enough.<br/><br/>
+
+    <b>Table names must adhere to the following rules:</b>
+    <li>The first character must be a letter</li>
+    <li>The entire table name must be less than or equal to 18 characters</li>
+    <li>The only characters allowed are letters (A-Z, a-z), numbers (0-9), and an underscore ( '_' )</li>
+    <blockquote>
+        Examples:
+        <li>"abcDEF_"</li>
+        <li>"abc123"</li>
+        <li>"An_example_"</li>
+    </blockquote>
+</div>
+
+<br/>
+
+<div class="helpTitle">
+    Settings Page
+</div>
+
+<div class="helpContent">
+
+    <li>Connection Settings</li>
+    This is where the connection settings may be checked, changed, and tested. It is possible to check the connection
+    without saving by changing any connection-related option and
+    pressing the "Test Connection" button. A message will appear showing the results.
+
+    <li>Automatic Collection Settings</li>
+    Here there are two options: The first option allows collection to happen anywhere from 1 to 320 hours (30 days). It
+    is recommended that the value not be set too high or too low because either may cause another collection to start
+    before the first is incomplete starving a WebCTRL of resources. The second option is set at a daily collection at a
+    specific time every 24 hours.
+
+    <li>Alarm Settings</li>
+    This is the path to the Alarm Control Program that allows the add-on to alert system administrators that something
+    has happened that requires their attention. It is optional but recommended.
+
+</div>
+
+</body>
+</html>

@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns="http://java.sun.com/xml/ns/javaee"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://java.sun.com/xml/ns/javaee
+		  http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+           version="2.5">
+
+    <security-constraint>
+      <web-resource-collection>
+         <web-resource-name>WEB</web-resource-name>
+         <url-pattern>/*</url-pattern>
+         <http-method>GET</http-method>
+         <http-method>POST</http-method>
+      </web-resource-collection>
+      <auth-constraint>
+         <role-name>login</role-name>
+      </auth-constraint>
+   </security-constraint>
+
+   <login-config>
+      <auth-method>FORM</auth-method>
+      <form-login-config>
+         <form-login-page>/loginout/login.jsp</form-login-page>
+         <form-error-page>/loginout/fail_login.jsp</form-error-page>
+      </form-login-config>
+   </login-config>
+
+    <servlet>
+        <servlet-name>addOrRemove</servlet-name>
+        <servlet-class>com.controlj.addon.trendexport.servlets.AddRemoveServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>addOrRemove</servlet-name>
+        <url-pattern>/servlets/addOrRemoveSource</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>treedata</servlet-name>
+        <servlet-class>com.controlj.addon.trendexport.servlets.TreeDataServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>treedata</servlet-name>
+        <url-pattern>/servlets/treedata/*</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>currentTrends</servlet-name>
+        <servlet-class>com.controlj.addon.trendexport.servlets.TableListServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>currentTrends</servlet-name>
+        <url-pattern>/servlets/currentTrends</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>settings</servlet-name>
+        <servlet-class>com.controlj.addon.trendexport.servlets.SettingsPageServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>settings</servlet-name>
+        <url-pattern>/servlets/settings</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>tester</servlet-name>
+        <servlet-class>com.controlj.addon.trendexport.servlets.TestServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>tester</servlet-name>
+        <url-pattern>/servlets/tester</url-pattern>
+    </servlet-mapping>
+
+    <listener>
+        <listener-class>com.controlj.addon.trendexport.util.ScheduledTrendCollector</listener-class>
+    </listener>
+</web-app>
