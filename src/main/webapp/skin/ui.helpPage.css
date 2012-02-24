@@ -2,7 +2,7 @@ div {
     padding-left: 1%;
 }
 
-div.helpTitle {
+div.helpTitle, div.helpSubTitle {
     font-weight: bold;
     background: #C8DDFD;
     padding-bottom: 2px;
@@ -11,6 +11,11 @@ div.helpTitle {
     border-top-right-radius: 5px;
     border-bottom-left-radius: 5px;
     border-bottom-right-radius: 5px;
+    margin-top: 1em;
+}
+
+div.helpTitle {
+    font-size: 1.5em;
 }
 
 div.helpContent {

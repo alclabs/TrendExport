@@ -31,6 +31,7 @@
     <link rel='stylesheet' type='text/css' href='skin/jquery.svg.css'/>
     <link rel="stylesheet" type="text/css" href="skin/ui.theme.css"/>
     <link rel="stylesheet" type="text/css" href="skin/ui.maintainPage.css"/>
+    <link rel="stylesheet" type='text/css' href='skin/ui.helpPage.css'/>
 
     <script type="text/javascript" src="js/jquery-1.6.4.min.js"></script>
     <script type="text/javascript" src="js/jquery-ui-1.8.9.custom.min.js"></script>

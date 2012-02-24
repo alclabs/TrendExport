@@ -24,106 +24,138 @@
 -->
 
 <head>
-    <link rel="stylesheet" type='text/css' href='skin/ui.helpPage.css'/>
+   <link rel="stylesheet" type='text/css' href='skin/ui.helpPage.css'/>
 </head>
 
 <body>
 <div>
-    The Trend Export add-on is intended to store trends in a secondary database that is available for use outside of
-    WebCTRL. Each trend source has metadata stored in what is aptly named "metadata" and has each trend source's source
-    path,
-    display name, and its type (Analog, Digital, or
-    EquimpentColor - only present in WebCTRLv5.5 and up) as they appear in WebCTRL as well as the table name that is
-    being used by this add-on.
+   <p>This add-on exports trend data to a secondary database that is available for use by third-party applications.
+   This add-on can be configured to periodically export data from selected trend sources to an external
+   database.</p>
 </div>
 
-<br/>
-
-<div class="helpTitle">
-    Using the Interface
-</div>
-
+<div class="helpTitle">Using the Interface</div>
 <div class="helpContent">
-    On startup, one of the following tabs will be displayed:
-    <li>The 'Settings' tab: The connection settings must be configured to connect to the database where the trend
-        sources
-        will be stored by this add-on.
-    </li>
-    <li>The 'Maintain' tab: A table of the trend sources currently being collected.</li>
+   <p>The user needs to specify the database to which the add-on will exported data and the WebCTRL trend sources which should be exported.
+   This interface also has some simple database maintainance features.</p>
+   <div class="helpSubTitle">Maintain Tab</div>
+   <div class="helpContent">
+       <p>This tab shows all exported trend sources that are in the export database.  Because they can be a large number of
+       exported trend sources, this data is represented as a table that can be paged through and/or searched.  Rows in the
+       table can be selected (by clicking anywhere in the row) and multiple rows can be simultaneously selected.  There are
+       two action buttons that affect selected table rows:</p>
+       <ul>
+          <li>The "Collect Data Now" button allows the add-on to collect the selected sources latest data from the WEBCTRL database as
+             soon as possible. If a scheduled collection is taking place, this will interrupt the scheduled collection to until
+             the manual collection is complete.</li>
+          <li>The "Remove Source..." button removes a source from the currently collected items and provides two options.  You can
+             either select to clear all associated data from the database or keep the data but stop periodically exported new trend data.</li>
+       </ul>
+   </div>
+
+   <div class="helpSubTitle">Add Or Remove Tab</div>
+   <div class="helpContent">
+       <p>On this tab you can add new sources or remove sources currently being periodically exported. On the left of the page is the
+       system tree.  This tree is a "thin" tree that only shows equipment with trend souces. Any equipment whose text is bold in the
+       tree is already being periodically exported. Selecting an item in the tree causes the page to display the the table name and the option
+       to remove the source which provides the same two removal options presented in the Maintain tab's remove button.</p>
+       <br/>
+       <p>The middle of the page contains the data about the selected node - if any. When adding a source, a table name will
+       be automatically generated and presented in the text field. The name may be changed if desired.</p>
+       <br/>
+
+       <b>Table names must adhere to the following rules:</b>
+       <ul>
+       <li>The first character must be a letter</li>
+       <li>The entire table name must be less than or equal to 18 characters</li>
+       <li>The only characters allowed are letters (A-Z, a-z), numbers (0-9), and an underscore ( '_' )</li>
+       </ul>
+       <blockquote>
+           Examples: &nbsp;&nbsp;&nbsp; "abcDEF_" &nbsp;&nbsp;&nbsp; "abc123" &nbsp;&nbsp;&nbsp; "An_example_"
+       </blockquote>
+   </div>
+
+   <div class="helpSubTitle">Settings Page</div>
+   <div class="helpContent">
+       <p>Database Connection Settings<br/>
+       This is where the database connection settings may be checked, changed, and tested. It is possible to check the connection
+       without saving by changing any connection-related option and pressing the "Test Connection" button. A message will appear showing the results.</p>
+
+       <p>Automatic Collection Settings<br/>
+       Here there are two options. The first option causes collection to occur every 1 to 320 hours (30 days). The second option causes a
+       collection to occur at a specified time every day (i.e. the collection occurs every 24 hours).</p>
+
+       <p>Alarm Settings<br/>
+       This is the path to the Alarm Control Program that allows the add-on to alert system administrators that something
+       has happened that requires their attention. The control program is provided with this add-on, and it's use is optional but recommended.</p>
+   </div>
 </div>
 
-<br/>
-
-<div class="helpTitle">
-    Maintain Tab
-    <br/>
-</div>
-
+<div class="helpTitle">Database Structure</div>
 <div class="helpContent">
-    This tab shows what is currently trending and some actions that can be performed on any of the selected row(s).
-    <br/>
-    <li>The "Collect Data Now" allows the add-on to collect data from the WEBCTRL database as soon as possible, but be
-    careful! If a scheduled collection is taking place, this will interrupt the scheduled collection to until
-    the manual collection is complete.</li>
-    <li>Removing a source: This action removes a source from the currently collected items but provides two options.</li>
-    <blockquote>
-        1) Clearing all data and dropping the table wher the data was stored or <br/>
-        2) Not dropping the table and therefore keeping the data in the database.
-    </blockquote>
+   <p>The database schema is intended to be simple and easy to use in other applications.  This schema is fixed and cannot be
+   configured.  There is always a "metadata" table and one table per trend source that is exported from WebCTRL.</p>
+   <div class="helpSubTitle">Metadata Table</div>
+   <div class="helpContent">
+      <p>The metadata table contains one row for every trend source that has been exported to this database.  This table consists
+      of the following columns:</p>
+      <table>
+         <thead>
+         <th>Column Name</th>
+         <th>Column Type</th>
+         <th>Description</th>
+         </thead>
+         <tbody>
+         <tr><td>ID</td><td>integer</td><td>An autogenerated integer used as the primary key for this table.</td></tr>
+         <tr><td>ReferencePath</td><td>string</td><td>The full reference name path to the trend source.</td></tr>
+         <tr><td>DisplayName</td><td>string</td><td>The display name of the trend source.</td></tr>
+         <tr><td>DisplayPath</td><td>string</td><td>The full display name path to the trend source</td></tr>
+         <tr><td>TableName</td><td>string</td><td>The name of the table which has the data for this trend source.</td></tr>
+         <tr><td>SourceType</td><td>short integer</td><td>1 for analog trends, 2 for digital trends, or 3 for equipment color (only in WebCTRL v5.5 and later)</td></tr>
+         </tbody>
+      </table>
+   </div>
+   <div class="helpSubTitle">Trend Data Tables</div>
+   <div class="helpContent">
+      <p>Each trend source's data is put into a separate table.  The source type (which can be found in the metadata table) determines the data type of the "TrendData" column.
+      For analog trends, the "TrendData" column is a floating point number, for digial trends it is a boolean and for equipment color trends it is a short.  Trend data can
+      also be missing, which we call "holes" in the data.  This table therefore has a "TrendType" column which will have a value of 1 when the row represents a trend data sample.
+      When a hole in the data is found, two records are written to the table.  The first has a type of 2 and marks the start of the hole, and second has a type of 3 and marks
+      the end of the hole.</p>
+      <table>
+         <thead>
+         <th>Column Name</th>
+         <th>Column Type</th>
+         <th>Description</th>
+         </thead>
+         <tbody>
+         <tr><td>ID</td><td>integer</td><td>An autogenerated integer used as the primary key for this table.</td></tr>
+         <tr><td>DateStamp</td><td>date</td><td>The date when this sample (or hole) occurred.</td></tr>
+         <tr><td>TrendData</td><td>variable*</td><td>The sample data, or null if a hole</td></tr>
+         <tr><td>TrendType</td><td>short</td><td>1 for a data sample, 2 for a hole start, 3 for a hole end</td></tr>
+         </tbody>
+      </table>
+      <br/>
+      <em>* floating point for analog trends, boolean for digital trends and short for equipment color trends.  Short values for equipment colors are:
+      <ul>
+         <li>Mustard color (-1). Status unknown. This is used when the system is in design mode.</li>
+         <li>Purple color (0). No communications because of a hardware problem.</li>
+         <li>Gray color (1). Unoccupied or Inactive.</li>
+         <li>Red color (2). Heating Alarm.</li>
+         <li>Dark Blue color (3). Maximum (or second stage) heating.</li>
+         <li>Light Blue color (4). Moderate (or first stage) heating.</li>
+         <li>Green color (5). Operational &mdash; Heating or Cooling not required.</li>
+         <li>Speckled Green color (6). Free Cooling.</li>
+         <li>Yellow color (7). Moderate (or first stage) cooling.</li>
+         <li>Orange color (8). Maximum (or second stage) cooling.</li>
+         <li>Red color (9). Cooling Alarm.</li>
+         <li>White color (10). Occupied or active.</li>
+         <li>Coral color (13).  Control program error.</li>
+         <li>Charcoal color (14). Download required (or in progress).</li>
+         <li>Purple color (15). No communications because of a software error.</li>
+      </ul>
+      </em>
+   </div>
 </div>
-
-<div class="helpTitle">
-    Add Or Remove Tab
-</div>
-
-<div class="helpContent">
-    On this tab you can add new sources or remove sources currently being collected. On the left of the page is the
-    system tree.
-    This tree is a "thin" tree that only shows zone equipment and their parents (up to the system root).
-    Any equipment whose text is bold in the tree is already being collected.
-    Selecting an item in the tree causes the page to display the the table name and the option
-    to remove the source which provides the same two removal options presented in the Maintain tab's remove button.
-    <br/>
-    The middle of the page contains the data about the selected node - if any. When adding a source, a table name will
-    be automatically generated and present in the text field. The
-    name may be changed if it is not sufficient or verbose enough.<br/><br/>
-
-    <b>Table names must adhere to the following rules:</b>
-    <li>The first character must be a letter</li>
-    <li>The entire table name must be less than or equal to 18 characters</li>
-    <li>The only characters allowed are letters (A-Z, a-z), numbers (0-9), and an underscore ( '_' )</li>
-    <blockquote>
-        Examples:
-        <li>"abcDEF_"</li>
-        <li>"abc123"</li>
-        <li>"An_example_"</li>
-    </blockquote>
-</div>
-
-<br/>
-
-<div class="helpTitle">
-    Settings Page
-</div>
-
-<div class="helpContent">
-
-    <li>Connection Settings</li>
-    This is where the connection settings may be checked, changed, and tested. It is possible to check the connection
-    without saving by changing any connection-related option and
-    pressing the "Test Connection" button. A message will appear showing the results.
-
-    <li>Automatic Collection Settings</li>
-    Here there are two options: The first option allows collection to happen anywhere from 1 to 320 hours (30 days). It
-    is recommended that the value not be set too high or too low because either may cause another collection to start
-    before the first is incomplete starving a WebCTRL of resources. The second option is set at a daily collection at a
-    specific time every 24 hours.
-
-    <li>Alarm Settings</li>
-    This is the path to the Alarm Control Program that allows the add-on to alert system administrators that something
-    has happened that requires their attention. It is optional but recommended.
-
-</div>
-
 </body>
 </html>
