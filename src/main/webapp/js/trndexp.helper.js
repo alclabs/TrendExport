@@ -22,16 +22,16 @@
 
 function collectData(lookups)
 {
-    for (var index = 0; index < lookups.length; index++)
-    {
+//    for (var index = 0; index < lookups.length; index++)
+//    {
         var objToSend = {
             "action": "collectData",
-            "nodeLookupString": lookups[index]
+            "nodeLookupString": lookups
         };
 
         makeRequestToCollector(objToSend);
         // if failed, alert user and continue
-    }
+//    }
 }
 
 function createEnableCollectionRequest(nodeKey)

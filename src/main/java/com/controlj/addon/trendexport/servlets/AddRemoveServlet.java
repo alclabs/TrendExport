@@ -128,6 +128,7 @@ public class AddRemoveServlet extends HttpServlet
         {
             try
             {
+                synchronizer.connect();
                 DataCollector.collectDataForSource(source, synchronizer);
             }
             catch (SystemException e)
@@ -137,6 +138,22 @@ public class AddRemoveServlet extends HttpServlet
             catch (ActionExecutionException e)
             {
                 ErrorHandler.handleError("AddRemove - ActionExecution Error", e);
+            }
+            catch (DatabaseVersionMismatchException e)
+            {
+                e.printStackTrace();
+            }
+            catch (UpgradeException e)
+            {
+                e.printStackTrace();
+            }
+            catch (DatabaseException e)
+            {
+                e.printStackTrace();
+            }
+            finally {
+                if (synchronizer != null)
+                    synchronizer.disconnect();
             }
         }
     }
