@@ -139,4 +139,15 @@ public class SourceMappings
 
         return false;
     }
+
+    public String getDisplayPathFromTableName(String tableName)
+    {
+        for (TrendPathAndDBTableName t : sourcesAndTableNames)
+        {
+            if (t.getDbTableName().equals(tableName))
+                return t.getTrendSourceDisplayPath();
+        }
+
+        return null;
+    }
 }

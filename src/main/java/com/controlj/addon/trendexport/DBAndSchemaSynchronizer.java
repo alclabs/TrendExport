@@ -64,7 +64,7 @@ public class DBAndSchemaSynchronizer
 
                 String tableName = TrendTableNameGenerator.generateUniqueTableName(loc.getDisplayName(), sourceMappings.getTableNames());
                 if (tableName != null)
-                    addSourceAndTableName(source, loc.getDisplayName(), tableName, trendSource.getType());
+                    addSourceAndTableName(source, loc.getDisplayName(), loc.getDisplayPath(), tableName, trendSource.getType());
             }
         });
 
@@ -87,13 +87,13 @@ public class DBAndSchemaSynchronizer
     }
 
     // human-generated name - or passed name from another method
-    public void addSourceAndTableName(String source, String displayName, String tableName, TrendSource.Type type)
+    public void addSourceAndTableName(String source, String displayName, String displayPath, String tableName, TrendSource.Type type)
             throws DatabaseVersionMismatchException, UpgradeException, DatabaseException
     {
         if (sourceMappings.containsSource(source))
             return; // todo: check that tableName matches
 
-        sourceMappings.addSourceAndName(new TrendPathAndDBTableName(source, displayName, tableName, type, true));
+        sourceMappings.addSourceAndName(new TrendPathAndDBTableName(source, displayName, displayPath, tableName, type, true));
         DynamicDatabase newDatabase = database.upgradeSchema(sourceMappings, true);
         database.close();
         newDatabase.connect(connectionInfo);
@@ -154,8 +154,9 @@ public class DBAndSchemaSynchronizer
                         databaseReadAccess.execute(
                                 database.buildSelect(
                                         database.metaDataTable.id,
-                                        database.metaDataTable.sourcePath,
+                                        database.metaDataTable.referencePath,
                                         database.metaDataTable.displayName,
+                                        database.metaDataTable.displayPath,
                                         database.metaDataTable.tableName,
                                         database.metaDataTable.sourceType,
                                         database.metaDataTable.isTrendEnabled).orderBy(database.metaDataTable.id.asc())
@@ -165,8 +166,9 @@ public class DBAndSchemaSynchronizer
 
                 while (result.next())
                 {
-                    String sourcePath = result.get(database.metaDataTable.sourcePath);
+                    String sourcePath = result.get(database.metaDataTable.referencePath);
                     String displayName = result.get(database.metaDataTable.displayName);
+                    String displayPath = result.get(database.metaDataTable.displayPath);
                     String tableName = result.get(database.metaDataTable.tableName);
                     Short type = result.get(database.metaDataTable.sourceType);
                     boolean isEnabled = result.get(database.metaDataTable.isTrendEnabled);
@@ -176,16 +178,16 @@ public class DBAndSchemaSynchronizer
                     switch (type)
                     {
                         case 0:
-                            listOfEverything.add(new TrendPathAndDBTableName(sourcePath, displayName, tableName, TrendSource.Type.Analog, isEnabled));
+                            listOfEverything.add(new TrendPathAndDBTableName(sourcePath, displayName, displayPath, tableName, TrendSource.Type.Analog, isEnabled));
                             break;
                         case 1:
-                            listOfEverything.add(new TrendPathAndDBTableName(sourcePath, displayName, tableName, TrendSource.Type.Digital, isEnabled));
+                            listOfEverything.add(new TrendPathAndDBTableName(sourcePath, displayName, displayPath, tableName, TrendSource.Type.Digital, isEnabled));
                             break;
-                        case 2:
-                            listOfEverything.add(new TrendPathAndDBTableName(sourcePath, displayName, tableName, TrendSource.Type.EquipmentColor, isEnabled));
-                            break;
+//                        case 2:
+//                            listOfEverything.add(new TrendPathAndDBTableName(referencePath, displayName, displayPath, tableName, TrendSource.Type.EquipmentColor, isEnabled));
+//                            break;
                         default:
-                            listOfEverything.add(new TrendPathAndDBTableName(sourcePath, displayName, tableName, TrendSource.Type.Complex, isEnabled));
+                            listOfEverything.add(new TrendPathAndDBTableName(sourcePath, displayName, tableName, displayPath, TrendSource.Type.Complex, isEnabled));
                             break;
                     }
                 }

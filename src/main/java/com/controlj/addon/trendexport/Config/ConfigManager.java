@@ -81,10 +81,11 @@ public class ConfigManager
         }
         catch (Exception e)
         {
-            if (e.getCause() instanceof IOException)
+            configuration = null;
+            /*if (e.getCause() instanceof IOException)
                 throw (IOException) e.getCause();
             else
-                throw new IOException("Action execution exception reading datastore", e);
+                throw new IOException("Action execution exception reading datastore", e);  */
         }
     }
 

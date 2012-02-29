@@ -173,7 +173,7 @@ public class AddRemoveServlet extends HttpServlet
                     TrendSource trendSource = startLoc.getAspect(TrendSource.class);
                     TrendSource.Type type = trendSource.getType();
 
-                    synchronizer.addSourceAndTableName(nodeLookupString, startLoc.getDisplayName(), tableName, type);
+                    synchronizer.addSourceAndTableName(nodeLookupString, startLoc.getDisplayName(), startLoc.getDisplayPath(), tableName, type);
                 }
             }
         });

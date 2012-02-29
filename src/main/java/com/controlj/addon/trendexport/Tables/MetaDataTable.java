@@ -10,9 +10,10 @@ public class MetaDataTable
 {
     private final TableSchema tableSchema;
     public final IntColumn id;
-    public final StringColumn sourcePath;
+    public final StringColumn referencePath;
     public final StringColumn tableName;
     public final StringColumn displayName;
+    public final StringColumn displayPath;
     public final ShortColumn sourceType;
     public final BoolColumn isTrendEnabled;
 
@@ -20,9 +21,10 @@ public class MetaDataTable
     {
         this.tableSchema = db.addTable("Metadata");
 
-        id = tableSchema.addIntColumn("id");
-        sourcePath = tableSchema.addStringColumn("SourcePath", 600);
+        id = tableSchema.addIntColumn("ID");
+        referencePath = tableSchema.addStringColumn("ReferencePath", 600);
         displayName = tableSchema.addStringColumn("DisplayName", 30);
+        displayPath = tableSchema.addStringColumn("DisplayPath", 600);
         tableName = tableSchema.addStringColumn("TableName", 18);
         sourceType = tableSchema.addShortColumn("SourceType");
         isTrendEnabled = tableSchema.addBoolColumn("IsEnabled");
@@ -35,10 +37,11 @@ public class MetaDataTable
         return tableSchema;
     }
 
-    public void insertRow(Database db, String source, String displayName, String tableName, short type, boolean enabled) throws DatabaseException
+    public void insertRow(Database db, String source, String displayName, String displayPath, String tableName, short type, boolean enabled) throws DatabaseException
     {
-        Insert insert = db.buildInsert(this.sourcePath.set(source),
+        Insert insert = db.buildInsert(this.referencePath.set(source),
                                        this.displayName.set(displayName),
+                                       this.displayPath.set(displayPath),
                                        this.tableName.set(tableName),
                                        this.sourceType.set(type),
                                        this.isTrendEnabled.set(enabled));
@@ -48,7 +51,7 @@ public class MetaDataTable
     public void deleteRow(Database db, String source) throws DatabaseException
     {
         // needs the trenddata table schema... :/
-        Update delete = db.buildDelete(this.tableSchema).where(this.sourcePath.eq(source));
+        Update delete = db.buildDelete(this.tableSchema).where(this.referencePath.eq(source));
         delete.execute(db);
     }
 

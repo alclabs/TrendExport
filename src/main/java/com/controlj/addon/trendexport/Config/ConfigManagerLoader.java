@@ -11,7 +11,7 @@ public class ConfigManagerLoader
 {
     public ConfigManager loadConnectionInfoFromDataStore()
     {
-        ConfigManager manager = new ConfigManager("localhost", 0, "", "", DatabaseType.Derby, "");
+        ConfigManager manager = new ConfigManager("localhost", 3306, "root", "0000", DatabaseType.MySQL, "trendexport_schema");
 
         try
         {
@@ -27,6 +27,12 @@ public class ConfigManagerLoader
 
     public static boolean isConfigured()
     {
-        return XDatabase.getXDatabase().canReadDatabaseConnectionInfo("connection");
+        try {
+            return XDatabase.getXDatabase().canReadDatabaseConnectionInfo("connection");
+        }
+        catch (NullPointerException n)
+        {
+            return false;
+        }
     }
 }

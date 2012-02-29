@@ -79,6 +79,8 @@ public class DynamicDatabase extends Database
                     if (!dataTables.contains(newDataTable))
                     {
                         String displayName = newConfig.getDisplayNameFromTableName(tableName);
+                        String displayPath = newConfig.getDisplayPathFromTableName(tableName);
+                        displayPath = displayPath.substring(0, displayPath.lastIndexOf('/')).replace(" / ", "/");
                         String source = newConfig.getSourceFromTableName(tableName);
                         short type = newConfig.getTypeFromTableName(tableName);
                         boolean enabled = newConfig.getIsEnabled(tableName);
@@ -87,7 +89,7 @@ public class DynamicDatabase extends Database
                             throw new DatabaseException("Source does not exist for table: " + tableName);
 
                         dbAccess.addTable(new TrendDataTable(schema, tableName, type).getTableSchema());
-                        metaDataTable.insertRow(DynamicDatabase.this, source, displayName, tableName, type, enabled);
+                        metaDataTable.insertRow(DynamicDatabase.this, source, displayName, displayPath, tableName, type, enabled);
                     }
                 }
 
@@ -99,12 +101,12 @@ public class DynamicDatabase extends Database
                     {
                         // get the source to delete the row in the metadata table
                         String tableName = oldDataTable.getTableSchema().getName();
-                        Query q = buildSelect(DynamicDatabase.this.metaDataTable.sourcePath).
+                        Query q = buildSelect(DynamicDatabase.this.metaDataTable.referencePath).
                                 where(DynamicDatabase.this.metaDataTable.tableName.eq(tableName));
                         Result r = dbAccess.execute(q);
                         String source = null;
                         if (r.next())
-                            source = r.get(DynamicDatabase.this.metaDataTable.sourcePath);
+                            source = r.get(DynamicDatabase.this.metaDataTable.referencePath);
 
                         if (source != null)
                         {

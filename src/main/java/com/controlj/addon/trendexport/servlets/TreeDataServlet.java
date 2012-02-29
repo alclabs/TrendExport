@@ -146,8 +146,12 @@ public class TreeDataServlet extends HttpServlet
         List<Location> treeChildren = new ArrayList<Location>();
         for (Location child : location.getChildren(LocationSort.PRESENTATION))
         {
-            if (child.has(TrendSource.class, Acceptors.enabledTrendSource()))
+            if (!child.find(TrendSource.class, Acceptors.enabledTrendSource()).isEmpty())
                 treeChildren.add(child);
+
+//            API 1.2.0 (WebCTRL 5.5+) optimization - not supported in API v1.1.+ or WebCTRL 5.2
+//            if (child.has(TrendSource.class, Acceptors.enabledTrendSource()))
+//                treeChildren.add(child);
         }
         return treeChildren;
     }

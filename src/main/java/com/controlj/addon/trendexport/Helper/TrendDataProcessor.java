@@ -19,7 +19,9 @@ public class TrendDataProcessor implements TrendProcessor
     private final Database db;
     private final TrendDataTable table;
     private int samplesToSkip;
-    private Insert lastHoleInsert;
+    private Insert holeStartInsert;
+    private Insert holeEndInsert;
+
 
     public TrendDataProcessor(Database database, TrendDataTable trendDataTable, int numberOfSamplesToSkip)
     {
@@ -31,48 +33,6 @@ public class TrendDataProcessor implements TrendProcessor
     @Override
     public void processStart(@NotNull Date date, @Nullable TrendSample sample)
     {
-
-        // insert data based on type
-        /*Insert insert = null;
-        if (sample == null)
-        {
-            /*insert = db.buildInsert(table.dateColumn.set(date),
-                    table.typeColumn.set(0),
-                    table.valueColumn.set(null));
-        }
-        else if (sample instanceof TrendDigitalSample)
-        {
-            boolean value = ((TrendDigitalSample) sample).getState();
-            insert = db.buildInsert(table.dateColumn.set(sample.getTime()),
-                    table.typeColumn.set(0),
-                    table.valueColumn.set(value));
-
-        }
-        else if (sample instanceof TrendAnalogSample)
-        {
-            float value = sample.getSpecialValue();
-            insert = db.buildInsert(table.dateColumn.set(sample.getTime()),
-                    table.typeColumn.set(0),
-                    table.valueColumn.set(value));
-        }
-        else if (sample instanceof TrendEquipmentColorSample)
-        {
-            short value = (short) ((TrendEquipmentColorSample) sample).value().getValue();
-            // insert (needs to be short)
-            insert = db.buildInsert(table.dateColumn.set(sample.getTime()),
-                    table.typeColumn.set(0),
-                    table.valueColumn.set(value));
-        }
-
-        try
-        {
-            if (insert != null)
-                db.execute(insert);
-        }
-        catch (DatabaseException e)
-        {
-            e.printStackTrace();
-        }    */
     }
 
     @Override
@@ -87,10 +47,16 @@ public class TrendDataProcessor implements TrendProcessor
 
         try
         {
-            if (lastHoleInsert != null)
+            if (holeStartInsert != null)
             {
-                db.execute(lastHoleInsert);
-                lastHoleInsert = null;
+                db.execute(holeStartInsert);
+                holeStartInsert = null;
+            }
+
+            if (holeEndInsert != null)
+            {
+                db.execute(holeEndInsert);
+                holeEndInsert = null;
             }
 
             Insert insert = table.buildInsertForData(sample);
@@ -105,50 +71,12 @@ public class TrendDataProcessor implements TrendProcessor
     @Override
     public void processEnd(@NotNull Date date, @Nullable TrendSample sample)
     {
-        // insert data based on type
-        /*Insert insert = null;
-        if (sample == null)
-        {
-            insert = db.buildInsert(table.dateColumn.set(date),
-                    table.typeColumn.set(3),
-                    table.valueColumn.set(null));
-        }
-        else if (sample instanceof TrendDigitalSample)
-        {
-            boolean value = ((TrendDigitalSample) sample).getState();
-            insert = db.buildInsert(table.dateColumn.set(sample.getTime()),
-                    table.typeColumn.set(3),
-                    table.valueColumn.set(value));
-        }
-        else if (sample instanceof TrendAnalogSample)
-        {
-            float value = sample.getSpecialValue();
-            insert = db.buildInsert(table.dateColumn.set(sample.getTime()),
-                    table.typeColumn.set(3),
-                    table.valueColumn.set(value));
-        }
-        else if (sample instanceof TrendEquipmentColorSample)
-        {
-            short value = (short) ((TrendEquipmentColorSample) sample).value().getValue();
-            // insert (needs to be short)
-            insert = db.buildInsert(table.dateColumn.set(sample.getTime()),
-                    table.typeColumn.set(3),
-                    table.valueColumn.set(value));
-        }
-
-        try
-        {
-            db.execute(insert);
-        }
-        catch (DatabaseException e)
-        {
-            e.printStackTrace();
-        } */
     }
 
     @Override
     public void processHole(@NotNull Date startDate, @NotNull Date endDate)
     {
-        lastHoleInsert = table.buildInsertForHole(new Date(endDate.getTime() - startDate.getTime()));
+        holeStartInsert = table.buildInsertForHole(startDate, true);
+        holeEndInsert = table.buildInsertForHole(endDate, false);
     }
 }

@@ -46,6 +46,7 @@ public class ScheduledTrendCollector implements ServletContextListener
     {
         collectorRef.set(this);
 
+
         ConfigManager configManager = new ConfigManagerLoader().loadConnectionInfoFromDataStore();
         initializeAndScheduleCollector(configManager);
     }

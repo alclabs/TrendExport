@@ -1,8 +1,8 @@
 package com.controlj.addon.trendexport.servlets;
 
+import com.controlj.addon.trendexport.DBAndSchemaSynchronizer;
 import com.controlj.addon.trendexport.config.ConfigManager;
 import com.controlj.addon.trendexport.config.ConfigManagerLoader;
-import com.controlj.addon.trendexport.DBAndSchemaSynchronizer;
 import com.controlj.addon.trendexport.helper.TrendPathAndDBTableName;
 import com.controlj.addon.trendexport.util.ErrorHandler;
 import com.controlj.green.addonsupport.access.ActionExecutionException;
@@ -17,7 +17,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.Collection;
 
 public class TableListServlet extends HttpServlet
@@ -41,7 +40,11 @@ public class TableListServlet extends HttpServlet
             ConfigManager manager = new ConfigManagerLoader().loadConnectionInfoFromDataStore();
             synchronizer = new DBAndSchemaSynchronizer(manager.getCurrentConnectionInfo());
             synchronizer.connect();
-            getCurrentList(synchronizer, resp.getWriter());
+            JSONObject object = getCurrentList(synchronizer);
+            if (object != null)
+                resp.getWriter().print(object);
+            else
+                resp.getWriter().print(new JSONObject());
         }
         catch (Exception e)
         {
@@ -55,11 +58,15 @@ public class TableListServlet extends HttpServlet
         }
     }
 
-    private void getCurrentList(DBAndSchemaSynchronizer synchronizer, PrintWriter writer)
+    private JSONObject getCurrentList(DBAndSchemaSynchronizer synchronizer)
             throws JSONException, SystemException, ActionExecutionException, DatabaseException
     {
         JSONArray jsonArray = new JSONArray();
         Collection<TrendPathAndDBTableName> stuffs = synchronizer.getAllTrends();
+
+        // attempt to catch the emptiness
+        if (stuffs.isEmpty())
+            return null;
 
         for (TrendPathAndDBTableName trendPathAndDBTableName : stuffs)
         {
@@ -78,6 +85,6 @@ public class TableListServlet extends HttpServlet
 
         JSONObject responseObject = new JSONObject();
         responseObject.put("aaData", jsonArray);
-        writer.print(responseObject);
+        return responseObject;
     }
 }

@@ -24,9 +24,11 @@ package com.controlj.addon.trendexport.tables;
 
 import com.controlj.green.addonsupport.access.trend.TrendAnalogSample;
 import com.controlj.green.addonsupport.access.trend.TrendDigitalSample;
-import com.controlj.green.addonsupport.access.trend.TrendEquipmentColorSample;
 import com.controlj.green.addonsupport.access.trend.TrendSample;
-import com.controlj.green.addonsupport.xdatabase.*;
+import com.controlj.green.addonsupport.xdatabase.AllowNull;
+import com.controlj.green.addonsupport.xdatabase.DatabaseSchema;
+import com.controlj.green.addonsupport.xdatabase.Insert;
+import com.controlj.green.addonsupport.xdatabase.TableSchema;
 import com.controlj.green.addonsupport.xdatabase.column.DateColumn;
 import com.controlj.green.addonsupport.xdatabase.column.IntColumn;
 import com.controlj.green.addonsupport.xdatabase.dsl.Column;
@@ -49,30 +51,30 @@ public class TrendDataTable
         this.tableSchema = db.addTable(tableName);
         this.tableName = tableName;
 
-        id = tableSchema.addIntColumn("id");
+        id = tableSchema.addIntColumn("ID");
         tableSchema.setAutoGenerate(id);
         tableSchema.setPrimaryKey(id);
 
-        dateColumn = tableSchema.addDateColumn("datestamp");
-        typeColumn = tableSchema.addShortColumn("trendtype");
+        dateColumn = tableSchema.addDateColumn("DateStamp");
+        typeColumn = tableSchema.addShortColumn("TrendType");
 
         switch (type)
         {
-            case 0:
-                valueColumn = tableSchema.addFloatColumn("trenddata", AllowNull.TRUE);
-                break;
             case 1:
-                valueColumn = tableSchema.addBoolColumn("trenddata", AllowNull.TRUE);
+                valueColumn = tableSchema.addFloatColumn("TrendData", AllowNull.TRUE);
                 break;
             case 2:
-                valueColumn = tableSchema.addShortColumn("trenddata", AllowNull.TRUE);
+                valueColumn = tableSchema.addBoolColumn("TrendData", AllowNull.TRUE);
+                break;
+            case 3: // Eq Color (no longer supported :(  )
+                valueColumn = tableSchema.addShortColumn("TrendData", AllowNull.TRUE);
                 break;
             default:
-                throw new RuntimeException("Unhandled data type of "+type);
+                throw new RuntimeException("Unhandled data type of " + type);
         }
 
         // does not work...unknown reason :(
-        tableSchema.addIndex("date_idx_"+tableName, dateColumn);
+        tableSchema.addIndex("Date_IDX_" + tableName, dateColumn);
     }
 
     public TableSchema getTableSchema()
@@ -87,7 +89,7 @@ public class TrendDataTable
 
     public Insert buildInsertForData(TrendSample sample)
     {
-        if (sample instanceof TrendEquipmentColorSample)
+        /*if (sample instanceof TrendEquipmentColorSample)
         {
             short value = (short) ((TrendEquipmentColorSample) sample).value().getValue();
             return db.buildInsert(
@@ -95,7 +97,8 @@ public class TrendDataTable
                     typeColumn.set(1),
                     valueColumn.set(value));
         }
-        else if (sample instanceof TrendDigitalSample)
+        else*/
+        if (sample instanceof TrendDigitalSample)
         {
             boolean value = ((TrendDigitalSample) sample).getState();
             return db.buildInsert(
@@ -113,11 +116,15 @@ public class TrendDataTable
         }
     }
 
-    public Insert buildInsertForHole(Date durationDate)
+    public Insert buildInsertForHole(Date date, boolean isStart)
     {
-         return db.buildInsert(
-                 typeColumn.set(2),
-                dateColumn.set(durationDate),
+        int value = 3; // values are: 1 for data, 2 for hole start, and 3 for hole end
+        if (isStart)
+            value = 2;
+
+        return db.buildInsert(
+                typeColumn.set(value),
+                dateColumn.set(date),
                 valueColumn.set(null));
     }
 
