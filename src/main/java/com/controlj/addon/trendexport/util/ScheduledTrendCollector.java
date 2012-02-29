@@ -22,8 +22,8 @@
 
 package com.controlj.addon.trendexport.util;
 
-import com.controlj.addon.trendexport.Config.ConfigManager;
-import com.controlj.addon.trendexport.Config.ConfigManagerLoader;
+import com.controlj.addon.trendexport.config.ConfigManager;
+import com.controlj.addon.trendexport.config.ConfigManagerLoader;
 import com.controlj.addon.trendexport.DBAndSchemaSynchronizer;
 import com.controlj.addon.trendexport.DataCollector;
 import org.jetbrains.annotations.Nullable;
@@ -31,7 +31,6 @@ import org.jetbrains.annotations.Nullable;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import java.io.IOException;
-import java.util.Collection;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicReference;
 

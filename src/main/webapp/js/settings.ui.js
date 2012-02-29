@@ -23,6 +23,17 @@
 $(function()
 {
     $("#dbtypeCombo").simpleCombo();
+//    dbBrandcombo.bind('click', (function() {
+//        alert('changed');
+//
+//        if (dbBrandcombo.val() == 'Derby')
+//        {
+//            alert('derby');
+//        }
+//        else
+//            alert('not derby');
+//
+//    }));
     $("#alarmPath").removeProp("disabled");
     $('#testAlarm').button().bind("click", function()
     {

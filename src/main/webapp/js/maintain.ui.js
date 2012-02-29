@@ -59,12 +59,25 @@ $(function()
                 ],
                 "fnCreatedRow": function(nRow, aData, iDisplayIndex)
                 {
-                    $(nRow).click(rowClickEvent);
+                    $(nRow).live('click', rowClickEvent());
                     return nRow;
                 },
                 "fnInitComplete": function(oSettings)
                 {
-                    $('#maintenanceTable tr').click(rowClickEvent);
+                    $('#maintenanceTable tr').live('click', function()
+                    {
+                     if ($(this).hasClass('row_selected'))
+                        {
+                            $(this).removeClass('row_selected');
+                            checkTable(maintenanceTable);
+                        }
+                        else
+                        {
+                            $(this).addClass('row_selected');
+                            collectDataNowBtn.button('enable');
+                            removeSourceButton.button('enable');
+                        }
+                   } )
                 }
             });
 

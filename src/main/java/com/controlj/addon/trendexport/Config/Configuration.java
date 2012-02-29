@@ -1,4 +1,4 @@
-package com.controlj.addon.trendexport.Config;
+package com.controlj.addon.trendexport.config;
 
 import com.controlj.addon.trendexport.util.ErrorHandler;
 import org.jetbrains.annotations.NotNull;

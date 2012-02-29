@@ -22,8 +22,8 @@
 
 package com.controlj.addon.trendexport.util;
 
-import com.controlj.addon.trendexport.Config.ConfigManager;
-import com.controlj.addon.trendexport.Config.Configuration;
+import com.controlj.addon.trendexport.config.ConfigManager;
+import com.controlj.addon.trendexport.config.Configuration;
 
 import java.util.Calendar;
 import java.util.Date;

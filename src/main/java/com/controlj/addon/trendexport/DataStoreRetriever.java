@@ -22,7 +22,7 @@
 
 package com.controlj.addon.trendexport;
 
-import com.controlj.addon.trendexport.Tables.TrendDataTable;
+import com.controlj.addon.trendexport.tables.TrendDataTable;
 import com.controlj.green.addonsupport.xdatabase.DatabaseException;
 import com.controlj.green.addonsupport.xdatabase.DatabaseReadAccess;
 import com.controlj.green.addonsupport.xdatabase.QueryTask;

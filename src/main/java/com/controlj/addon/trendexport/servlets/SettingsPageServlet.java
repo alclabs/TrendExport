@@ -1,8 +1,8 @@
 package com.controlj.addon.trendexport.servlets;
 
-import com.controlj.addon.trendexport.Config.ConfigManager;
-import com.controlj.addon.trendexport.Config.ConfigManagerLoader;
-import com.controlj.addon.trendexport.Config.Configuration;
+import com.controlj.addon.trendexport.config.ConfigManager;
+import com.controlj.addon.trendexport.config.ConfigManagerLoader;
+import com.controlj.addon.trendexport.config.Configuration;
 import com.controlj.addon.trendexport.util.AlarmHandler;
 import com.controlj.addon.trendexport.util.ErrorHandler;
 import com.controlj.addon.trendexport.util.ScheduledTrendCollector;
@@ -42,11 +42,12 @@ public class SettingsPageServlet extends HttpServlet
                 responseObject.put("result", attemptConnection(newManager));
             }
             else if (req.getParameter("action").contains("save"))
+            {
                 saveConfiguration(createConfigManagerFromRequest(req));
+                responseObject.put("result", "Settings Saved");
+            }
             else if (req.getParameter("action").contains("testAlarm"))
-                testAlarmProgram(manager, req.getParameter("alarmPath"));
-
-            responseObject.put("result", "Success!");
+                testAlarmProgram(manager, req.getParameter("alarmPath"), responseObject);
         }
         catch (Exception e)
         {
@@ -67,9 +68,22 @@ public class SettingsPageServlet extends HttpServlet
         }
     }
 
-    private void testAlarmProgram(ConfigManager manager, String alarmPath)
+    private JSONObject testAlarmProgram(ConfigManager manager, String alarmPath, JSONObject responseObject) throws JSONException
     {
+        String tempPath = ErrorHandler.getAlarmPath();
+        ErrorHandler.setAlarmHandlerPath(alarmPath);
+
+        if (ErrorHandler.isAlarmHandlerConfigured())
+            responseObject.put("result", "Please check WebCTRL's alarms to see if an alarm has been triggered from this add-on.");
+        else
+            responseObject.put("result", "Please type path to equipment where alarm control program exists.");
+
         ErrorHandler.handleError("Testing Alarm...", new Exception("Just a test"), AlarmHandler.TrendExportAlarm.Test);
+
+        if (!tempPath.equals(""))
+            ErrorHandler.setAlarmHandlerPath(tempPath);
+
+        return responseObject;
     }
 
     private DatabaseType getDatabaseType(String dbType)

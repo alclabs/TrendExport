@@ -20,7 +20,7 @@
 * THE SOFTWARE.
 */
 
-package com.controlj.addon.trendexport.Tables;
+package com.controlj.addon.trendexport.tables;
 
 import com.controlj.green.addonsupport.access.trend.TrendAnalogSample;
 import com.controlj.green.addonsupport.access.trend.TrendDigitalSample;

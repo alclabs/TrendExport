@@ -22,10 +22,10 @@
 
 package com.controlj.addon.trendexport;
 
-import com.controlj.addon.trendexport.Config.SourceMappings;
-import com.controlj.addon.trendexport.Helper.TrendDataProcessor;
-import com.controlj.addon.trendexport.Tables.MetaDataTable;
-import com.controlj.addon.trendexport.Tables.TrendDataTable;
+import com.controlj.addon.trendexport.config.SourceMappings;
+import com.controlj.addon.trendexport.helper.TrendDataProcessor;
+import com.controlj.addon.trendexport.tables.MetaDataTable;
+import com.controlj.addon.trendexport.tables.TrendDataTable;
 import com.controlj.green.addonsupport.access.trend.TrendData;
 import com.controlj.green.addonsupport.xdatabase.*;
 import org.jetbrains.annotations.NotNull;

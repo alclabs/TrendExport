@@ -1,6 +1,6 @@
-package com.controlj.addon.trendexport.Helper;
+package com.controlj.addon.trendexport.helper;
 
-import com.controlj.addon.trendexport.Tables.TrendDataTable;
+import com.controlj.addon.trendexport.tables.TrendDataTable;
 import com.controlj.green.addonsupport.access.trend.*;
 import com.controlj.green.addonsupport.xdatabase.Database;
 import com.controlj.green.addonsupport.xdatabase.DatabaseException;

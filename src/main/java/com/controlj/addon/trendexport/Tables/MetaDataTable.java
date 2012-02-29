@@ -1,4 +1,4 @@
-package com.controlj.addon.trendexport.Tables;
+package com.controlj.addon.trendexport.tables;
 
 import com.controlj.green.addonsupport.xdatabase.*;
 import com.controlj.green.addonsupport.xdatabase.column.BoolColumn;

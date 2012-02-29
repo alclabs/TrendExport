@@ -1,7 +1,7 @@
 package com.controlj.addon.trendexport.servlets;
 
-import com.controlj.addon.trendexport.Config.ConfigManager;
-import com.controlj.addon.trendexport.Config.ConfigManagerLoader;
+import com.controlj.addon.trendexport.config.ConfigManager;
+import com.controlj.addon.trendexport.config.ConfigManagerLoader;
 import com.controlj.addon.trendexport.DBAndSchemaSynchronizer;
 import com.controlj.addon.trendexport.DataStoreRetriever;
 import com.controlj.green.addonsupport.access.*;

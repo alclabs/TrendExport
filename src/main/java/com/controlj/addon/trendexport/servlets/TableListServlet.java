@@ -1,9 +1,9 @@
 package com.controlj.addon.trendexport.servlets;
 
-import com.controlj.addon.trendexport.Config.ConfigManager;
-import com.controlj.addon.trendexport.Config.ConfigManagerLoader;
+import com.controlj.addon.trendexport.config.ConfigManager;
+import com.controlj.addon.trendexport.config.ConfigManagerLoader;
 import com.controlj.addon.trendexport.DBAndSchemaSynchronizer;
-import com.controlj.addon.trendexport.Helper.TrendPathAndDBTableName;
+import com.controlj.addon.trendexport.helper.TrendPathAndDBTableName;
 import com.controlj.addon.trendexport.util.ErrorHandler;
 import com.controlj.green.addonsupport.access.ActionExecutionException;
 import com.controlj.green.addonsupport.access.SystemException;
@@ -34,11 +34,12 @@ public class TableListServlet extends HttpServlet
             throws ServletException, IOException
     {
         resp.setContentType("application/json");
-        ConfigManager manager = new ConfigManagerLoader().loadConnectionInfoFromDataStore();
-        DBAndSchemaSynchronizer synchronizer = new DBAndSchemaSynchronizer(manager.getCurrentConnectionInfo());
+        DBAndSchemaSynchronizer synchronizer = null;
 
         try
         {
+            ConfigManager manager = new ConfigManagerLoader().loadConnectionInfoFromDataStore();
+            synchronizer = new DBAndSchemaSynchronizer(manager.getCurrentConnectionInfo());
             synchronizer.connect();
             getCurrentList(synchronizer, resp.getWriter());
         }
@@ -49,7 +50,8 @@ public class TableListServlet extends HttpServlet
         }
         finally
         {
-            synchronizer.disconnect();
+            if (synchronizer != null)
+                synchronizer.disconnect();
         }
     }
 

@@ -1,8 +1,8 @@
-package com.controlj.addon.trendexport.Config;
+package com.controlj.addon.trendexport.config;
 
 // Holds sourceMappings for
 
-import com.controlj.addon.trendexport.Helper.TrendPathAndDBTableName;
+import com.controlj.addon.trendexport.helper.TrendPathAndDBTableName;
 
 import java.util.Collection;
 import java.util.HashSet;

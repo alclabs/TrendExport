@@ -25,9 +25,9 @@ package com.controlj.addon.trendexport;
 // maintains correlation between source mappings and a dynamic schema, also handles DB upgrade tasks
 // adding, removing sources is handled here encapsulating the synchronization between the two objects
 
-import com.controlj.addon.trendexport.Config.SourceMappings;
-import com.controlj.addon.trendexport.Helper.TrendPathAndDBTableName;
-import com.controlj.addon.trendexport.Helper.TrendTableNameGenerator;
+import com.controlj.addon.trendexport.config.SourceMappings;
+import com.controlj.addon.trendexport.helper.TrendPathAndDBTableName;
+import com.controlj.addon.trendexport.helper.TrendTableNameGenerator;
 import com.controlj.green.addonsupport.access.*;
 import com.controlj.green.addonsupport.access.aspect.TrendSource;
 import com.controlj.green.addonsupport.access.trend.TrendData;

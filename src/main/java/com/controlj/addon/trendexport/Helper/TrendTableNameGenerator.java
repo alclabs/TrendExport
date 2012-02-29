@@ -1,4 +1,4 @@
-package com.controlj.addon.trendexport.Helper;
+package com.controlj.addon.trendexport.helper;
 
 import java.util.Collection;
 

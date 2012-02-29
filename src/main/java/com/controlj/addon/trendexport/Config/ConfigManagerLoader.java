@@ -1,6 +1,7 @@
-package com.controlj.addon.trendexport.Config;
+package com.controlj.addon.trendexport.config;
 
-import com.controlj.addon.trendexport.util.Logger;
+import com.controlj.addon.trendexport.util.AlarmHandler;
+import com.controlj.addon.trendexport.util.ErrorHandler;
 import com.controlj.green.addonsupport.xdatabase.DatabaseType;
 import com.controlj.green.addonsupport.xdatabase.XDatabase;
 
@@ -10,7 +11,7 @@ public class ConfigManagerLoader
 {
     public ConfigManager loadConnectionInfoFromDataStore()
     {
-        ConfigManager manager = new ConfigManager("localhost", 3306, "root", "0000", DatabaseType.MySQL, "trendexport_schema");
+        ConfigManager manager = new ConfigManager("localhost", 0, "", "", DatabaseType.Derby, "");
 
         try
         {
@@ -18,7 +19,7 @@ public class ConfigManagerLoader
         }
         catch (IOException e)
         {
-            Logger.println("Error reading SourceMappings data", e);
+            ErrorHandler.handleError("Error reading SourceMappings data", e, AlarmHandler.TrendExportAlarm.CollectionFailure);
         }
 
         return manager;

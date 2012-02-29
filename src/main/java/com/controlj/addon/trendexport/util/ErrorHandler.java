@@ -33,6 +33,16 @@ public class ErrorHandler
         alarmHandler = new AlarmHandler(path);
     }
 
+    public static void setAlarmHandlerPath(String path)
+    {
+        alarmHandler = new AlarmHandler(path);
+    }
+
+    public static boolean isAlarmHandlerConfigured()
+    {
+        return alarmHandler.isConfigured();
+    }
+
     public static void handleError(String message, Throwable throwable)
     {
         Logger.println(message, throwable);
@@ -42,10 +52,14 @@ public class ErrorHandler
     {
         handleError(message, throwable);
 
-        if (alarmHandler == null)
+        if (alarmHandler == null && !isAlarmHandlerConfigured())
             return;
 
         alarmHandler.triggerAlarm(alarmType);
     }
 
+    public static String getAlarmPath()
+    {
+        return alarmHandler.getAlarmLocation();
+    }
 }

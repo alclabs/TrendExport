@@ -1,4 +1,4 @@
-package com.controlj.addon.trendexport.Helper;
+package com.controlj.addon.trendexport.helper;
 
 import com.controlj.green.addonsupport.access.*;
 import com.controlj.green.addonsupport.access.aspect.TrendSource;

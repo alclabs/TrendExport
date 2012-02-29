@@ -22,7 +22,7 @@
 
 package com.controlj.addon.trendexport;
 
-import com.controlj.addon.trendexport.Helper.TrendPathAndDBTableName;
+import com.controlj.addon.trendexport.helper.TrendPathAndDBTableName;
 import com.controlj.addon.trendexport.util.AlarmHandler;
 import com.controlj.addon.trendexport.util.ErrorHandler;
 import com.controlj.green.addonsupport.access.*;

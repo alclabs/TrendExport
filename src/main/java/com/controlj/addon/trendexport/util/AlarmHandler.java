@@ -82,4 +82,14 @@ public class AlarmHandler
             ErrorHandler.handleError("AlarmHandler ActionExecution Exception!", e);
         }
     }
+
+    protected boolean isConfigured()
+    {
+        return !this.alarmLocation.isEmpty();
+    }
+
+    protected String getAlarmLocation()
+    {
+        return this.alarmLocation;
+    }
 }

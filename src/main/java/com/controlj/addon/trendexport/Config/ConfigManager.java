@@ -1,6 +1,6 @@
-package com.controlj.addon.trendexport.Config;
+package com.controlj.addon.trendexport.config;
 
-// Manages Config object from Xdatabase datastore for persistence
+// Manages config object from Xdatabase datastore for persistence
 
 import com.controlj.green.addonsupport.access.*;
 import com.controlj.green.addonsupport.xdatabase.DatabaseConnectionInfo;
