@@ -47,7 +47,7 @@ public class SourceMappings
     {
         for (TrendPathAndDBTableName obj : sourcesAndTableNames)
         {
-            if (obj.getTrendSourceLookupString().equalsIgnoreCase(source))
+            if (obj.getTrendSourceReferenceName().equalsIgnoreCase(source))
                 return obj;
         }
 
@@ -58,7 +58,7 @@ public class SourceMappings
     {
         Collection<String> names = new HashSet<String>(sourcesAndTableNames.size());
         for (TrendPathAndDBTableName t : sourcesAndTableNames)
-            names.add(t.getTrendSourceLookupString());
+            names.add(t.getTrendSourceReferenceName());
 
         return names;
     }
@@ -96,7 +96,7 @@ public class SourceMappings
         for (TrendPathAndDBTableName t : sourcesAndTableNames)
         {
             if (t.getDbTableName().equals(tableName))
-                return t.getTrendSourceLookupString();
+                return t.getTrendSourceReferenceName();
         }
 
         return null;

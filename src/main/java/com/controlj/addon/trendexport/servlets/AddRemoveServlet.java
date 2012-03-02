@@ -37,9 +37,11 @@ public class AddRemoveServlet extends HttpServlet
         // get parameters
         String actionToAttempt = req.getParameter("action");
         List<String> nodeLookupStrings = sanitizeLookupStrings(req.getParameter("nodeLookupString"));
-
         DBAndSchemaSynchronizer synchronizer = null;
         String result = "Success!";
+
+        if (nodeLookupStrings.contains("0123thisIsNotValid"))
+            result = "Please add a real source from the Add or Remove Tab";
 
         try
         {
@@ -118,7 +120,6 @@ public class AddRemoveServlet extends HttpServlet
         String[] split = input.split(";;");
 
         Collections.addAll(collection, split);
-
         return collection;
     }
 
@@ -151,7 +152,8 @@ public class AddRemoveServlet extends HttpServlet
             {
                 e.printStackTrace();
             }
-            finally {
+            finally
+            {
                 if (synchronizer != null)
                     synchronizer.disconnect();
             }
@@ -172,13 +174,37 @@ public class AddRemoveServlet extends HttpServlet
                     Location startLoc = access.getTree(SystemTree.Geographic).resolve(nodeLookupString);
                     TrendSource trendSource = startLoc.getAspect(TrendSource.class);
                     TrendSource.Type type = trendSource.getType();
+                    String referencePath = getReferencePath(startLoc, new StringBuilder()).toString();
+                    String fullDisplayPath = getFullDisplayPath(startLoc, new StringBuilder()).toString();
 
-                    synchronizer.addSourceAndTableName(nodeLookupString, startLoc.getDisplayName(), startLoc.getDisplayPath(), tableName, type);
+                    synchronizer.addSourceAndTableName(referencePath, startLoc.getDisplayName(), fullDisplayPath, tableName, type);
                 }
             }
         });
 
 
+    }
+
+    private StringBuilder getReferencePath(Location location, StringBuilder builder) throws UnresolvableException
+    {
+        if (location.hasParent())
+        {
+            getReferencePath(location.getParent(), builder);
+            builder.append(location.getReferenceName());
+            if (!location.getChildren().isEmpty())
+                    builder.append('/');
+        }
+
+        return builder;
+    }
+
+    private StringBuilder getFullDisplayPath(Location location, StringBuilder builder) throws UnresolvableException
+    {
+        if (location.hasParent())
+            getFullDisplayPath(location.getParent(), builder);
+
+        builder.append(" \\ ").append(location.getDisplayName());
+        return builder;
     }
 
     private void removeSource(List<String> nodeLookups, DBAndSchemaSynchronizer synchronizer, String keepData)

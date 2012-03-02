@@ -37,9 +37,9 @@ public class MetaDataTable
         return tableSchema;
     }
 
-    public void insertRow(Database db, String source, String displayName, String displayPath, String tableName, short type, boolean enabled) throws DatabaseException
+    public void insertRow(Database db, String referencePath, String displayName, String displayPath, String tableName, short type, boolean enabled) throws DatabaseException
     {
-        Insert insert = db.buildInsert(this.referencePath.set(source),
+        Insert insert = db.buildInsert(this.referencePath.set(referencePath),
                                        this.displayName.set(displayName),
                                        this.displayPath.set(displayPath),
                                        this.tableName.set(tableName),

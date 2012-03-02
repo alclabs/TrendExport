@@ -46,7 +46,6 @@ public class ScheduledTrendCollector implements ServletContextListener
     {
         collectorRef.set(this);
 
-
         ConfigManager configManager = new ConfigManagerLoader().loadConnectionInfoFromDataStore();
         initializeAndScheduleCollector(configManager);
     }
@@ -98,19 +97,6 @@ public class ScheduledTrendCollector implements ServletContextListener
                     DataCollector.collectData(synchronizer);
                 }
             }, initialDelay, interval, TimeUnit.HOURS);
-    }
-
-    public static String getStatus()
-    {
-        if (collectorRef.get().collectionHandler.isDone())
-            return "Collecting...";
-        else
-            return "Idle";
-    }
-
-    public static long getSecondsUntilNextCollection()
-    {
-        return collectorRef.get().collectionHandler.getDelay(TimeUnit.SECONDS);
     }
 }
 

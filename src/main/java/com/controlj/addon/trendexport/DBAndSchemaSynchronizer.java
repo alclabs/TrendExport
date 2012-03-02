@@ -49,8 +49,8 @@ public class DBAndSchemaSynchronizer
         connectionInfo = info;
     }
 
-    // auto-generated name
-    public void addSource(final String source) throws Exception
+    // auto-generated name - only used in Test -> use addSourceAndTableName below
+    public void addSource(final String referencePath) throws Exception
     {
         // get trend source via persistent lookup string and get type within read action
         SystemConnection connection = DirectAccess.getDirectAccess().getRootSystemConnection();
@@ -59,12 +59,12 @@ public class DBAndSchemaSynchronizer
             @Override
             public void execute(@NotNull SystemAccess systemAccess) throws Exception
             {
-                Location loc = systemAccess.getTree(SystemTree.Geographic).resolve(source);
+                Location loc = systemAccess.getTree(SystemTree.Geographic).resolve(referencePath);
                 TrendSource trendSource = loc.getAspect(TrendSource.class);
 
                 String tableName = TrendTableNameGenerator.generateUniqueTableName(loc.getDisplayName(), sourceMappings.getTableNames());
                 if (tableName != null)
-                    addSourceAndTableName(source, loc.getDisplayName(), loc.getDisplayPath(), tableName, trendSource.getType());
+                    addSourceAndTableName(referencePath, loc.getDisplayName(), loc.getDisplayPath(), tableName, trendSource.getType());
             }
         });
 
@@ -87,13 +87,13 @@ public class DBAndSchemaSynchronizer
     }
 
     // human-generated name - or passed name from another method
-    public void addSourceAndTableName(String source, String displayName, String displayPath, String tableName, TrendSource.Type type)
+    public void addSourceAndTableName(String source, String displayName, String referencePath, String tableName, TrendSource.Type type)
             throws DatabaseVersionMismatchException, UpgradeException, DatabaseException
     {
         if (sourceMappings.containsSource(source))
             return; // todo: check that tableName matches
 
-        sourceMappings.addSourceAndName(new TrendPathAndDBTableName(source, displayName, displayPath, tableName, type, true));
+        sourceMappings.addSourceAndName(new TrendPathAndDBTableName(source, displayName, referencePath, tableName, type, true));
         DynamicDatabase newDatabase = database.upgradeSchema(sourceMappings, true);
         database.close();
         newDatabase.connect(connectionInfo);

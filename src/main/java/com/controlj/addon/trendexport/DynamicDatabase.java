@@ -80,7 +80,6 @@ public class DynamicDatabase extends Database
                     {
                         String displayName = newConfig.getDisplayNameFromTableName(tableName);
                         String displayPath = newConfig.getDisplayPathFromTableName(tableName);
-                        displayPath = displayPath.substring(0, displayPath.lastIndexOf('/')).replace(" / ", "/");
                         String source = newConfig.getSourceFromTableName(tableName);
                         short type = newConfig.getTypeFromTableName(tableName);
                         boolean enabled = newConfig.getIsEnabled(tableName);

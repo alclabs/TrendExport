@@ -1,8 +1,6 @@
 package com.controlj.addon.trendexport.helper;
 
-import com.controlj.green.addonsupport.access.*;
 import com.controlj.green.addonsupport.access.aspect.TrendSource;
-import org.jetbrains.annotations.NotNull;
 
 public class TrendPathAndDBTableName
 {
@@ -23,7 +21,7 @@ public class TrendPathAndDBTableName
         this.isEnabled = enabled;
     }
 
-    public String getTrendSourceLookupString()
+    public String getTrendSourceReferenceName()
     {
         return trendSourceLookupString;
     }
@@ -43,20 +41,6 @@ public class TrendPathAndDBTableName
             //return 3;
         else
             return 4; // 'Complex' should never show up
-    }
-
-    public String getDisplayPath() throws SystemException, ActionExecutionException
-    {
-        final String lookup = this.trendSourceLookupString;
-        SystemConnection connection = DirectAccess.getDirectAccess().getRootSystemConnection();
-        return connection.runReadAction(new ReadActionResult<String>()
-        {
-            @Override
-            public String execute(@NotNull SystemAccess access) throws Exception
-            {
-                return access.getTree(SystemTree.Geographic).resolve(lookup).getDisplayPath();
-            }
-        });
     }
 
     public String getDisplayName()

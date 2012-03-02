@@ -40,11 +40,10 @@ public class TableListServlet extends HttpServlet
             ConfigManager manager = new ConfigManagerLoader().loadConnectionInfoFromDataStore();
             synchronizer = new DBAndSchemaSynchronizer(manager.getCurrentConnectionInfo());
             synchronizer.connect();
+
             JSONObject object = getCurrentList(synchronizer);
-            if (object != null)
-                resp.getWriter().print(object);
-            else
-                resp.getWriter().print(new JSONObject());
+
+            resp.getWriter().print(object);
         }
         catch (Exception e)
         {
@@ -64,22 +63,31 @@ public class TableListServlet extends HttpServlet
         JSONArray jsonArray = new JSONArray();
         Collection<TrendPathAndDBTableName> stuffs = synchronizer.getAllTrends();
 
-        // attempt to catch the emptiness
+        // catch an empty list and make a dummy object - prevents a crash in datatables
         if (stuffs.isEmpty())
-            return null;
+        {
+            JSONObject emptyObject = new JSONObject();
+
+            emptyObject.put("sourceLookupString", "0123thisIsNotValid");
+            emptyObject.put("sourceDisplayName", "Please add a source to view");
+            emptyObject.put("path", "Please add a source to view");
+            emptyObject.put("tableName", "Please add a source to view");
+            emptyObject.put("isEnabled", " ");
+
+            jsonArray.put(emptyObject);
+        }
 
         for (TrendPathAndDBTableName trendPathAndDBTableName : stuffs)
         {
             JSONObject object = new JSONObject();
 
-            object.put("sourceLookupString", trendPathAndDBTableName.getTrendSourceLookupString());
+            object.put("sourceLookupString", trendPathAndDBTableName.getTrendSourceReferenceName());
             object.put("sourceDisplayName", trendPathAndDBTableName.getDisplayName());
-            object.put("path", trendPathAndDBTableName.getDisplayPath());
+            object.put("path", trendPathAndDBTableName.getTrendSourceDisplayPath());
             object.put("tableName", trendPathAndDBTableName.getDbTableName());
 //            object.put("tableEntries", trendPathAndDBTableName.)
             object.put("isEnabled", trendPathAndDBTableName.getIsEnabled());
 
-            // other stuff here
             jsonArray.put(object);
         }
 
