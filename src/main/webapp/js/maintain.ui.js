@@ -66,6 +66,14 @@ $(function()
                 {
                     $('#maintenanceTable tbody tr').live('click', function()
                     {
+                        // fix for detecting dummy table row in the event that the table is empty
+                        var htmlString = $(this).html();
+                        if (htmlString.indexOf("Please add a source to view") !== -1)
+                        {
+                            alert("Please add at least one trend source from the Add or Remove Tab.");
+                            return;
+                        }
+
                         if ($(this).hasClass('row_selected'))
                         {
                             $(this).removeClass('row_selected');
