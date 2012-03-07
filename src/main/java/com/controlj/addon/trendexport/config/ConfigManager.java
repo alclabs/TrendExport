@@ -79,10 +79,10 @@ public class ConfigManager
             });
 
         }
-        catch (Exception e)
+        catch (IOException e)
         {
             configuration = new Configuration(12L, Configuration.CollectionMethod.Interval);
-            save();
+//            save();
         }
     }
 

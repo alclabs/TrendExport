@@ -5,13 +5,12 @@ import com.controlj.addon.trendexport.util.ErrorHandler;
 import com.controlj.green.addonsupport.xdatabase.DatabaseType;
 import com.controlj.green.addonsupport.xdatabase.XDatabase;
 
-import java.io.IOException;
-
 public class ConfigManagerLoader
 {
     public ConfigManager loadConnectionInfoFromDataStore()
     {
-        ConfigManager manager = new ConfigManager("localhost", 3306, "root", "0000", DatabaseType.MySQL, "trendexport_schema");
+//        ConfigManager manager = new ConfigManager("localhost", 3306, "root", "0000", DatabaseType.MySQL, "trendexport_schema");
+        ConfigManager manager = new ConfigManager("", 0, "", "", DatabaseType.Derby, "");
 
         try
         {
