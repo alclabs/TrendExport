@@ -23,8 +23,6 @@
 $(function()
 {
     $("#dbtypeCombo").hyjack_select();
-
-
     $("#alarmPath").removeProp("disabled");
     $('#testAlarm').button().bind("click", function()
     {
@@ -37,25 +35,7 @@ $(function()
     });
     $(':input').change(function ()
     {
-        if ($(this).val() === "derby")
-        {
-            // disable all other connection controls
-            $('#host').prop('disabled', true);
-            $('#port').prop('disabled', true);
-            $('#instance').prop('disabled', true);
-            $('#user').prop('disabled', true);
-            $('#pass').prop('disabled', true);
-        }
-        else
-        {
-            // enable controls
-            $('#host').prop('disabled', false);
-            $('#port').prop('disabled', false);
-            $('#instance').prop('disabled', false);
-            $('#user').prop('disabled', false);
-            $('#pass').prop('disabled', false);
-        }
-
+        updateComboSettings($(this));
     });
 
     $.getJSON("servlets/settings",
@@ -67,6 +47,8 @@ $(function()
                 $('#instance').val(data['instance']);
                 $('#user').val(data['user']);
                 $('#pass').val(data['pass']);
+
+                updateComboSettings($("#dbtypeCombo").hyjack_select());
 
                 // set collection settings
                 if (data['collectionType'] === 'Interval')
@@ -132,6 +114,30 @@ $(function()
     {
         enableTimeSettings($("input[name=collectionSettings]:checked").val() === "time");
     });
+
+    function updateComboSettings(thing)
+    {
+        if (thing.val() === "derby")
+        {
+            // disable all other connection controls
+            $('#host').prop('disabled', true);
+            $('#port').prop('disabled', true);
+            $('#instance').prop('disabled', true);
+            $('#user').prop('disabled', true);
+            $('#pass').prop('disabled', true);
+        }
+        else
+        {
+            // enable controls
+            $('#host').prop('disabled', false);
+            $('#port').prop('disabled', false);
+            $('#instance').prop('disabled', false);
+            $('#user').prop('disabled', false);
+            $('#pass').prop('disabled', false);
+        }
+    }
+
+
 });
 
 function getSettingsObj(action)
