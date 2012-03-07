@@ -38,7 +38,7 @@ public class TableListServlet extends HttpServlet
         try
         {
             ConfigManager manager = new ConfigManagerLoader().loadConnectionInfoFromDataStore();
-            synchronizer = new DBAndSchemaSynchronizer(manager.getCurrentConnectionInfo());
+            synchronizer = DBAndSchemaSynchronizer.getSynchronizer(manager.getCurrentConnectionInfo());
             synchronizer.connect();
 
             JSONObject object = getCurrentList(synchronizer);

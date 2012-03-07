@@ -28,6 +28,7 @@ package com.controlj.addon.trendexport;
 import com.controlj.addon.trendexport.config.SourceMappings;
 import com.controlj.addon.trendexport.helper.TrendPathAndDBTableName;
 import com.controlj.addon.trendexport.helper.TrendTableNameGenerator;
+import com.controlj.addon.trendexport.util.Logger;
 import com.controlj.green.addonsupport.access.*;
 import com.controlj.green.addonsupport.access.aspect.TrendSource;
 import com.controlj.green.addonsupport.access.trend.TrendData;
@@ -36,17 +37,46 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class DBAndSchemaSynchronizer
 {
+    private static final AtomicReference<DBAndSchemaSynchronizer> me = new AtomicReference<DBAndSchemaSynchronizer>();
+
     private DynamicDatabase database;
     private SourceMappings sourceMappings;
     private DatabaseConnectionInfo connectionInfo;
+    private boolean isConnected;
 
-    public DBAndSchemaSynchronizer(DatabaseConnectionInfo info)
+    private DBAndSchemaSynchronizer(DatabaseConnectionInfo info)
     {
         database = new DynamicDatabase();
         connectionInfo = info;
+    }
+
+    public static synchronized DBAndSchemaSynchronizer getSynchronizer(DatabaseConnectionInfo info)
+    {
+        DBAndSchemaSynchronizer synchronizer = me.get();
+        if (synchronizer == null || !isSameConnection(synchronizer.connectionInfo, info))
+        {
+            synchronizer = new DBAndSchemaSynchronizer(info);
+            me.set(synchronizer);
+        }
+        return synchronizer;
+    }
+
+    private static boolean isSameConnection(DatabaseConnectionInfo info1, DatabaseConnectionInfo info2)
+    {
+        String host = info1.getHost();
+        String instance = info1.getInstance();
+        String user = info1.getUser();
+        String passwd = info1.getPasswd();
+        return info1.getType() == info2.getType() &&
+               (host == null ? info2.getHost() == null : host.equals(info2.getHost())) &&
+               (instance == null ? info2.getInstance() == null : instance.equals(info2.getInstance())) &&
+               info1.getPort() == info2.getPort() &&
+               (user == null ? info2.getUser() == null : user.equals(info2.getUser())) &&
+               (passwd == null ? info2.getPasswd() == null : passwd.equals(info2.getPasswd()));
     }
 
     // auto-generated name - only used in Test -> use addSourceAndTableName below
@@ -87,7 +117,7 @@ public class DBAndSchemaSynchronizer
     }
 
     // human-generated name - or passed name from another method
-    public void addSourceAndTableName(String source, String displayName, String referencePath, String tableName, TrendSource.Type type)
+    public synchronized void addSourceAndTableName(String source, String displayName, String referencePath, String tableName, TrendSource.Type type)
             throws DatabaseVersionMismatchException, UpgradeException, DatabaseException
     {
         if (sourceMappings.containsSource(source))
@@ -112,13 +142,15 @@ public class DBAndSchemaSynchronizer
         sourceMappings = new SourceMappings();
     }
 
-    public void connect() throws DatabaseVersionMismatchException, DatabaseException, UpgradeException
+    public synchronized void connect() throws DatabaseVersionMismatchException, DatabaseException, UpgradeException
     {
+        if (isConnected)
+            return;
+
         // implicit upgrade:
         // written because on initial call, schema only had metadata table but when asked to add the
         // data tables, it would not add tables to the schema even if they already existed in the db (since we only
         // load the metadata table)
-
         try
         {
             database.connect(connectionInfo);
@@ -126,21 +158,21 @@ public class DBAndSchemaSynchronizer
         }
         catch (Exception e)
         {
-            e.printStackTrace();
             create();
         }
-        disconnect();
-        //if (sourceMappings.getTableNames().isEmpty())
-        //throw new DatabaseException("No source mappings in database!");
+        database.close();
 
         database = new DynamicDatabase(sourceMappings);
         database.connect(connectionInfo);
         database.upgradeSchema(sourceMappings, true);
+        isConnected = true;
     }
 
-    public void disconnect()
+    public synchronized void disconnect()
     {
         database.close();
+        database = new DynamicDatabase();
+        isConnected = false;
     }
 
     private Collection<TrendPathAndDBTableName> getMetaDataTableInfo() throws DatabaseException

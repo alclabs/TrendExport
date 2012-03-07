@@ -79,7 +79,7 @@ public class ScheduledTrendCollector implements ServletContextListener
         final DBAndSchemaSynchronizer synchronizer;
         try
         {
-            synchronizer = new DBAndSchemaSynchronizer(manager.getCurrentConnectionInfo());
+            synchronizer = DBAndSchemaSynchronizer.getSynchronizer(manager.getCurrentConnectionInfo());
         }
         catch (IOException e)
         {

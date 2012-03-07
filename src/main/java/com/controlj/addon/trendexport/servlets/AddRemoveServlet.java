@@ -196,6 +196,6 @@ public class AddRemoveServlet extends HttpServlet
     private DBAndSchemaSynchronizer initializeSynchronizer() throws IOException
     {
         ConfigManager manager = new ConfigManagerLoader().loadConnectionInfoFromDataStore();
-        return new DBAndSchemaSynchronizer(manager.getCurrentConnectionInfo());
+        return DBAndSchemaSynchronizer.getSynchronizer(manager.getCurrentConnectionInfo());
     }
 }

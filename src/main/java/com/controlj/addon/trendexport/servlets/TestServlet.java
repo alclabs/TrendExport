@@ -38,7 +38,7 @@ public class TestServlet extends HttpServlet
         // set up objects
         try
         {
-            synchronizer = new DBAndSchemaSynchronizer(manager.getCurrentConnectionInfo());
+            synchronizer = DBAndSchemaSynchronizer.getSynchronizer(manager.getCurrentConnectionInfo());
 
             if (actionToAttempt.contains("connect"))
             {

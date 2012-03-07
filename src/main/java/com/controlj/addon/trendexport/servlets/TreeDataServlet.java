@@ -73,7 +73,7 @@ public class TreeDataServlet extends HttpServlet
                 public void execute(@NotNull SystemAccess access) throws Exception
                 {
                     ConfigManager manager = new ConfigManagerLoader().loadConnectionInfoFromDataStore();
-                    DBAndSchemaSynchronizer synchronizer = new DBAndSchemaSynchronizer(manager.getCurrentConnectionInfo());
+                    DBAndSchemaSynchronizer synchronizer = DBAndSchemaSynchronizer.getSynchronizer(manager.getCurrentConnectionInfo());
 
                     try
                     {
