@@ -110,7 +110,7 @@ public class SourceMappings
                 return t.getTrendType();
         }
 
-        return -1;
+        return -2;
     }
 
     public String getDisplayNameFromTableName(String tableName)

@@ -217,9 +217,9 @@ public class DBAndSchemaSynchronizer
         database.insertDataIntoTrendTable(tableName, trendData, numberOfSamplesToSkip);
     }
 
-    public boolean containsSource(String lookup)
+    public boolean containsSource(String referencePath)
     {
-        return sourceMappings.containsSource(lookup);
+        return sourceMappings.containsSource(referencePath);
     }
 
     public Collection<TrendPathAndDBTableName> getAllTrends() throws DatabaseException

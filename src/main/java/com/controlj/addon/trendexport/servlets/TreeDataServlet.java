@@ -26,6 +26,7 @@ import com.controlj.addon.trendexport.config.ConfigManager;
 import com.controlj.addon.trendexport.config.ConfigManagerLoader;
 import com.controlj.addon.trendexport.DBAndSchemaSynchronizer;
 import com.controlj.addon.trendexport.DataStoreRetriever;
+import com.controlj.addon.trendexport.helper.TrendSourcePathResolvers;
 import com.controlj.addon.trendexport.helper.TrendTableNameGenerator;
 import com.controlj.addon.trendexport.util.AlarmHandler;
 import com.controlj.addon.trendexport.util.ErrorHandler;
@@ -73,6 +74,8 @@ public class TreeDataServlet extends HttpServlet
                 {
                     ConfigManager manager = new ConfigManagerLoader().loadConnectionInfoFromDataStore();
                     DBAndSchemaSynchronizer synchronizer = new DBAndSchemaSynchronizer(manager.getCurrentConnectionInfo());
+                    //String persistentLookupString = req.getParameter("key");
+
                     try
                     {
                         synchronizer.connect();
@@ -95,7 +98,11 @@ public class TreeDataServlet extends HttpServlet
                             arrayData.write(resp.getWriter());
                         }
                         else if (req.getParameter("mode").contains("data"))
-                            getTreeData(req.getParameter("key"), synchronizer);
+                        {
+                            Location location = geoTree.resolve(req.getParameter("key"));
+                            String referencePath = TrendSourcePathResolvers.getReferencePath(location, new StringBuilder()).toString();
+                            getTreeData(referencePath, synchronizer);
+                        }
                     }
                     finally
                     {
@@ -117,7 +124,6 @@ public class TreeDataServlet extends HttpServlet
             ErrorHandler.handleError("ActionExecution", e);
         }
     }
-
 
 
     private Collection<Location> getEntries(Tree tree, String lookupString)
@@ -161,14 +167,14 @@ public class TreeDataServlet extends HttpServlet
         return TreeIcon.findIcon(type).getImageUrl();
     }
 
-    private void getTreeData(String lookup, DBAndSchemaSynchronizer synchronizer)
+    private void getTreeData(String referencePath, DBAndSchemaSynchronizer synchronizer)
     {
         try
         {
             JSONObject next = new JSONObject();
-            if (synchronizer.containsSource(lookup))
+            if (synchronizer.containsSource(referencePath))
             {
-                DataStoreRetriever retriever = synchronizer.getRetrieverForTrendSource(lookup);
+                DataStoreRetriever retriever = synchronizer.getRetrieverForTrendSource(referencePath);
                 next.put("addClass", "selectedNode");
                 next.put("selected", "true");
                 next.put("url", retriever.getTableName());

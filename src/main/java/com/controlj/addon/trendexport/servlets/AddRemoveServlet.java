@@ -1,9 +1,10 @@
 package com.controlj.addon.trendexport.servlets;
 
-import com.controlj.addon.trendexport.config.ConfigManager;
-import com.controlj.addon.trendexport.config.ConfigManagerLoader;
 import com.controlj.addon.trendexport.DBAndSchemaSynchronizer;
 import com.controlj.addon.trendexport.DataCollector;
+import com.controlj.addon.trendexport.config.ConfigManager;
+import com.controlj.addon.trendexport.config.ConfigManagerLoader;
+import com.controlj.addon.trendexport.helper.TrendSourcePathResolvers;
 import com.controlj.addon.trendexport.helper.TrendTableNameGenerator;
 import com.controlj.addon.trendexport.util.AlarmHandler;
 import com.controlj.addon.trendexport.util.ErrorHandler;
@@ -174,8 +175,8 @@ public class AddRemoveServlet extends HttpServlet
                     Location startLoc = access.getTree(SystemTree.Geographic).resolve(nodeLookupString);
                     TrendSource trendSource = startLoc.getAspect(TrendSource.class);
                     TrendSource.Type type = trendSource.getType();
-                    String referencePath = getReferencePath(startLoc, new StringBuilder()).toString();
-                    String fullDisplayPath = getFullDisplayPath(startLoc, new StringBuilder()).toString();
+                    String referencePath = TrendSourcePathResolvers.getReferencePath(startLoc, new StringBuilder()).toString();
+                    String fullDisplayPath = TrendSourcePathResolvers.getFullDisplayPath(startLoc, new StringBuilder()).toString();
 
                     synchronizer.addSourceAndTableName(referencePath, startLoc.getDisplayName(), fullDisplayPath, tableName, type);
                 }
@@ -183,28 +184,6 @@ public class AddRemoveServlet extends HttpServlet
         });
 
 
-    }
-
-    private StringBuilder getReferencePath(Location location, StringBuilder builder) throws UnresolvableException
-    {
-        if (location.hasParent())
-        {
-            getReferencePath(location.getParent(), builder);
-            builder.append(location.getReferenceName());
-            if (!location.getChildren().isEmpty())
-                    builder.append('/');
-        }
-
-        return builder;
-    }
-
-    private StringBuilder getFullDisplayPath(Location location, StringBuilder builder) throws UnresolvableException
-    {
-        if (location.hasParent())
-            getFullDisplayPath(location.getParent(), builder);
-
-        builder.append(" \\ ").append(location.getDisplayName());
-        return builder;
     }
 
     private void removeSource(List<String> nodeLookups, DBAndSchemaSynchronizer synchronizer, String keepData)

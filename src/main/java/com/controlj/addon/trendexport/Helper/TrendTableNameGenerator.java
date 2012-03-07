@@ -15,15 +15,6 @@ public class TrendTableNameGenerator
 
         displayName = displayName.toLowerCase();
 
-        /*int charsToRemove = 0;
-        for (int i = 0; i < displayName.length() && !Character.isLetter(displayName.charAt(i)); ++i)
-            charsToRemove = i;
-
-        if (charsToRemove == displayName.length() || charsToRemove > 18)
-            return generateTableName(existingTableNames);
-
-        displayName = displayName.substring(charsToRemove);*/
-
         StringBuilder builder = new StringBuilder();
         for (char c : displayName.toCharArray())
         {
@@ -40,6 +31,7 @@ public class TrendTableNameGenerator
         return tempTableName + tempNameIndex;
     }
 
+    // deprecated
     private static String generateTableName(Collection<String> existingTableNames)
     {
         // reset if we need to begin rolling to the other letters
@@ -75,6 +67,6 @@ public class TrendTableNameGenerator
                 return false;
         }
 
-        return true;
+        return !(tableName.substring(tableName.length()-2).equals("__"));
     }
 }
