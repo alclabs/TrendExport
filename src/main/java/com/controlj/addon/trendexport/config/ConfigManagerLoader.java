@@ -17,7 +17,7 @@ public class ConfigManagerLoader
         {
             manager.load();
         }
-        catch (IOException e)
+        catch (Exception e)
         {
             ErrorHandler.handleError("Error reading SourceMappings data", e, AlarmHandler.TrendExportAlarm.CollectionFailure);
         }

@@ -1,39 +1,30 @@
 /*
-* Copyright (c) 2011 Automated Logic Corporation
-*
-* Permission is hereby granted, free of charge, to any person obtaining a copy
-* of this software and associated documentation files (the "Software"), to deal
-* in the Software without restriction, including without limitation the rights
-* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-* copies of the Software, and to permit persons to whom the Software is
-* furnished to do so, subject to the following conditions:
-*
-* The above copyright notice and this permission notice shall be included in
-* all copies or substantial portions of the Software.
-*
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-* LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-* OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-* THE SOFTWARE.
-*/
+ * Copyright (c) 2011 Automated Logic Corporation
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
 
 $(function()
 {
-    $("#dbtypeCombo").simpleCombo();
-//    dbBrandcombo.bind('click', (function() {
-//        alert('changed');
-//
-//        if (dbBrandcombo.val() == 'Derby')
-//        {
-//            alert('derby');
-//        }
-//        else
-//            alert('not derby');
-//
-//    }));
+    $("#dbtypeCombo").hyjack_select();
+
+
     $("#alarmPath").removeProp("disabled");
     $('#testAlarm').button().bind("click", function()
     {
@@ -43,6 +34,28 @@ $(function()
                 {
                     alert(data["result"]);
                 });
+    });
+    $(':input').change(function ()
+    {
+        if ($(this).val() === "derby")
+        {
+            // disable all other connection controls
+            $('#host').prop('disabled', true);
+            $('#port').prop('disabled', true);
+            $('#instance').prop('disabled', true);
+            $('#user').prop('disabled', true);
+            $('#pass').prop('disabled', true);
+        }
+        else
+        {
+            // enable controls
+            $('#host').prop('disabled', false);
+            $('#port').prop('disabled', false);
+            $('#instance').prop('disabled', false);
+            $('#user').prop('disabled', false);
+            $('#pass').prop('disabled', false);
+        }
+
     });
 
     $.getJSON("servlets/settings",

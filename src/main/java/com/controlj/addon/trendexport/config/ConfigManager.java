@@ -43,7 +43,7 @@ public class ConfigManager
         configuration = config;
     }
 
-    public void load() throws IOException
+    public void load() throws Exception
     {
         try
         {
@@ -81,11 +81,8 @@ public class ConfigManager
         }
         catch (Exception e)
         {
-            configuration = null;
-            /*if (e.getCause() instanceof IOException)
-                throw (IOException) e.getCause();
-            else
-                throw new IOException("Action execution exception reading datastore", e);  */
+            configuration = new Configuration(12L, Configuration.CollectionMethod.Interval);
+            save();
         }
     }
 

@@ -68,9 +68,10 @@ $(function()
                     {
                         // fix for detecting dummy table row in the event that the table is empty
                         var htmlString = $(this).html();
-                        if (htmlString.indexOf("Please add a source to view") !== -1)
+                        if (htmlString.indexOf("Add a source from") !== -1)
                         {
-                            alert("Please add at least one trend source from the Add or Remove Tab.");
+                            $("#tabs").tabs('select', 1);
+//                            alert("Please add at least one trend source from the Add or Remove Tab.");
                             return;
                         }
 

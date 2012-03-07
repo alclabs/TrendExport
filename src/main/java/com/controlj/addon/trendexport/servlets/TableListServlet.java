@@ -69,9 +69,9 @@ public class TableListServlet extends HttpServlet
             JSONObject emptyObject = new JSONObject();
 
             emptyObject.put("sourceLookupString", "0123thisIsNotValid");
-            emptyObject.put("sourceDisplayName", "Please add a source to view");
-            emptyObject.put("path", "Please add a source to view");
-            emptyObject.put("tableName", "Please add a source to view");
+            emptyObject.put("sourceDisplayName", "Add a source from the Add or Remove Tab");
+            emptyObject.put("path", "Add a source from the Add or Remove Tab");
+            emptyObject.put("tableName", "Add a source from the Add or Remove Tab");
             emptyObject.put("isEnabled", " ");
 
             jsonArray.put(emptyObject);
