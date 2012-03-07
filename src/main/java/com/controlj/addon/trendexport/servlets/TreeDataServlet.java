@@ -74,7 +74,6 @@ public class TreeDataServlet extends HttpServlet
                 {
                     ConfigManager manager = new ConfigManagerLoader().loadConnectionInfoFromDataStore();
                     DBAndSchemaSynchronizer synchronizer = new DBAndSchemaSynchronizer(manager.getCurrentConnectionInfo());
-                    //String persistentLookupString = req.getParameter("key");
 
                     try
                     {
