@@ -81,26 +81,28 @@ public class TreeDataServlet extends HttpServlet
                         synchronizer.connect();
                         Tree geoTree = access.getTree(SystemTree.Geographic);
 
-                        // initialize tree
                         if (req.getParameterMap().size() == 1)
                         {
+                            // initialize tree
                             Collection<Location> treeChildren = getEntries(geoTree, req.getParameter("key"));
 
                             JSONArray arrayData = toJSON(treeChildren, synchronizer);
                             arrayData.write(resp.getWriter());
                         }
-                        // lazyRead tree
                         else if (req.getParameter("mode").contains("lazyTree"))
                         {
+                            // lazyRead tree
                             Collection<Location> treeChildren = getEntries(geoTree, req.getParameter("key"));
-
                             JSONArray arrayData = toJSON(treeChildren, synchronizer);
+
                             arrayData.write(resp.getWriter());
                         }
                         else if (req.getParameter("mode").contains("data"))
                         {
+                            // get data about a node
                             Location location = geoTree.resolve(req.getParameter("key"));
                             String referencePath = TrendSourcePathResolvers.getReferencePath(location, new StringBuilder()).toString();
+
                             getTreeData(referencePath, synchronizer);
                         }
                     }
@@ -193,7 +195,8 @@ public class TreeDataServlet extends HttpServlet
         }
     }
 
-    private JSONArray toJSON(Collection<Location> treeEntries, DBAndSchemaSynchronizer synchronizer) throws JSONException, DatabaseVersionMismatchException, UpgradeException, DatabaseException
+    private JSONArray toJSON(Collection<Location> treeEntries, DBAndSchemaSynchronizer synchronizer)
+            throws JSONException, DatabaseVersionMismatchException, UpgradeException, DatabaseException, UnresolvableException
     {
         JSONArray arrayData = new JSONArray();
         for (Location location : treeEntries)
@@ -222,7 +225,11 @@ public class TreeDataServlet extends HttpServlet
                 next.put("url", getTableName(lookup, displayName, synchronizer));
             }
 
-            if (synchronizer.containsSource(lookup))
+            // Convert persstent lookup to reference name here because the synchronizer only maintains a list of
+            // active trend sources via GQLPaths
+            String referencePath = TrendSourcePathResolvers.getReferencePath(location, new StringBuilder()).toString();
+
+            if (synchronizer.containsSource(referencePath))
                 next.put("addClass", "selectedNode");
             else
                 next.put("addClass", "null");

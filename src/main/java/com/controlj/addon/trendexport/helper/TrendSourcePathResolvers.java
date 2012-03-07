@@ -1,7 +1,7 @@
 package com.controlj.addon.trendexport.helper;
 
-import com.controlj.green.addonsupport.access.*;
-import org.jetbrains.annotations.NotNull;
+import com.controlj.green.addonsupport.access.Location;
+import com.controlj.green.addonsupport.access.UnresolvableException;
 
 public class TrendSourcePathResolvers
 {
@@ -25,20 +25,5 @@ public class TrendSourcePathResolvers
 
         builder.append(" \\ ").append(location.getDisplayName());
         return builder;
-    }
-
-    public static String convertPersistentLookupToReferencePath(String lookup) throws SystemException, ActionExecutionException
-    {
-        SystemConnection connection = DirectAccess.getDirectAccess().getRootSystemConnection();
-        connection.runReadAction(new ReadAction()
-        {
-            @Override
-            public void execute(@NotNull SystemAccess access) throws Exception
-            {
-
-            }
-        });
-
-        return lookup;
     }
 }
