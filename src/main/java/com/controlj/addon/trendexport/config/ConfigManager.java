@@ -58,7 +58,7 @@ public class ConfigManager
                     DataStore store = systemAccess.getSystemDataStore("TrendExportConfig");
                     BufferedReader reader = store.getReader();
 
-                    long timeInterval = (long) Integer.valueOf(reader.readLine());
+                    long timeInterval = Long.valueOf(reader.readLine());
                     String collMethod = reader.readLine();
 
                     Configuration.CollectionMethod method;
@@ -69,10 +69,10 @@ public class ConfigManager
 
 
                     String alarmPath = reader.readLine();
-                    if (alarmPath != null)
-                        ConfigManager.this.configuration = new Configuration(timeInterval, method, alarmPath);
-                    else
+                    if (alarmPath == null || !alarmPath.isEmpty())
                         ConfigManager.this.configuration = new Configuration(timeInterval, method);
+                    else
+                        ConfigManager.this.configuration = new Configuration(timeInterval, method, alarmPath);
 
                     reader.close();
                 }
@@ -82,7 +82,6 @@ public class ConfigManager
         catch (IOException e)
         {
             configuration = new Configuration(12L, Configuration.CollectionMethod.Interval);
-//            save();
         }
     }
 

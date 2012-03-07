@@ -105,6 +105,11 @@ public class TreeDataServlet extends HttpServlet
                             getTreeData(referencePath, synchronizer);
                         }
                     }
+                    catch (Exception e)
+                    {
+                        ErrorHandler.handleError("System Error", e);
+                        e.printStackTrace();
+                    }
                     finally
                     {
                         synchronizer.disconnect();
