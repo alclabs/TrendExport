@@ -24,22 +24,31 @@ $(function()
 {
     $("#tabs").tabs();
     $('#source_tableName_input').val("(Select a node)");
+    $('#source_tableName_input').prop('disabled', true);
     $('#removeDialog').hide();
     $('#workingText').hide();
-
+    $('#addSource').button("disable");
     $('#addSource').button().bind("click", function()
     {
         createEnableCollectionRequest(getActiveNodeKey());
     });
-    $('#addSource').button("disable");
 
-
+    $('#addRemove_removeSource').button("disable");
     $('#addRemove_removeSource').button().bind("click", function()
     {
         askToKeepData(getActiveNodeKey());
     });
-    $('#addRemove_removeSource').button("disable");
 
+    $('input:checkbox').removeProp('checked');
+    $('input:checkbox').prop('disabled', true);
+    $('input:checkbox').click(function() {
+        // get source
+
+        createEnableCollectionRequest(getActiveNodeKey());
+
+        // send request
+        // set enabled or disabled
+    });
 
     $("#treeOfPotentialSources").dynatree({
                 title: "System",
@@ -102,6 +111,8 @@ function updateUI(dtnode, typeOfRequest)
     {
         dtnode.data.addClass = typeOfRequest !== 'removeSource' ? "selectedNode" : "unselectedNode";
         dtnode.render();
+
+        $('input:checkbox').prop('disabled', dtnode.data.isFolder === true && typeOfRequest === 'removeSource');
     }
 
     // May be way to simplify logic here: too many enable/disables being repeated
@@ -112,6 +123,8 @@ function updateUI(dtnode, typeOfRequest)
 
         $('#addSource').button("disable");
         $('#addRemove_removeSource').button("disable");
+
+        $('input:checkbox').prop('disabled', dtnode.data.isFolder === true);
     }
     else
     {
@@ -122,11 +135,13 @@ function updateUI(dtnode, typeOfRequest)
         {
             $('#addSource').button("disable");
             $('#addRemove_removeSource').button("enable");
+            $('input:checkbox').prop('checked', true);
         }
         else
         {
             $('#addSource').button("enable");
             $('#addRemove_removeSource').button("disable");
+            $('input:checkbox').removeProp('checked');
         }
     }
 }

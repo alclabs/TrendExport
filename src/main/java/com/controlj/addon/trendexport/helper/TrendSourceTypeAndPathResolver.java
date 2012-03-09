@@ -36,8 +36,8 @@ public class TrendSourceTypeAndPathResolver
                 return TrendSource.Type.Analog;
             case 2:
                 return TrendSource.Type.Digital;
-            case 3:
-                return TrendSource.Type.EquipmentColor;
+//            case 3:
+//                return TrendSource.Type.EquipmentColor;
         }
 
         return TrendSource.Type.Complex;

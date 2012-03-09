@@ -79,8 +79,8 @@
                     <tbody>
                     <tr>
                         <td>Table Name:&nbsp;&nbsp;</td>
-                        <td><input class="mainPageStretchedTDs" type="text" id="source_tableName_input" value="..."/>
-                        </td>
+                        <td><input class="mainPageStretchedTDs" type="text" id="source_tableName_input" value="..."/></td>
+                        <td><input type="checkbox" id="isTrendEnabled" value="yes"/>Collection enabled?</td>
                     </tr>
                     <tr>
                         <td><span id="workingText">Working....</span></td>
