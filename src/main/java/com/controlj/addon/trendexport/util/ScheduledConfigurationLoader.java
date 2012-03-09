@@ -60,9 +60,12 @@ public class ScheduledConfigurationLoader
     {
         // time of collection of this day - schedule will handle the 24hrs...only recalculate on (re)initialize
         long rawTimeMilliseconds = manager.getConfiguration().getCollectionValue();
-        long rawTimeMinutes = rawTimeMilliseconds / 60000;
+        long rawTimeMinutes = rawTimeMilliseconds / 60000; // convert to minutes
 
         int hours = (int) (rawTimeMinutes / 60);
+        if (hours > 12)
+            hours /= 12;
+
         int minutes = (int) (rawTimeMinutes % 60);
 
         // Time of collection
@@ -82,9 +85,8 @@ public class ScheduledConfigurationLoader
             return timeOfCollection.getTime() - currentTime.getTime();
         else
         {
-            // the time now is after the collection date so we need to increment the calendar by one day
-            calendar.add(Calendar.DATE, 1 + calendar.get(Calendar.DATE));
-
+            // the current time is after the requested collection time so we need to increment the calendar by one day and wait
+            calendar.add(Calendar.DAY_OF_MONTH, 1);
             return calendar.getTimeInMillis() - currentTime.getTime();
         }
     }

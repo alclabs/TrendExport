@@ -186,11 +186,26 @@ public class AddRemoveServlet extends HttpServlet
 
     }
 
-    private void removeSource(List<String> nodeLookups, DBAndSchemaSynchronizer synchronizer, String keepData)
-            throws DatabaseVersionMismatchException, UpgradeException, DatabaseException
+    private void removeSource(final List<String> nodeLookups, final DBAndSchemaSynchronizer synchronizer, final String keepData)
+            throws DatabaseVersionMismatchException, UpgradeException, DatabaseException, SystemException, ActionExecutionException
     {
-        for (String nodeLookupString : nodeLookups)
-            synchronizer.removeSource(nodeLookupString, keepData.equals("true"));
+        for (String referencePath : nodeLookups)
+            synchronizer.removeSource(referencePath, keepData.equals("true"));
+//        SystemConnection connection = DirectAccess.getDirectAccess().getRootSystemConnection();
+//        connection.runReadAction(FieldAccessFactory.newDisabledFieldAccess(), new ReadAction()
+//        {
+//            @Override
+//            public void execute(@NotNull SystemAccess access) throws Exception
+//            {
+//                for (String nodeLookupString : nodeLookups)
+//                {
+//                    Location startLoc = access.getTree(SystemTree.Geographic).resolve(nodeLookupString);
+//                    String referencePath = TrendSourcePathResolvers.getReferencePath(startLoc, new StringBuilder()).toString();
+//
+//                    synchronizer.removeSource(referencePath, keepData.equals("true"));
+//                }
+//            }
+//        });
     }
 
     private DBAndSchemaSynchronizer initializeSynchronizer() throws IOException

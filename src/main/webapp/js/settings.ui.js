@@ -33,10 +33,12 @@ $(function()
                     alert(data["result"]);
                 });
     });
-    $(':input').change(function ()
+    $('select').change(function()
     {
-        updateComboSettings($(this));
+        updateComboSettings($(this).val());
     });
+
+    updateComboSettings($('select').val());
 
     $.getJSON("servlets/settings",
             function(data)
@@ -48,7 +50,7 @@ $(function()
                 $('#user').val(data['user']);
                 $('#pass').val(data['pass']);
 
-                updateComboSettings($("#dbtypeCombo").hyjack_select());
+                updateComboSettings($('select').val());
 
                 // set collection settings
                 if (data['collectionType'] === 'Interval')
@@ -57,13 +59,11 @@ $(function()
                     enableTimeSettings(false);
 
                     $('#intervalValue').val(data['collectionValue']);
-
                 }
                 else
                 {
                     $('#collTime').prop('checked', true);
                     enableTimeSettings(true);
-
 
                     var rawTime = data['collectionValue'] / 60000;
                     var hours = Math.round(rawTime / 60);
@@ -71,7 +71,7 @@ $(function()
 
                     if (hours > 12)
                     {
-                        hours -= 12;
+                        hours /= 12;
                         $('#pm').prop('checked', true);
                     }
 
@@ -84,10 +84,6 @@ $(function()
 
                 // Alarm control program path
                 $('#alarmPath').val(data['alarmPath']);
-
-                // update status in maintain page
-//                $('#collectorStatusLabel').text("Current Status: " + data['collectorStatus']);
-
             });
 
     $('#Save').button().bind("click", function()
@@ -117,7 +113,8 @@ $(function()
 
     function updateComboSettings(thing)
     {
-        if (thing.val() === "derby")
+//        alert(thing);
+        if (thing === "derby")
         {
             // disable all other connection controls
             $('#host').prop('disabled', true);
@@ -126,7 +123,7 @@ $(function()
             $('#user').prop('disabled', true);
             $('#pass').prop('disabled', true);
         }
-        else
+        else if (thing === "mysql" || thing === "postgresql" || thing === "oracle" || thing === "sqlserver")
         {
             // enable controls
             $('#host').prop('disabled', false);

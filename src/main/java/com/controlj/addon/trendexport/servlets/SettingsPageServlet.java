@@ -19,7 +19,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.Calendar;
 
 public class SettingsPageServlet extends HttpServlet
 {
@@ -132,34 +131,24 @@ public class SettingsPageServlet extends HttpServlet
         String value = req.getParameter("collValue");
         String alarmPath = req.getParameter("alarmPath");
 
-        long time = 0;
+        long time;
         if (value.contains(":"))
         {
             int start = value.indexOf(':');
+            int end = value.lastIndexOf(':');
             int hours = Integer.parseInt(value.substring(0, start));
-            int minutes = Integer.parseInt(value.substring(start + 1, value.lastIndexOf(':'))) * 60;
-            // parse for time instead
+            int minutes = Integer.parseInt(value.substring(start + 1, end));
 
-            Calendar cal = Calendar.getInstance();
-            cal.set(Calendar.HOUR, hours);
-            cal.set(Calendar.MINUTE, minutes);
-            cal.set(Calendar.SECOND, 0);
-            cal.set(Calendar.MILLISECOND, 0);
-            if (value.contains("AM"))
-                cal.set(Calendar.AM_PM, Calendar.AM);
-            else
-            {
-                cal.set(Calendar.AM_PM, Calendar.PM);
-                time = 12 * 3600000; // hours * 60 * 60 * 1000 = ms)
-            }
-
-            time += cal.getTimeInMillis();
+            // hours -> ms = 60 * 60 * 1000
+            time = hours * 3600000 + (minutes * 60000);
+            if (value.contains("PM"))
+                time *= 12;
         }
         else
         {
             time = Long.parseLong(value);
-            if (time < 1 || time > 1440)
-                throw new IllegalArgumentException("Time must be within 1 and 1440 hours");
+//            if (time < 1 || time > 1440)
+//                throw new IllegalArgumentException("Time must be within 1 and 1440 hours");
         }
 
         Configuration.CollectionMethod collectionMethod;

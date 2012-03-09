@@ -28,7 +28,6 @@ package com.controlj.addon.trendexport;
 import com.controlj.addon.trendexport.config.SourceMappings;
 import com.controlj.addon.trendexport.helper.TrendPathAndDBTableName;
 import com.controlj.addon.trendexport.helper.TrendTableNameGenerator;
-import com.controlj.addon.trendexport.util.Logger;
 import com.controlj.green.addonsupport.access.*;
 import com.controlj.green.addonsupport.access.aspect.TrendSource;
 import com.controlj.green.addonsupport.access.trend.TrendData;
@@ -130,9 +129,9 @@ public class DBAndSchemaSynchronizer
         database = newDatabase;
     }
 
-    public void removeSource(String source, boolean keepData) throws DatabaseVersionMismatchException, UpgradeException, DatabaseException
+    public void removeSource(String gqlReferencePath, boolean keepData) throws DatabaseVersionMismatchException, UpgradeException, DatabaseException
     {
-        sourceMappings.removeSource(source);
+        sourceMappings.removeSource(gqlReferencePath);
         database.upgradeSchema(sourceMappings, keepData);
     }
 
