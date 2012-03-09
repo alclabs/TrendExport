@@ -39,12 +39,18 @@ $(function()
         askToKeepData(getActiveNodeKey());
     });
 
-    $('input:checkbox').removeProp('checked');
-    $('input:checkbox').prop('disabled', true);
-    $('input:checkbox').click(function() {
-        // get source
+    $('#isTrendEnabled').removeProp('checked');
+    $('#isTrendEnabled').prop('disabled', true);
+    $('#isTrendEnabled').click(function()
+    {
+        alert$('#isTrendEnabled:checked' !== undefined);
+        var mode = 'disable';
+        if (this.is(':checked'))
+            mode = 'enable';
 
-        createEnableCollectionRequest(getActiveNodeKey());
+        var obj = createRequestObject(mode, getActiveNodeKey(), this.is(':checked'));
+
+//        createEnableCollectionRequest(getActiveNodeKey());
 
         // send request
         // set enabled or disabled
@@ -107,29 +113,28 @@ function getActiveNodeKey()
 
 function updateUI(dtnode, typeOfRequest)
 {
-    if (typeOfRequest === 'removeSource' || typeOfRequest === 'addSource')
-    {
-        dtnode.data.addClass = typeOfRequest !== 'removeSource' ? "selectedNode" : "unselectedNode";
-        dtnode.render();
+    $('#source_tableName_input').prop('disabled', dtnode.data.isFolder === true);
 
-        $('input:checkbox').prop('disabled', dtnode.data.isFolder === true && typeOfRequest === 'removeSource');
-    }
-
-    // May be way to simplify logic here: too many enable/disables being repeated
     if (dtnode.data.isFolder === true)
     {
         $('#source_tableName_input').val("N/A");
-        $('#source_tableName_input').prop('disabled', dtnode.data.isFolder === true);
 
         $('#addSource').button("disable");
         $('#addRemove_removeSource').button("disable");
 
-        $('input:checkbox').prop('disabled', dtnode.data.isFolder === true);
+        $('input:checkbox').prop('disabled', true);
     }
     else
     {
+        if (typeOfRequest === 'removeSource' || typeOfRequest === 'addSource')
+        {
+            dtnode.data.addClass = typeOfRequest !== 'removeSource' ? "selectedNode" : "unselectedNode";
+            dtnode.render();
+        }
+
         $('#source_tableName_input').val(dtnode.data.url);
         $('#source_tableName_input').prop('disabled', dtnode.data.addClass === "selectedNode");
+        $('input:checkbox').prop('disabled', dtnode.data.addClass !== "selectedNode");
 
         if (dtnode.data.addClass === "selectedNode")
         {

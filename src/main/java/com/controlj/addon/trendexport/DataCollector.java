@@ -76,18 +76,28 @@ public class DataCollector
         SystemConnection connection = DirectAccess.getDirectAccess().getRootSystemConnection();
         connection.runReadAction(FieldAccessFactory.newDisabledFieldAccess(), new ReadAction()
         {
-            @Override public void execute(@NotNull SystemAccess systemAccess) throws Exception
+            @Override
+            public void execute(@NotNull SystemAccess systemAccess) throws Exception
             {
-                Location startLoc = systemAccess.getTree(SystemTree.Geographic).resolve(nodeLookupString);
-                TrendSource trendSource = startLoc.getAspect(TrendSource.class);
+                try
+                {
+//                    Location startLoc = systemAccess.getTree(SystemTree.Geographic).resolve(nodeLookupString);
+                    Location startLoc = systemAccess.resolveGQLPath(nodeLookupString);
+                    TrendSource trendSource = startLoc.getAspect(TrendSource.class);
 
-                // start using the retriever
-                DataStoreRetriever retriever = synchronizer.getRetrieverForTrendSource(nodeLookupString);
-                Date startDate = retriever.getLastRecordedDate();
-                int numberOfSamplesToSkip = retriever.getNumberOfSamplesToSkip();
-                TrendData trendData = trendSource.getTrendData(TrendRangeFactory.byDateRange(startDate, new Date()));
 
-                synchronizer.insertTrendSamples(nodeLookupString, trendData, numberOfSamplesToSkip);
+                    // start using the retriever
+                    DataStoreRetriever retriever = synchronizer.getRetrieverForTrendSource(nodeLookupString);
+                    Date startDate = retriever.getLastRecordedDate();
+                    int numberOfSamplesToSkip = retriever.getNumberOfSamplesToSkip();
+                    TrendData trendData = trendSource.getTrendData(TrendRangeFactory.byDateRange(startDate, new Date()));
+
+                    synchronizer.insertTrendSamples(nodeLookupString, trendData, numberOfSamplesToSkip);
+                }
+                catch (Exception e)
+                {
+                    ErrorHandler.handleError("Collector Failure", e);
+                }
             }
         });
     }
