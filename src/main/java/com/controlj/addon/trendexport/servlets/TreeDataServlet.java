@@ -26,7 +26,7 @@ import com.controlj.addon.trendexport.config.ConfigManager;
 import com.controlj.addon.trendexport.config.ConfigManagerLoader;
 import com.controlj.addon.trendexport.DBAndSchemaSynchronizer;
 import com.controlj.addon.trendexport.DataStoreRetriever;
-import com.controlj.addon.trendexport.helper.TrendSourcePathResolvers;
+import com.controlj.addon.trendexport.helper.TrendSourceTypeAndPathResolver;
 import com.controlj.addon.trendexport.helper.TrendTableNameGenerator;
 import com.controlj.addon.trendexport.util.AlarmHandler;
 import com.controlj.addon.trendexport.util.ErrorHandler;
@@ -100,7 +100,7 @@ public class TreeDataServlet extends HttpServlet
                         {
                             // get data about a node
                             Location location = geoTree.resolve(req.getParameter("key"));
-                            String referencePath = TrendSourcePathResolvers.getReferencePath(location, new StringBuilder()).toString();
+                            String referencePath = TrendSourceTypeAndPathResolver.getReferencePath(location, new StringBuilder()).toString();
 
                             getTreeData(referencePath, synchronizer);
                         }
@@ -231,7 +231,7 @@ public class TreeDataServlet extends HttpServlet
 
             // Convert persstent lookup to reference name here because the synchronizer only maintains a list of
             // active trend sources via GQLPaths
-            String referencePath = TrendSourcePathResolvers.getReferencePath(location, new StringBuilder()).toString();
+            String referencePath = TrendSourceTypeAndPathResolver.getReferencePath(location, new StringBuilder()).toString();
 
             if (synchronizer.containsSource(referencePath))
                 next.put("addClass", "selectedNode");

@@ -81,7 +81,7 @@ public class TableListServlet extends HttpServlet
         {
             JSONObject object = new JSONObject();
 
-            object.put("sourceLookupString", trendPathAndDBTableName.getTrendSourceReferenceName());
+            object.put("sourceLookupString", trendPathAndDBTableName.getTrendSourceReferencePath());
             object.put("sourceDisplayName", trendPathAndDBTableName.getDisplayName());
             object.put("path", trendPathAndDBTableName.getTrendSourceDisplayPath());
             object.put("tableName", trendPathAndDBTableName.getDbTableName());

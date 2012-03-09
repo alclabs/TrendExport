@@ -4,7 +4,7 @@ import com.controlj.addon.trendexport.DBAndSchemaSynchronizer;
 import com.controlj.addon.trendexport.DataCollector;
 import com.controlj.addon.trendexport.config.ConfigManager;
 import com.controlj.addon.trendexport.config.ConfigManagerLoader;
-import com.controlj.addon.trendexport.helper.TrendSourcePathResolvers;
+import com.controlj.addon.trendexport.helper.TrendSourceTypeAndPathResolver;
 import com.controlj.addon.trendexport.helper.TrendTableNameGenerator;
 import com.controlj.addon.trendexport.util.AlarmHandler;
 import com.controlj.addon.trendexport.util.ErrorHandler;
@@ -175,8 +175,8 @@ public class AddRemoveServlet extends HttpServlet
                     Location startLoc = access.getTree(SystemTree.Geographic).resolve(nodeLookupString);
                     TrendSource trendSource = startLoc.getAspect(TrendSource.class);
                     TrendSource.Type type = trendSource.getType();
-                    String referencePath = TrendSourcePathResolvers.getReferencePath(startLoc, new StringBuilder()).toString();
-                    String fullDisplayPath = TrendSourcePathResolvers.getFullDisplayPath(startLoc, new StringBuilder()).toString();
+                    String referencePath = TrendSourceTypeAndPathResolver.getReferencePath(startLoc, new StringBuilder()).toString();
+                    String fullDisplayPath = TrendSourceTypeAndPathResolver.getFullDisplayPath(startLoc, new StringBuilder()).toString();
 
                     synchronizer.addSourceAndTableName(referencePath, startLoc.getDisplayName(), fullDisplayPath, tableName, type);
                 }
@@ -191,21 +191,6 @@ public class AddRemoveServlet extends HttpServlet
     {
         for (String referencePath : nodeLookups)
             synchronizer.removeSource(referencePath, keepData.equals("true"));
-//        SystemConnection connection = DirectAccess.getDirectAccess().getRootSystemConnection();
-//        connection.runReadAction(FieldAccessFactory.newDisabledFieldAccess(), new ReadAction()
-//        {
-//            @Override
-//            public void execute(@NotNull SystemAccess access) throws Exception
-//            {
-//                for (String nodeLookupString : nodeLookups)
-//                {
-//                    Location startLoc = access.getTree(SystemTree.Geographic).resolve(nodeLookupString);
-//                    String referencePath = TrendSourcePathResolvers.getReferencePath(startLoc, new StringBuilder()).toString();
-//
-//                    synchronizer.removeSource(referencePath, keepData.equals("true"));
-//                }
-//            }
-//        });
     }
 
     private DBAndSchemaSynchronizer initializeSynchronizer() throws IOException

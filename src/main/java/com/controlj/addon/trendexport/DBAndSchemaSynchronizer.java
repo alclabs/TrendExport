@@ -27,6 +27,7 @@ package com.controlj.addon.trendexport;
 
 import com.controlj.addon.trendexport.config.SourceMappings;
 import com.controlj.addon.trendexport.helper.TrendPathAndDBTableName;
+import com.controlj.addon.trendexport.helper.TrendSourceTypeAndPathResolver;
 import com.controlj.addon.trendexport.helper.TrendTableNameGenerator;
 import com.controlj.green.addonsupport.access.*;
 import com.controlj.green.addonsupport.access.aspect.TrendSource;
@@ -71,11 +72,11 @@ public class DBAndSchemaSynchronizer
         String user = info1.getUser();
         String passwd = info1.getPasswd();
         return info1.getType() == info2.getType() &&
-               (host == null ? info2.getHost() == null : host.equals(info2.getHost())) &&
-               (instance == null ? info2.getInstance() == null : instance.equals(info2.getInstance())) &&
-               info1.getPort() == info2.getPort() &&
-               (user == null ? info2.getUser() == null : user.equals(info2.getUser())) &&
-               (passwd == null ? info2.getPasswd() == null : passwd.equals(info2.getPasswd()));
+                (host == null ? info2.getHost() == null : host.equals(info2.getHost())) &&
+                (instance == null ? info2.getInstance() == null : instance.equals(info2.getInstance())) &&
+                info1.getPort() == info2.getPort() &&
+                (user == null ? info2.getUser() == null : user.equals(info2.getUser())) &&
+                (passwd == null ? info2.getPasswd() == null : passwd.equals(info2.getPasswd()));
     }
 
     // auto-generated name - only used in Test -> use addSourceAndTableName below
@@ -116,13 +117,13 @@ public class DBAndSchemaSynchronizer
     }
 
     // human-generated name - or passed name from another method
-    public synchronized void addSourceAndTableName(String source, String displayName, String referencePath, String tableName, TrendSource.Type type)
+    public synchronized void addSourceAndTableName(String referencePath, String displayName, String displayPath, String tableName, TrendSource.Type type)
             throws DatabaseVersionMismatchException, UpgradeException, DatabaseException
     {
-        if (sourceMappings.containsSource(source))
+        if (sourceMappings.containsSource(referencePath))
             return; // todo: check that tableName matches
 
-        sourceMappings.addSourceAndName(new TrendPathAndDBTableName(source, displayName, referencePath, tableName, type, true));
+        sourceMappings.addSourceAndName(new TrendPathAndDBTableName(referencePath, displayName, displayPath, tableName, type, true));
         DynamicDatabase newDatabase = database.upgradeSchema(sourceMappings, true);
         database.close();
         newDatabase.connect(connectionInfo);
@@ -206,21 +207,10 @@ public class DBAndSchemaSynchronizer
 
                     if (type == null)
                         throw new RuntimeException("Type not found");
-                    switch (type)
-                    {
-                        case 0:
-                            listOfEverything.add(new TrendPathAndDBTableName(sourcePath, displayName, displayPath, tableName, TrendSource.Type.Analog, isEnabled));
-                            break;
-                        case 1:
-                            listOfEverything.add(new TrendPathAndDBTableName(sourcePath, displayName, displayPath, tableName, TrendSource.Type.Digital, isEnabled));
-                            break;
-//                        case 2:
-//                            listOfEverything.add(new TrendPathAndDBTableName(referencePath, displayName, displayPath, tableName, TrendSource.Type.EquipmentColor, isEnabled));
-//                            break;
-                        default:
-                            listOfEverything.add(new TrendPathAndDBTableName(sourcePath, displayName, tableName, displayPath, TrendSource.Type.Complex, isEnabled));
-                            break;
-                    }
+
+                    TrendSource.Type trendSourceType = TrendSourceTypeAndPathResolver.getTrendSourceType(type);
+
+                    listOfEverything.add(new TrendPathAndDBTableName(sourcePath, displayName, displayPath, tableName, trendSourceType, isEnabled));
                 }
 
                 return listOfEverything;

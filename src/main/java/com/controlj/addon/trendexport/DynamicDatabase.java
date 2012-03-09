@@ -102,8 +102,10 @@ public class DynamicDatabase extends Database
                         String tableName = oldDataTable.getTableSchema().getName();
                         Query q = buildSelect(DynamicDatabase.this.metaDataTable.referencePath).
                                 where(DynamicDatabase.this.metaDataTable.tableName.eq(tableName));
+
                         Result r = dbAccess.execute(q);
                         String source = null;
+
                         if (r.next())
                             source = r.get(DynamicDatabase.this.metaDataTable.referencePath);
 

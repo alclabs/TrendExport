@@ -53,7 +53,7 @@ public class TrendTableNameGenerator
     public static boolean isTableNameValid(String tableName)
     {
         // if length > 18
-        if (tableName.length() > 18)
+        if (tableName.length() > 18 || tableName.contains(" "))
             return false;
 
         // if char[] at 0 is not a letter
