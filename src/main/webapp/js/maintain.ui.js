@@ -50,11 +50,11 @@ $(function()
                 "sPaginationType": "full_numbers",
                 "sRowSelect": "multiple",
                 "aoColumns" : [
+                    {"sTitle": "Enabled", "sWidth": "2%", "mDataProp": "isEnabled"},
                     {"sTitle": "Source Path",   "sWidth": "50%", "mDataProp": "path"},
                     {"sTitle": "Source Name",   "sWidth": "25%", "mDataProp": "sourceDisplayName"},
                     {"sTitle": "Table Name",    "sWidth": "25%", "mDataProp": "tableName"},
 //                        {"sTitle": "Table Entries", "sWidth": "5%", "mDataProp": "tableEntries"},
-                    {"sTitle": "Enabled", "sWidth": "5%", "mDataProp": "isEnabled"},
                     {"sTitle": "Lookup String", "sWidth": "5%",  "mDataProp": "sourceLookupString", "bVisible": false}
                 ],
                 "fnCreatedRow": function(nRow, aData, iDisplayIndex)
