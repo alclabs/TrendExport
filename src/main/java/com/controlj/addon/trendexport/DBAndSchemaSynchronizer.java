@@ -148,7 +148,8 @@ public class DBAndSchemaSynchronizer
 
     public synchronized void connect() throws DatabaseVersionMismatchException, DatabaseException, UpgradeException
     {
-        ErrorHandler.handleError("Attempt CONNECT ", new Throwable());
+//        ErrorHandler.handleError("Attempt CONNECT ", new Throwable());
+        connections++;
 
         if (isConnected)
             return;
@@ -168,7 +169,7 @@ public class DBAndSchemaSynchronizer
         }
         catch (Exception e)
         {
-            ErrorHandler.handleError("Error Connecting ", e);
+            ErrorHandler.handleError("Error Connecting...recreating database ", e);
             create();
         }
         database.close();
@@ -177,7 +178,6 @@ public class DBAndSchemaSynchronizer
         database.connect(connectionInfo);
         database.upgradeSchema(sourceMappings, true);
         isConnected = true;
-        connections++;
 
 //        ErrorHandler.handleError("Number of connections: " + connections, new Throwable());
     }

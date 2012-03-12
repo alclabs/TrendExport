@@ -140,10 +140,6 @@ public class AddRemoveServlet extends HttpServlet
             {
                 ErrorHandler.handleError("AddRemove - ActionExecution Error", e);
             }
-            {
-//                if (synchronizer != null)
-//                    synchronizer.disconnect();
-            }
         }
     }
 
