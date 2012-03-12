@@ -29,6 +29,7 @@ import com.controlj.addon.trendexport.config.SourceMappings;
 import com.controlj.addon.trendexport.helper.TrendPathAndDBTableName;
 import com.controlj.addon.trendexport.helper.TrendSourceTypeAndPathResolver;
 import com.controlj.addon.trendexport.helper.TrendTableNameGenerator;
+import com.controlj.addon.trendexport.util.ErrorHandler;
 import com.controlj.green.addonsupport.access.*;
 import com.controlj.green.addonsupport.access.aspect.TrendSource;
 import com.controlj.green.addonsupport.access.trend.TrendData;
@@ -47,11 +48,13 @@ public class DBAndSchemaSynchronizer
     private SourceMappings sourceMappings;
     private DatabaseConnectionInfo connectionInfo;
     private boolean isConnected;
+    private int connections;
 
     private DBAndSchemaSynchronizer(DatabaseConnectionInfo info)
     {
         database = new DynamicDatabase();
         connectionInfo = info;
+        connections = 0;
     }
 
     public static synchronized DBAndSchemaSynchronizer getSynchronizer(DatabaseConnectionInfo info)
@@ -103,6 +106,7 @@ public class DBAndSchemaSynchronizer
 
     public DataStoreRetriever getRetrieverForTrendSource(String nodeLookupString)
     {
+
         return new DataStoreRetriever(sourceMappings.getNameFromSource(nodeLookupString), database);
     }
 
@@ -144,6 +148,8 @@ public class DBAndSchemaSynchronizer
 
     public synchronized void connect() throws DatabaseVersionMismatchException, DatabaseException, UpgradeException
     {
+        ErrorHandler.handleError("Attempt CONNECT ", new Throwable());
+
         if (isConnected)
             return;
 
@@ -153,11 +159,16 @@ public class DBAndSchemaSynchronizer
         // load the metadata table)
         try
         {
+            ErrorHandler.handleError("Attempt CONNECTION ", new Throwable());
+
             database.connect(connectionInfo);
             sourceMappings = readMappingsFromDatabase();
+
+            ErrorHandler.handleError("Connection Successful", new Throwable());
         }
         catch (Exception e)
         {
+            ErrorHandler.handleError("Error Connecting ", e);
             create();
         }
         database.close();
@@ -166,10 +177,21 @@ public class DBAndSchemaSynchronizer
         database.connect(connectionInfo);
         database.upgradeSchema(sourceMappings, true);
         isConnected = true;
+        connections++;
+
+        ErrorHandler.handleError("Number of connections: " + connections, new Throwable());
+
     }
 
     public synchronized void disconnect()
     {
+//        ErrorHandler.handleError("Attempt DISCONNECT: " + connections, new Throwable());
+
+        connections--;
+        if (connections > 0)
+            return;
+
+//        ErrorHandler.handleError("Number of connections: " + connections, new Throwable());
         database.close();
         database = new DynamicDatabase();
         isConnected = false;

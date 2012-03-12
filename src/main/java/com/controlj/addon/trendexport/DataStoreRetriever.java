@@ -53,6 +53,7 @@ public class DataStoreRetriever
 
     private Date getLastRecordedDateFromDB() throws DatabaseException
     {
+//        ErrorHandler.handleError("Entering GET DATE", new Throwable());
         return database.runQuery(new QueryTask<Date>()
         {
             @Override
@@ -60,6 +61,8 @@ public class DataStoreRetriever
             {
                 TrendDataTable table = trendDataTable;
                 Result result = databaseReadAccess.execute(database.buildSelect(table.dateColumn).orderBy(table.dateColumn.desc()));
+
+//                ErrorHandler.handleError("Leaving GET DATE", new Throwable());
 
                 if (result.next())
                     return result.get(table.dateColumn);

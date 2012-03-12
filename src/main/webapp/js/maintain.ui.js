@@ -27,6 +27,7 @@ $(function()
     var collectDataNowBtn = $('#collectDataNow').button().bind("click", function()
     {
         var selected = getRowData(maintenanceTable);
+//        collectDataNowBtn.button('disable');
         collectData(combineKeys(selected));
     });
     collectDataNowBtn.button('disable');

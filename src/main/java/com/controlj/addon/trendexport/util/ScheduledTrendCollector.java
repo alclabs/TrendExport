@@ -22,16 +22,18 @@
 
 package com.controlj.addon.trendexport.util;
 
+import com.controlj.addon.trendexport.DBAndSchemaSynchronizer;
 import com.controlj.addon.trendexport.config.ConfigManager;
 import com.controlj.addon.trendexport.config.ConfigManagerLoader;
-import com.controlj.addon.trendexport.DBAndSchemaSynchronizer;
-import com.controlj.addon.trendexport.DataCollector;
 import org.jetbrains.annotations.Nullable;
 
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import java.io.IOException;
-import java.util.concurrent.*;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class ScheduledTrendCollector implements ServletContextListener
@@ -94,7 +96,7 @@ public class ScheduledTrendCollector implements ServletContextListener
         collectionHandler = executor.scheduleAtFixedRate(new Runnable() {
                 @Override public void run()
                 {
-                    DataCollector.collectData(synchronizer);
+                    //DataCollector.collectData(synchronizer);
                 }
             }, initialDelay, interval, TimeUnit.HOURS);
     }

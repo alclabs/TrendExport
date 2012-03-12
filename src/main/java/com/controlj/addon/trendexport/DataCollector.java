@@ -44,12 +44,12 @@ public class DataCollector
     {
         try
         {
-            synchronizer.connect();
+            //synchronizer.connect();
             Collection<TrendPathAndDBTableName> sources = synchronizer.getSourceMappings().getSourcesAndTableNames();
 
             for (TrendPathAndDBTableName source : sources)
             {
-                collectDataForSource(source.getTrendSourceReferencePath(), synchronizer);
+                //collectDataForSource(source.getTrendSourceReferencePath(), synchronizer);
             }
         }
         catch (Exception e)
@@ -58,7 +58,7 @@ public class DataCollector
         }
         finally
         {
-            synchronizer.disconnect();
+            //synchronizer.disconnect();
         }
     }
 
@@ -82,6 +82,7 @@ public class DataCollector
                 try
                 {
 //                    Location startLoc = systemAccess.getTree(SystemTree.Geographic).resolve(nodeLookupString);
+//                    ErrorHandler.handleError("Entering COPY", new Throwable());
                     Location startLoc = systemAccess.resolveGQLPath(nodeLookupString);
                     TrendSource trendSource = startLoc.getAspect(TrendSource.class);
 
@@ -92,7 +93,12 @@ public class DataCollector
                     int numberOfSamplesToSkip = retriever.getNumberOfSamplesToSkip();
                     TrendData trendData = trendSource.getTrendData(TrendRangeFactory.byDateRange(startDate, new Date()));
 
+//                    ErrorHandler.handleError("Entering INSERT", new Throwable());
+
                     synchronizer.insertTrendSamples(nodeLookupString, trendData, numberOfSamplesToSkip);
+
+//                    ErrorHandler.handleError("Leaving INSERT", new Throwable());
+
                 }
                 catch (Exception e)
                 {

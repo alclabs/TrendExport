@@ -47,7 +47,7 @@ public class AddRemoveServlet extends HttpServlet
         try
         {
             synchronizer = initializeSynchronizer();
-            synchronizer.connect();
+//            synchronizer.connect();
 
             // perform action
             if (actionToAttempt.contains("addSource"))
@@ -94,8 +94,8 @@ public class AddRemoveServlet extends HttpServlet
         }
         finally
         {
-            if (synchronizer != null)
-                synchronizer.disconnect();
+//            if (synchronizer != null)
+//                synchronizer.disconnect();
         }
     }
 
@@ -143,15 +143,15 @@ public class AddRemoveServlet extends HttpServlet
             }
             catch (DatabaseVersionMismatchException e)
             {
-                e.printStackTrace();
+                e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
             }
             catch (UpgradeException e)
             {
-                e.printStackTrace();
+                e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
             }
             catch (DatabaseException e)
             {
-                e.printStackTrace();
+                e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
             }
             finally
             {
