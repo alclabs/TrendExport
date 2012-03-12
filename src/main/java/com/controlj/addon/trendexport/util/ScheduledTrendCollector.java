@@ -23,6 +23,7 @@
 package com.controlj.addon.trendexport.util;
 
 import com.controlj.addon.trendexport.DBAndSchemaSynchronizer;
+import com.controlj.addon.trendexport.DataCollector;
 import com.controlj.addon.trendexport.config.ConfigManager;
 import com.controlj.addon.trendexport.config.ConfigManagerLoader;
 import org.jetbrains.annotations.Nullable;
@@ -96,7 +97,7 @@ public class ScheduledTrendCollector implements ServletContextListener
         collectionHandler = executor.scheduleAtFixedRate(new Runnable() {
                 @Override public void run()
                 {
-                    //DataCollector.collectData(synchronizer);
+                    DataCollector.collectData(synchronizer);
                 }
             }, initialDelay, interval, TimeUnit.HOURS);
     }

@@ -44,7 +44,7 @@ public class DataCollector
     {
         try
         {
-            //synchronizer.connect();
+            synchronizer.connect();
             Collection<TrendPathAndDBTableName> sources = synchronizer.getSourceMappings().getSourcesAndTableNames();
 
             for (TrendPathAndDBTableName source : sources)
@@ -58,7 +58,7 @@ public class DataCollector
         }
         finally
         {
-            //synchronizer.disconnect();
+            synchronizer.disconnect();
         }
     }
 
