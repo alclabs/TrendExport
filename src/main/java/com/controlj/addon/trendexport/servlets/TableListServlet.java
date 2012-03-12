@@ -4,6 +4,7 @@ import com.controlj.addon.trendexport.DBAndSchemaSynchronizer;
 import com.controlj.addon.trendexport.config.ConfigManager;
 import com.controlj.addon.trendexport.config.ConfigManagerLoader;
 import com.controlj.addon.trendexport.helper.TrendPathAndDBTableName;
+import com.controlj.addon.trendexport.helper.TrendSourceTypeAndPathResolver;
 import com.controlj.addon.trendexport.util.ErrorHandler;
 import com.controlj.green.addonsupport.access.ActionExecutionException;
 import com.controlj.green.addonsupport.access.SystemException;
@@ -81,9 +82,9 @@ public class TableListServlet extends HttpServlet
         {
             JSONObject object = new JSONObject();
 
-            // get lookup string
-            // object.put("sourceLookupString", trendPathAndDBTableName);
-            object.put("sourceReferencePath", trendPathAndDBTableName.getTrendSourceReferencePath());
+            String referencePath = trendPathAndDBTableName.getTrendSourceReferencePath();
+            object.put("sourceLookupString", TrendSourceTypeAndPathResolver.getPersistentLookupString(referencePath));
+            object.put("sourceReferencePath", referencePath);
             object.put("sourceDisplayName", trendPathAndDBTableName.getDisplayName());
             object.put("displayPath", trendPathAndDBTableName.getTrendSourceDisplayPath());
             object.put("tableName", trendPathAndDBTableName.getDbTableName());

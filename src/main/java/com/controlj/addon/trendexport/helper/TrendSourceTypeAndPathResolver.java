@@ -1,8 +1,8 @@
 package com.controlj.addon.trendexport.helper;
 
-import com.controlj.green.addonsupport.access.Location;
-import com.controlj.green.addonsupport.access.UnresolvableException;
+import com.controlj.green.addonsupport.access.*;
 import com.controlj.green.addonsupport.access.aspect.TrendSource;
+import org.jetbrains.annotations.NotNull;
 
 public class TrendSourceTypeAndPathResolver
 {
@@ -60,11 +60,18 @@ public class TrendSourceTypeAndPathResolver
             return 4;
     }
 
-    public static String getPersistentLookupString(String referencePath)
+    public static String getPersistentLookupString(final String referencePath) throws SystemException, ActionExecutionException
     {
-
-
-        return "";
-
+        SystemConnection connection = DirectAccess.getDirectAccess().getRootSystemConnection();
+        return connection.runReadAction(FieldAccessFactory.newDisabledFieldAccess(), new ReadActionResult<String>()
+        {
+            @Override
+            public String execute(@NotNull SystemAccess access) throws Exception
+            {
+//                    Location startLoc = access.getTree(SystemTree.Geographic).resolve(nodeLookupString);
+                Location location = access.resolveGQLPath(referencePath);
+                return location.getPersistentLookupString(true);
+            }
+        });
     }
 }

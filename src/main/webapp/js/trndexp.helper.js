@@ -88,15 +88,21 @@ function makeRequestToCollector(objectToSend)
                     alert("Table Name is not valid. Please refer to the help section about valid table names.");
                 else
                 {
+                    reloadTable(); // method defined in maintain.ui.js
                     var node = $("#treeOfPotentialSources").dynatree("getTree").getNodeByKey(objectToSend["nodeLookupString"]);
-
+                    var activeNode = getActiveNodeKey();
                     if (objectToSend['tableName'] != null)
                         node.data.url = objectToSend['tableName']; // need to update the new name
 
                     if (node != null)
                         updateUI(node, objectToSend["action"]);
+                    else
+                    {
+                        // unfortunate fix to force the tree to reload and redraw
+                        var tree = $("#treeOfPotentialSources").dynatree("getTree");
+                        tree.reload();
+                    }
 
-                    reloadTable(); // method defined in maintain.ui.js
                 }
 
                 $('#workingText').hide();

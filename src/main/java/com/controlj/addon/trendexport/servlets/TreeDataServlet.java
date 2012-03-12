@@ -22,18 +22,16 @@
 
 package com.controlj.addon.trendexport.servlets;
 
-import com.controlj.addon.trendexport.config.ConfigManager;
-import com.controlj.addon.trendexport.config.ConfigManagerLoader;
 import com.controlj.addon.trendexport.DBAndSchemaSynchronizer;
 import com.controlj.addon.trendexport.DataStoreRetriever;
+import com.controlj.addon.trendexport.config.ConfigManager;
+import com.controlj.addon.trendexport.config.ConfigManagerLoader;
 import com.controlj.addon.trendexport.helper.TrendSourceTypeAndPathResolver;
 import com.controlj.addon.trendexport.helper.TrendTableNameGenerator;
 import com.controlj.addon.trendexport.util.AlarmHandler;
 import com.controlj.addon.trendexport.util.ErrorHandler;
 import com.controlj.green.addonsupport.InvalidConnectionRequestException;
 import com.controlj.green.addonsupport.access.*;
-import com.controlj.green.addonsupport.access.aspect.TrendSource;
-import com.controlj.green.addonsupport.access.util.Acceptors;
 import com.controlj.green.addonsupport.access.util.LocationSort;
 import com.controlj.green.addonsupport.xdatabase.DatabaseException;
 import com.controlj.green.addonsupport.xdatabase.DatabaseVersionMismatchException;
@@ -83,7 +81,7 @@ public class TreeDataServlet extends HttpServlet
                         if (req.getParameterMap().size() == 1)
                         {
                             // initialize tree
-                            Collection<Location> treeChildren = getEntries(geoTree, req.getParameter("key"));
+                            Collection<Location> treeChildren = getEntries(geoTree, req.getParameter("key"), access);
 
                             JSONArray arrayData = toJSON(treeChildren, synchronizer);
                             arrayData.write(resp.getWriter());
@@ -91,7 +89,7 @@ public class TreeDataServlet extends HttpServlet
                         else if (req.getParameter("mode").contains("lazyTree"))
                         {
                             // lazyRead tree
-                            Collection<Location> treeChildren = getEntries(geoTree, req.getParameter("key"));
+                            Collection<Location> treeChildren = getEntries(geoTree, req.getParameter("key"), access);
                             JSONArray arrayData = toJSON(treeChildren, synchronizer);
 
                             arrayData.write(resp.getWriter());
@@ -132,14 +130,14 @@ public class TreeDataServlet extends HttpServlet
     }
 
 
-    private Collection<Location> getEntries(Tree tree, String lookupString)
+    private Collection<Location> getEntries(Tree tree, String lookupString, SystemAccess access)
     {
         if (lookupString == null)
             return getRoot(tree);
 
         try
         {
-            return getChildren(tree.resolve(lookupString));
+            return getChildren(tree.resolve(lookupString), access);
         }
         catch (UnresolvableException e)
         {
@@ -152,13 +150,15 @@ public class TreeDataServlet extends HttpServlet
         return Collections.singleton(tree.getRoot());
     }
 
-    private Collection<Location> getChildren(Location location)
+    private Collection<Location> getChildren(Location location, SystemAccess access)
     {
         // return all enabled children
         List<Location> treeChildren = new ArrayList<Location>();
-        for (Location child : location.getChildren(LocationSort.PRESENTATION))
+        Collection<Location> locChildren = location.getChildren(LocationSort.PRESENTATION);
+        for (Location child : locChildren)
         {
-            if (!child.find(TrendSource.class, Acceptors.enabledTrendSource()).isEmpty())
+//            if (!child.find(TrendSource.class, Acceptors.enabledTrendSource()).isEmpty())
+            if (quickFind(child, access))
                 treeChildren.add(child);
 
 //            API 1.2.0 (WebCTRL 5.5+) optimization - not supported in API v1.1.+ or WebCTRL 5.2
@@ -166,6 +166,26 @@ public class TreeDataServlet extends HttpServlet
 //                treeChildren.add(child);
         }
         return treeChildren;
+    }
+
+    private boolean quickFind(Location location, SystemAccess access)
+    {
+        try
+        {
+            access.find(location, Aspect.class, new AspectAcceptor<Aspect>()
+            {
+                @Override
+                public boolean accept(@NotNull Aspect aspect)
+                {
+                    throw new RuntimeException();
+                }
+            });
+            return false;
+        }
+        catch (RuntimeException e)
+        {
+            return true;
+        }
     }
 
     private String getIconForType(LocationType type)

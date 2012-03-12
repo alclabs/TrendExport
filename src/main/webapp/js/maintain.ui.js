@@ -55,8 +55,8 @@ $(function()
                     {"sTitle": "Source Path",   "sWidth": "50%", "mDataProp": "displayPath"},
                     {"sTitle": "Source Name",   "sWidth": "25%", "mDataProp": "sourceDisplayName"},
                     {"sTitle": "Table Name",    "sWidth": "25%", "mDataProp": "tableName"},
-                    {"sTitle": "Lookup String", "sWidth": "5%",  "mDataProp": "sourceReferencePath", "bVisible": false},
-                    {"sTitle": "Lookup String", "sWidth": "5%",  "mDataProp": "sourceLookupString", "bVisible": false}
+                    {"sTitle": "Lookup String", "sWidth": "5%",  "mDataProp": "sourceReferencePath", "bVisible": false}
+//                    {"sTitle": "Lookup String", "sWidth": "5%",  "mDataProp": "sourceLookupString", "bVisible": false}
 
                 ],
                 "fnCreatedRow": function(nRow, aData, iDisplayIndex)
@@ -121,7 +121,7 @@ function combineKeys(keys)
 {
     var keyString = "";
     for (var index = 0; index < keys.length; index++)
-        keyString += keys[index]["sourceLookupString"] + ";;";
+        keyString += keys[index]["sourceReferencePath"] + ";;";
 
     return keyString;
 }

@@ -59,7 +59,9 @@ public class AddRemoveServlet extends HttpServlet
                     result = "Table Name is not valid";
             }
             else if (actionToAttempt.contains("removeSource"))
-                removeSource(nodeLookupStrings, synchronizer, req.getParameter("keepData"));
+            {
+                removeSource(nodeLookupStrings, synchronizer);
+            }
             else if (actionToAttempt.contains("collectData"))
                 collectData(nodeLookupStrings, synchronizer);
             else if (actionToAttempt.contains("enableSource") || actionToAttempt.contains("disableSource"))
@@ -175,13 +177,33 @@ public class AddRemoveServlet extends HttpServlet
 
     }
 
-    private void removeSource(final List<String> nodeLookups, final DBAndSchemaSynchronizer synchronizer, final String keepData)
+    private void removeSource(final List<String> nodeLookups, final DBAndSchemaSynchronizer synchronizer)
             throws DatabaseVersionMismatchException, UpgradeException, DatabaseException, SystemException, ActionExecutionException
     {
+        // resolve any DBIDS to GQL reference paths as well
         for (String referencePath : nodeLookups)
-            synchronizer.removeSource(referencePath, keepData.equals("true"));
+        {
+            String temp = referencePath;
+            if (temp.contains("DBID:"))
+                temp = resolveLookupStringToReferencePath(temp);
+
+            synchronizer.removeSource(temp, false);
+        }
     }
 
+    private String resolveLookupStringToReferencePath(final String lookupString) throws SystemException, ActionExecutionException
+    {
+        SystemConnection connection = DirectAccess.getDirectAccess().getRootSystemConnection();
+        return connection.runReadAction(FieldAccessFactory.newDisabledFieldAccess(), new ReadActionResult<String>()
+        {
+            @Override
+            public String execute(@NotNull SystemAccess access) throws Exception
+            {
+                Location location = access.getTree(SystemTree.Geographic).resolve(lookupString);
+                return TrendSourceTypeAndPathResolver.getReferencePath(location);
+            }
+        });
+    }
 
     private JSONObject enableSource(List<String> nodeLookups, DBAndSchemaSynchronizer synchronizer, boolean enable) throws JSONException
     {

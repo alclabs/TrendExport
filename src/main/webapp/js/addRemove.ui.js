@@ -49,6 +49,12 @@ $(function()
             createDisableCollectionRequest(getActiveNodeKey());
     });
 
+    initializeTree();
+
+});
+
+function initializeTree()
+{
     $("#treeOfPotentialSources").dynatree({
                 title: "System",
                 selectMode: 1,
@@ -93,7 +99,7 @@ $(function()
                             });
                 }
             });
-});
+}
 
 function getActiveNodeKey()
 {
