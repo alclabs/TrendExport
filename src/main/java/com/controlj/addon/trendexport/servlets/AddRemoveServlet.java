@@ -47,7 +47,7 @@ public class AddRemoveServlet extends HttpServlet
         try
         {
             synchronizer = initializeSynchronizer();
-//            synchronizer.connect();
+            synchronizer.connect();
 
             // perform action
             if (actionToAttempt.contains("addSource"))
@@ -94,8 +94,8 @@ public class AddRemoveServlet extends HttpServlet
         }
         finally
         {
-//            if (synchronizer != null)
-//                synchronizer.disconnect();
+            if (synchronizer != null)
+                synchronizer.disconnect();
         }
     }
 
@@ -130,7 +130,6 @@ public class AddRemoveServlet extends HttpServlet
         {
             try
             {
-                synchronizer.connect();
                 DataCollector.collectDataForSource(source, synchronizer);
             }
             catch (SystemException e)
@@ -141,22 +140,9 @@ public class AddRemoveServlet extends HttpServlet
             {
                 ErrorHandler.handleError("AddRemove - ActionExecution Error", e);
             }
-            catch (DatabaseVersionMismatchException e)
             {
-                e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-            }
-            catch (UpgradeException e)
-            {
-                e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-            }
-            catch (DatabaseException e)
-            {
-                e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-            }
-            finally
-            {
-                if (synchronizer != null)
-                    synchronizer.disconnect();
+//                if (synchronizer != null)
+//                    synchronizer.disconnect();
             }
         }
     }

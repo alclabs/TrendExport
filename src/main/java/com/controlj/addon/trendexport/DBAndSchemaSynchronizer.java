@@ -159,12 +159,12 @@ public class DBAndSchemaSynchronizer
         // load the metadata table)
         try
         {
-            ErrorHandler.handleError("Attempt CONNECTION ", new Throwable());
+//            ErrorHandler.handleError("Attempt CONNECTION ", new Throwable());
 
             database.connect(connectionInfo);
             sourceMappings = readMappingsFromDatabase();
 
-            ErrorHandler.handleError("Connection Successful", new Throwable());
+//            ErrorHandler.handleError("Connection Successful", new Throwable());
         }
         catch (Exception e)
         {
@@ -179,7 +179,7 @@ public class DBAndSchemaSynchronizer
         isConnected = true;
         connections++;
 
-        ErrorHandler.handleError("Number of connections: " + connections, new Throwable());
+//        ErrorHandler.handleError("Number of connections: " + connections, new Throwable());
 
     }
 
