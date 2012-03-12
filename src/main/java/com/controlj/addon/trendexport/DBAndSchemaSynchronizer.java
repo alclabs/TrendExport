@@ -180,7 +180,6 @@ public class DBAndSchemaSynchronizer
         connections++;
 
 //        ErrorHandler.handleError("Number of connections: " + connections, new Throwable());
-
     }
 
     public synchronized void disconnect()

@@ -49,7 +49,7 @@ public class DataCollector
 
             for (TrendPathAndDBTableName source : sources)
             {
-                //collectDataForSource(source.getTrendSourceReferencePath(), synchronizer);
+                collectDataForSource(source.getTrendSourceReferencePath(), synchronizer);
             }
         }
         catch (Exception e)
