@@ -20,34 +20,26 @@
  * THE SOFTWARE.
  */
 
-function createRequestObject(mode, nodeKey, other)
-{
-    if (mode === 'addSource')
-        return {"action": "addSource", "nodeLookupString": nodeKey , "tableName": other};
-    else if (mode === 'enable' || mode === 'disable')
-        return {"action" : mode, "nodeLookupString": nodeKey, "keepData": other};
-    else
-        return {"action" : mode, "nodeLookupString": nodeKey};
-}
-
 function collectData(lookups)
 {
-//    for (var index = 0; index < lookups.length; index++)
-//    {
     var objToSend = {
         "action": "collectData",
         "nodeLookupString": lookups
     };
 
     makeRequestToCollector(objToSend);
-    // if failed, alert user and continue
-//    }
+}
+
+function createAddSourceRequest(nodeKey)
+{
+    var tableName = $("#source_tableName_input").val();
+    makeRequestToCollector({"action": "addSource", "nodeLookupString": nodeKey , "tableName": tableName});
 }
 
 function createEnableCollectionRequest(nodeKey)
 {
     var tableName = $("#source_tableName_input").val();
-    makeRequestToCollector({"action": "addSource", "nodeLookupString": nodeKey , "tableName": tableName});
+    makeRequestToCollector({"action": "enableSource", "nodeLookupString": nodeKey , "tableName": tableName, "keepData" : false});
 }
 
 function askToKeepData(keys)
@@ -55,20 +47,16 @@ function askToKeepData(keys)
     $("#removeDialog").show();
     $("#removeDialog").dialog({
                 resizable: true,
-                height: 160,
+                height: 250,
+                width: 400,
                 modal: true,
                 buttons: {
-                    "Clear Data": function()
+                    "Yes": function()
                     {
-                        createDisableCollectionRequest(keys, false);
+                        createRemoveSourceRequest(keys);
                         $(this).dialog("close");
                     },
-                    "Keep Data": function()
-                    {
-                        createDisableCollectionRequest(keys, true);
-                        $(this).dialog("close");
-                    },
-                    Cancel: function()
+                    "No": function()
                     {
                         $(this).dialog("close");
                     }
@@ -78,11 +66,16 @@ function askToKeepData(keys)
 
 // key      - key of tree (persistent lookup from dynatree for node)
 // keepData - boolean asking whether to keep the current data or clear it
-function createDisableCollectionRequest(nodeKey, keepData)
+function createDisableCollectionRequest(nodeKey)
 {
-    makeRequestToCollector({"action": "removeSource", "nodeLookupString": nodeKey, "keepData" : keepData});
+    var tableName = $("#source_tableName_input").val();
+    makeRequestToCollector({"action": "disableSource", "nodeLookupString": nodeKey , "tableName": tableName, "keepData" : false});
 }
 
+function createRemoveSourceRequest(nodeKey)
+{
+    makeRequestToCollector({"action": "removeSource", "nodeLookupString": nodeKey, "keepData" : false});
+}
 
 function makeRequestToCollector(objectToSend)
 {
@@ -95,10 +88,13 @@ function makeRequestToCollector(objectToSend)
                     alert("Table Name is not valid. Please refer to the help section about valid table names.");
                 else
                 {
-                    var node = $('#treeOfPotentialSources').dynatree('getActiveNode');
+                    var node = $("#treeOfPotentialSources").dynatree("getTree").getNodeByKey(objectToSend["nodeLookupString"]);
+
                     if (objectToSend['tableName'] != null)
                         node.data.url = objectToSend['tableName']; // need to update the new name
-                    updateUI(node, objectToSend["action"]);
+
+                    if (node != null)
+                        updateUI(node, objectToSend["action"]);
 
                     reloadTable(); // method defined in maintain.ui.js
                 }

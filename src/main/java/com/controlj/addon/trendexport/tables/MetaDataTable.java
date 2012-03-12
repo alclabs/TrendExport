@@ -60,4 +60,10 @@ public class MetaDataTable
           Update update = db.buildUpdate(this.isTrendEnabled.set(keepData)).where(this.tableName.eq(tableName));
           update.execute(db);
     }
+
+    public void setEnabledByReferenceName(Database db, String referencePath, boolean keepData) throws DatabaseException
+    {
+        Update update = db.buildUpdate(this.isTrendEnabled.set(keepData)).where(this.referencePath.eq(referencePath));
+        update.execute(db);
+    }
 }

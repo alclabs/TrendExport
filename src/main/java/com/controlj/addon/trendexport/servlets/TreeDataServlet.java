@@ -100,7 +100,7 @@ public class TreeDataServlet extends HttpServlet
                         {
                             // get data about a node
                             Location location = geoTree.resolve(req.getParameter("key"));
-                            String referencePath = TrendSourceTypeAndPathResolver.getReferencePath(location, new StringBuilder()).toString();
+                            String referencePath = TrendSourceTypeAndPathResolver.getReferencePath(location);
 
                             getTreeData(referencePath, synchronizer);
                         }
@@ -226,15 +226,17 @@ public class TreeDataServlet extends HttpServlet
             {
                 next.put("hideCheckbox", false);
                 next.put("isFolder", false);
-                next.put("url", getTableName(lookup, displayName, synchronizer));
+                next.put("url", getTableName(location, displayName, synchronizer));
             }
 
             // Convert persstent lookup to reference name here because the synchronizer only maintains a list of
             // active trend sources via GQLPaths
-            String referencePath = TrendSourceTypeAndPathResolver.getReferencePath(location, new StringBuilder()).toString();
+            String referencePath = TrendSourceTypeAndPathResolver.getReferencePath(location);
 
-            if (synchronizer.containsSource(referencePath))
+            if (synchronizer.containsSource(referencePath) && synchronizer.isSourceEnabled(referencePath))
                 next.put("addClass", "selectedNode");
+            else if (synchronizer.containsSource(referencePath) && !synchronizer.isSourceEnabled(referencePath))
+                next.put("addClass", "disabledNode");
             else
                 next.put("addClass", "null");
 
@@ -247,11 +249,12 @@ public class TreeDataServlet extends HttpServlet
         return arrayData;
     }
 
-    private String getTableName(String lookup, String displayName, DBAndSchemaSynchronizer synchronizer)
+    private String getTableName(Location location, String displayName, DBAndSchemaSynchronizer synchronizer) throws UnresolvableException
     {
         // get table name if one exists if not, get it from the table name generator
-        if (synchronizer.containsSource(lookup))
-            return synchronizer.getRetrieverForTrendSource(lookup).getTableName();
+        String referencePath = TrendSourceTypeAndPathResolver.getReferencePath(location);
+        if (synchronizer.containsSource(referencePath))
+            return synchronizer.getRetrieverForTrendSource(referencePath).getTableName();
         else
             return TrendTableNameGenerator.generateUniqueTableName(displayName, synchronizer.getSourceMappings().getTableNames());
     }

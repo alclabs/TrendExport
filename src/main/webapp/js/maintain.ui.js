@@ -52,10 +52,12 @@ $(function()
                 "sRowSelect": "multiple",
                 "aoColumns" : [
                     {"sTitle": "Enabled", "sWidth": "2%", "mDataProp": "isEnabled"},
-                    {"sTitle": "Source Path",   "sWidth": "50%", "mDataProp": "path"},
+                    {"sTitle": "Source Path",   "sWidth": "50%", "mDataProp": "displayPath"},
                     {"sTitle": "Source Name",   "sWidth": "25%", "mDataProp": "sourceDisplayName"},
                     {"sTitle": "Table Name",    "sWidth": "25%", "mDataProp": "tableName"},
+                    {"sTitle": "Lookup String", "sWidth": "5%",  "mDataProp": "sourceReferencePath", "bVisible": false},
                     {"sTitle": "Lookup String", "sWidth": "5%",  "mDataProp": "sourceLookupString", "bVisible": false}
+
                 ],
                 "fnCreatedRow": function(nRow, aData, iDisplayIndex)
                 {

@@ -6,11 +6,16 @@ import com.controlj.green.addonsupport.access.aspect.TrendSource;
 
 public class TrendSourceTypeAndPathResolver
 {
-    public static StringBuilder getReferencePath(Location location, StringBuilder builder) throws UnresolvableException
+    public static String getReferencePath(Location location) throws UnresolvableException
+    {
+        return resolveReferencePath(location, new StringBuilder()).toString();
+    }
+
+    private static StringBuilder resolveReferencePath(Location location, StringBuilder builder) throws UnresolvableException
     {
         if (location.hasParent())
         {
-            getReferencePath(location.getParent(), builder);
+            resolveReferencePath(location.getParent(), builder);
             builder.append(location.getReferenceName());
             if (!location.getChildren().isEmpty())
                 builder.append('/');
@@ -53,5 +58,13 @@ public class TrendSourceTypeAndPathResolver
 //            return 3;
         else
             return 4;
+    }
+
+    public static String getPersistentLookupString(String referencePath)
+    {
+
+
+        return "";
+
     }
 }

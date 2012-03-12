@@ -30,7 +30,7 @@ $(function()
     $('#addSource').button("disable");
     $('#addSource').button().bind("click", function()
     {
-        createEnableCollectionRequest(getActiveNodeKey());
+        createAddSourceRequest(getActiveNodeKey());
     });
 
     $('#addRemove_removeSource').button("disable");
@@ -39,21 +39,14 @@ $(function()
         askToKeepData(getActiveNodeKey());
     });
 
-    $('#isTrendEnabled').removeProp('checked');
-    $('#isTrendEnabled').prop('disabled', true);
-    $('#isTrendEnabled').click(function()
+    var sourceEnabledCheckbox = $('#isTrendEnabled').removeProp('checked');
+    sourceEnabledCheckbox.prop('disabled', true);
+    sourceEnabledCheckbox.click(function()
     {
-        alert$('#isTrendEnabled:checked' !== undefined);
-        var mode = 'disable';
-        if (this.is(':checked'))
-            mode = 'enable';
-
-        var obj = createRequestObject(mode, getActiveNodeKey(), this.is(':checked'));
-
-//        createEnableCollectionRequest(getActiveNodeKey());
-
-        // send request
-        // set enabled or disabled
+        if (sourceEnabledCheckbox.is(':checked'))
+            createEnableCollectionRequest(getActiveNodeKey());
+        else
+            createDisableCollectionRequest(getActiveNodeKey());
     });
 
     $("#treeOfPotentialSources").dynatree({
@@ -131,16 +124,23 @@ function updateUI(dtnode, typeOfRequest)
             dtnode.data.addClass = typeOfRequest !== 'removeSource' ? "selectedNode" : "unselectedNode";
             dtnode.render();
         }
+        else if (typeOfRequest === 'enableSource' || typeOfRequest === 'disableSource')
+        {
+            dtnode.data.addClass = typeOfRequest === 'enableSource' ? "selectedNode" : "disabledNode";
+            dtnode.render();
+        }
+
+        var isSelectedNodeOrDisabled = dtnode.data.addClass === "selectedNode" || dtnode.data.addClass === 'disabledNode';
 
         $('#source_tableName_input').val(dtnode.data.url);
-        $('#source_tableName_input').prop('disabled', dtnode.data.addClass === "selectedNode");
-        $('input:checkbox').prop('disabled', dtnode.data.addClass !== "selectedNode");
+        $('#source_tableName_input').prop('disabled', isSelectedNodeOrDisabled);
+        $('input:checkbox').prop('disabled', isSelectedNodeOrDisabled === false);
 
-        if (dtnode.data.addClass === "selectedNode")
+        if (isSelectedNodeOrDisabled)
         {
             $('#addSource').button("disable");
             $('#addRemove_removeSource').button("enable");
-            $('input:checkbox').prop('checked', true);
+            $('input:checkbox').prop('checked', dtnode.data.addClass !== 'disabledNode');
         }
         else
         {

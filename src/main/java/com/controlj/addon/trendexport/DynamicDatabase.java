@@ -128,6 +128,11 @@ public class DynamicDatabase extends Database
         return newDatabase;
     }
 
+    public void setEnabledOrDisabled(String referencePath, boolean enabled) throws DatabaseException
+    {
+        metaDataTable.setEnabledByReferenceName(this, referencePath, enabled);
+    }
+
     public void insertDataIntoTrendTable(String tableName, TrendData<?> data, int numberOfSamplesToSkip) throws Exception
     {
         // get the table that the data needs to be inserted

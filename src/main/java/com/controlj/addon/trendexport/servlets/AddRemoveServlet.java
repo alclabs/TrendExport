@@ -62,6 +62,9 @@ public class AddRemoveServlet extends HttpServlet
                 removeSource(nodeLookupStrings, synchronizer, req.getParameter("keepData"));
             else if (actionToAttempt.contains("collectData"))
                 collectData(nodeLookupStrings, synchronizer);
+            else if (actionToAttempt.contains("enableSource") || actionToAttempt.contains("disableSource"))
+                enableSource(nodeLookupStrings, synchronizer, actionToAttempt.contains("enableSource"));
+
 
             resp.getWriter().print(writeResult(result));
         }
@@ -91,6 +94,10 @@ public class AddRemoveServlet extends HttpServlet
             resp.getWriter().print(writeResult("Action not successful"));
             ErrorHandler.handleError("AddOrRemoveSerlvet Failed!", e,
                     AlarmHandler.TrendExportAlarm.CollectionDatabaseCommError);
+        }
+        catch (JSONException e)
+        {
+            e.printStackTrace();
         }
         finally
         {
@@ -157,7 +164,7 @@ public class AddRemoveServlet extends HttpServlet
                     Location startLoc = access.getTree(SystemTree.Geographic).resolve(nodeLookupString);
                     TrendSource trendSource = startLoc.getAspect(TrendSource.class);
                     TrendSource.Type type = trendSource.getType();
-                    String referencePath = TrendSourceTypeAndPathResolver.getReferencePath(startLoc, new StringBuilder()).toString();
+                    String referencePath = TrendSourceTypeAndPathResolver.getReferencePath(startLoc);
                     String fullDisplayPath = TrendSourceTypeAndPathResolver.getFullDisplayPath(startLoc, new StringBuilder()).toString();
 
                     synchronizer.addSourceAndTableName(referencePath, startLoc.getDisplayName(), fullDisplayPath, tableName, type);
@@ -173,6 +180,40 @@ public class AddRemoveServlet extends HttpServlet
     {
         for (String referencePath : nodeLookups)
             synchronizer.removeSource(referencePath, keepData.equals("true"));
+    }
+
+
+    private JSONObject enableSource(List<String> nodeLookups, DBAndSchemaSynchronizer synchronizer, boolean enable) throws JSONException
+    {
+        JSONObject object = new JSONObject();
+
+        for (String referencePath : nodeLookups)
+        {
+            try
+            {
+                synchronizer.enableOrDisableSource(referencePath, enable);
+            }
+            catch (DatabaseException e)
+            {
+                ErrorHandler.handleError("Error enabling source: " + referencePath, e);
+                object.put("result", "Error enabling/disabling source: " + referencePath);
+                return object;
+//                e.printStackTrace();
+            }
+            catch (ActionExecutionException e)
+            {
+                e.printStackTrace();
+            }
+            catch (SystemException e)
+            {
+                e.printStackTrace();
+            }
+        }
+
+        object.put("result", "Success!");
+        //require reverse lookup to get persistent lookup string for updating tree....
+        //object.put("nodeLookupString", )
+        return object; // needs to be results if successful or failure
     }
 
     private DBAndSchemaSynchronizer initializeSynchronizer() throws IOException

@@ -70,7 +70,7 @@ public class TableListServlet extends HttpServlet
 
             emptyObject.put("sourceLookupString", "0123thisIsNotValid");
             emptyObject.put("sourceDisplayName", "Add a source from the Add or Remove Tab");
-            emptyObject.put("path", "Add a source from the Add or Remove Tab");
+            emptyObject.put("displayPath", "Add a source from the Add or Remove Tab");
             emptyObject.put("tableName", "Add a source from the Add or Remove Tab");
             emptyObject.put("isEnabled", " ");
 
@@ -81,9 +81,11 @@ public class TableListServlet extends HttpServlet
         {
             JSONObject object = new JSONObject();
 
-            object.put("sourceLookupString", trendPathAndDBTableName.getTrendSourceReferencePath());
+            // get lookup string
+            // object.put("sourceLookupString", trendPathAndDBTableName);
+            object.put("sourceReferencePath", trendPathAndDBTableName.getTrendSourceReferencePath());
             object.put("sourceDisplayName", trendPathAndDBTableName.getDisplayName());
-            object.put("path", trendPathAndDBTableName.getTrendSourceDisplayPath());
+            object.put("displayPath", trendPathAndDBTableName.getTrendSourceDisplayPath());
             object.put("tableName", trendPathAndDBTableName.getDbTableName());
 //            object.put("tableEntries", trendPathAndDBTableName.)
             object.put("isEnabled", trendPathAndDBTableName.getIsEnabled());

@@ -17,7 +17,8 @@ ul.dynatree-container {
     overflow: visible;
 }
 
-span.selectedNode {
+span.selectedNode,
+span.disabledNode {
     font-weight: bold;
 }
 

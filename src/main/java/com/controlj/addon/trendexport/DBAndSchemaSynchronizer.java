@@ -96,8 +96,8 @@ public class DBAndSchemaSynchronizer
                 TrendSource trendSource = loc.getAspect(TrendSource.class);
 
                 String tableName = TrendTableNameGenerator.generateUniqueTableName(loc.getDisplayName(), sourceMappings.getTableNames());
-                if (tableName != null)
-                    addSourceAndTableName(referencePath, loc.getDisplayName(), loc.getDisplayPath(), tableName, trendSource.getType());
+//                if (tableName != null)
+//                    addSourceAndTableName(referencePath, loc.getDisplayName(), loc.getDisplayPath(), tableName, trendSource.getType());
             }
         });
 
@@ -120,6 +120,11 @@ public class DBAndSchemaSynchronizer
         return sourceMappings.getTableNames().size();
     }
 
+    public boolean isSourceEnabled(String referenceName)
+    {
+        return sourceMappings.getTrendPathAndDBTableNameObject(referenceName).getIsEnabled();
+    }
+
     // human-generated name - or passed name from another method
     public synchronized void addSourceAndTableName(String referencePath, String displayName, String displayPath, String tableName, TrendSource.Type type)
             throws DatabaseVersionMismatchException, UpgradeException, DatabaseException
@@ -136,8 +141,29 @@ public class DBAndSchemaSynchronizer
 
     public void removeSource(String gqlReferencePath, boolean keepData) throws DatabaseVersionMismatchException, UpgradeException, DatabaseException
     {
+        // will need to use lookup string :(
+
         sourceMappings.removeSource(gqlReferencePath);
         database.upgradeSchema(sourceMappings, keepData);
+    }
+
+    public void enableOrDisableSource(final String lookupString, final boolean enable) throws DatabaseException, SystemException, ActionExecutionException
+    {
+        SystemConnection connection = DirectAccess.getDirectAccess().getRootSystemConnection();
+        connection.runReadAction(FieldAccessFactory.newDisabledFieldAccess(), new ReadAction()
+        {
+            @Override
+            public void execute(@NotNull SystemAccess systemAccess) throws Exception
+            {
+                Location loc = systemAccess.getTree(SystemTree.Geographic).resolve(lookupString);
+                String gqlReferencePath = TrendSourceTypeAndPathResolver.getReferencePath(loc);
+                if (sourceMappings.containsSource(gqlReferencePath))
+                {
+                    database.setEnabledOrDisabled(gqlReferencePath, enable);
+                    sourceMappings = readMappingsFromDatabase();
+                }
+            }
+        });
     }
 
     public void create() throws DatabaseVersionMismatchException, DatabaseException
@@ -150,7 +176,6 @@ public class DBAndSchemaSynchronizer
     {
 //        ErrorHandler.handleError("Attempt CONNECT ", new Throwable());
         connections++;
-
         if (isConnected)
             return;
 
@@ -246,8 +271,8 @@ public class DBAndSchemaSynchronizer
 
         for (TrendPathAndDBTableName table : listOfAll)
         {
-            if (table.getIsEnabled()) // we only want enabled source mappings
-                mappings.addSourceAndName(table);
+//            if (table.getIsEnabled()) // we only want enabled source mappings
+            mappings.addSourceAndName(table);
         }
 
         return mappings;

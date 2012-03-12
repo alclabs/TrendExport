@@ -60,7 +60,10 @@
     <%--Define dialog content--%>
     <div id="removeDialog" title="Remove Source?">
         <p><span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>
-            Would you like to keep your data associated with this source?
+            This will remove all the data associated this source from the TrendExport database.
+            If you want to keep your data but prevent additional data from being collected about this source,
+            please disable this source instead.<br/><br/>
+            Are you sure you want to remove the source?
         </p>
     </div>
 
