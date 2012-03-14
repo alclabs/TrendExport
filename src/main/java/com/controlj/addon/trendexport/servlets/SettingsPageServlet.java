@@ -35,7 +35,9 @@ public class SettingsPageServlet extends HttpServlet
         try
         {
             if (req.getParameterMap().isEmpty())
+            {
                 responseObject = getResponseObject(manager);
+            }
             else if (req.getParameter("action").contains("connect"))
             {
                 ConfigManager newManager = createConfigManagerFromRequest(req);
@@ -43,8 +45,15 @@ public class SettingsPageServlet extends HttpServlet
             }
             else if (req.getParameter("action").contains("save"))
             {
-                saveConfiguration(createConfigManagerFromRequest(req));
-                responseObject.put("result", "Settings Saved");
+                try
+                {
+                    saveConfiguration(createConfigManagerFromRequest(req));
+                    responseObject.put("result", "Settings Saved");
+                }
+                catch (NumberFormatException e)
+                {
+                    responseObject.put("result", "Time is not valid. Set the hours and minutes to whole numbers");
+                }
             }
             else if (req.getParameter("action").contains("testAlarm"))
                 testAlarmProgram(req.getParameter("alarmPath"), responseObject);
@@ -154,8 +163,8 @@ public class SettingsPageServlet extends HttpServlet
 
             // hours -> ms = 60 * 60 * 1000
             time = hours * 3600000 + (minutes * 60000);
-            if (value.contains("PM"))
-                time *= 12;
+            if (value.contains("AM"))
+                time *= -1;
         }
         else
         {

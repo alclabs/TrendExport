@@ -64,18 +64,17 @@ $(function()
                     enableTimeSettings(true);
 
                     var rawTime = data['collectionValue'] / 60000;
-                    var hours = Math.round(rawTime / 60);
-                    var minutes = rawTime % 60;
-
-                    if (hours > 12)
+                    if (rawTime < 0)
                     {
-                        hours /= 12;
-                        $('#pm').prop('checked', true);
+                        $('#am').prop('checked', true);
+                        rawTime *= -1;
                     }
 
+                    var hours = rawTime / 60;
+                    var minutes = rawTime % 60;
                     var minute_str = minutes < 10 ? "0" + minutes : minutes;
 
-                    $('#collTime_Hours').val(hours);
+                    $('#collTime_Hours').val(Math.floor(hours));
                     $('#collTime_Minutes').val(minute_str);
                     $('#intervalValue').val("");
                 }
@@ -87,6 +86,12 @@ $(function()
     $('#Save').button().bind("click", function()
     {
         var newInfo = getSettingsObj("save");
+        if (newInfo === null)
+        {
+            alert("The Collection Interval Box is empty.");
+            return;
+        }
+
         $.getJSON("servlets/settings", newInfo,
                 function(data)
                 {
@@ -137,7 +142,11 @@ $(function()
 
 function getSettingsObj(action)
 {
-    if ($("input[@name='collectionSettings']:checked").val() === 'interval')
+    if ($('#intervalValue').val() === "" && $("input[@name='collectionSettings']:checked").val() === 'interval')
+    {
+        return null;
+    }
+    else if ($("input[@name='collectionSettings']:checked").val() === 'interval')
     {
         return {
             "action"     : action,
