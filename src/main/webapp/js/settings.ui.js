@@ -27,6 +27,9 @@ $(function()
     $('#testAlarm').button().bind("click", function()
     {
         var obj = getSettingsObj("testAlarm");
+        if (obj === null)
+            return;
+
         $.getJSON("servlets/settings", obj,
                 function(data)
                 {
@@ -87,10 +90,7 @@ $(function()
     {
         var newInfo = getSettingsObj("save");
         if (newInfo === null)
-        {
-            alert("The Collection Interval Box is empty.");
             return;
-        }
 
         $.getJSON("servlets/settings", newInfo,
                 function(data)
@@ -102,6 +102,9 @@ $(function()
     $('#testConnection').button().bind("click", function()
     {
         var obj = getSettingsObj("connect");
+        if (obj === null)
+            return;
+
         $.getJSON("servlets/settings", obj,
                 function(data)
                 {
@@ -142,10 +145,8 @@ $(function()
 
 function getSettingsObj(action)
 {
-    if ($('#intervalValue').val() === "" && $("input[@name='collectionSettings']:checked").val() === 'interval')
-    {
+    if (checkInputs() === null)
         return null;
-    }
     else if ($("input[@name='collectionSettings']:checked").val() === 'interval')
     {
         return {
@@ -180,6 +181,66 @@ function getSettingsObj(action)
         };
     }
 
+}
+
+function checkInputs()
+{
+    if ($('#dbTypeCombo').val() !== "derby")
+    {
+        if ($('#host').val() === "")
+        {
+            alert("Host box is empty");
+            return null;
+        }
+        else if ($('#port').val() === "")
+        {
+            alert("There needs to be a port.");
+            return null;
+        }
+        else if ($('#instance').val() === "")
+        {
+            alert("There needs to be an instance to continue.");
+            return null;
+        }
+        else if ($('#user').val().val() === "")
+        {
+            alert("There needs to be a user in order to connect.");
+            return null;
+        }
+        else
+            return true
+    }
+
+    return checkCollectionInputs();
+}
+
+function checkCollectionInputs()
+{
+    if ($("input[@name='collectionSettings']:checked").val() === 'interval')
+    {
+        if ($('#intervalValue').val() === "")
+        {
+            alert("Collection Interval is blank.");
+            return null;
+        }
+        else
+            return true;
+    }
+    else
+    {
+        if ($('#collTime_Hours').val() === "")
+        {
+            alert("Collection Hours is blank.");
+            return null;
+        }
+        else if ($('#collTime_Minutes').val()=== "")
+        {
+            alert("Collection Minutes is blank.");
+            return null;
+        }
+        else
+            return true;
+    }
 }
 
 function enableTimeSettings(enableTime)
