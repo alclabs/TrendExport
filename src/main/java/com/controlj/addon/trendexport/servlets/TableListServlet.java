@@ -69,6 +69,7 @@ public class TableListServlet extends HttpServlet
         {
             JSONObject emptyObject = new JSONObject();
 
+            emptyObject.put("sourceReferencePath", "0123thisIsNotValid");
             emptyObject.put("sourceLookupString", "0123thisIsNotValid");
             emptyObject.put("sourceDisplayName", "Add a source from the Add or Remove Tab");
             emptyObject.put("displayPath", "Add a source from the Add or Remove Tab");

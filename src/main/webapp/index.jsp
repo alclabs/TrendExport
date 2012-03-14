@@ -34,7 +34,13 @@
     <link rel="stylesheet" type='text/css' href='skin/ui.helpPage.css'/>
 
     <script type="text/javascript" src="js/jquery-1.6.4.min.js"></script>
-    <script type="text/javascript" src="js/jquery-ui-1.8.9.custom.min.js"></script>
+    <%--<script type="text/javascript" src="js/jquery-ui-1.8.9.custom.min.js"></script>--%>
+    <script type="text/javascript" src="js/jquery.ui.widget.js"></script>
+    <script type="text/javascript" src="js/jquery.ui.core.js"></script>
+    <script type="text/javascript" src="js/jquery.ui.button.js"></script>
+    <script type="text/javascript" src="js/jquery.ui.dialog.js"></script>
+    <script type="text/javascript" src="js/jquery.ui.tabs.js"></script>
+
     <script type="text/javascript" src="js/jquery.dynatree.min.js"></script>
     <script type="text/javascript" src="js/jquery.hyjack.select.min.js"></script>
     <script type="text/javascript" src="js/jquery.dataTables.js"></script>
@@ -101,6 +107,7 @@
     <div id="maintain">
         <div class="groupTitle">
             <button id="collectDataNow">Collect Data Now</button>
+            <button id="enableOrDisable_btn">Enable Source</button>
             <button id="maintain_RemoveSource">Remove Source...</button>
         </div>
 

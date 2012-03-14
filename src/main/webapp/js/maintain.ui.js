@@ -22,11 +22,11 @@
 
 $(function()
 {
-    var maintenanceTable;
+    var tableOfAllSources;
 
     var collectDataNowBtn = $('#collectDataNow').button().bind("click", function()
     {
-        var selected = getRowData(maintenanceTable);
+        var selected = getSelectedRows(tableOfAllSources);
 //        collectDataNowBtn.button('disable');
         collectData(combineKeys(selected));
     });
@@ -34,22 +34,43 @@ $(function()
 
     var removeSourceButton = $('#maintain_RemoveSource').button().bind("click", function()
     {
-        var selected = getRowData(maintenanceTable);
+        var selected = getSelectedRows(tableOfAllSources);
         askToKeepData(combineKeys(selected));
 
     });
     removeSourceButton.button('disable');
 
+    var enableOrDisable_btn = $('#enableOrDisable_btn').button().bind("click", function()
+    {
+        var selectedRows = getSelectedRows(tableOfAllSources);
+
+        if (determineIfRowsEnabled(selectedRows) === true) // all selected rows are enabled
+            createDisableCollectionRequest(combineKeys(selectedRows));
+        else
+            createEnableCollectionRequest(combineKeys(selectedRows));
+    });
+    enableOrDisable_btn.button('disable');
+
 
     $('#collectorStatusLabel').text("Current Status: ");
 
-    maintenanceTable = $('#maintenanceTable').dataTable({
+    tableOfAllSources = $('#maintenanceTable').dataTable({
                 bPaginate: true,
                 bAutoWidth: false,
                 "bDeferRender": true,
                 "sAjaxSource" : 'servlets/currentTrends',
                 "sPaginationType": "full_numbers",
                 "sRowSelect": "multiple",
+                "fnServerData": function(sSource, aoData, fnCallback)
+                {
+                    $.getJSON(sSource, aoData, function (json)
+                    {
+                        removeSelectedClassFromRows(tableOfAllSources);
+                        updateButtonsBasedOnRowsSelected(getSelectedRows(tableOfAllSources));
+                        fnCallback(json)
+                    });
+
+                },
                 "aoColumns" : [
                     {"sTitle": "Enabled", "sWidth": "2%", "mDataProp": "isEnabled"},
                     {"sTitle": "Source Path",   "sWidth": "50%", "mDataProp": "displayPath"},
@@ -73,48 +94,51 @@ $(function()
                         if (htmlString.indexOf("Add a source from") !== -1)
                         {
                             $("#tabs").tabs('select', 1);
-//                            alert("Please add at least one trend source from the Add or Remove Tab.");
                             return;
                         }
 
                         if ($(this).hasClass('row_selected'))
-                        {
                             $(this).removeClass('row_selected');
-                            checkTable(maintenanceTable);
-                        }
                         else
-                        {
                             $(this).addClass('row_selected');
-                            collectDataNowBtn.button('enable');
-                            removeSourceButton.button('enable');
-                        }
-                    })
+
+                        updateButtonsBasedOnRowsSelected(getSelectedRows(tableOfAllSources));
+                    });
                 }
             });
 
     function rowClickEvent()
     {
         if ($(this).hasClass('row_selected'))
-        {
             $(this).removeClass('row_selected');
-            checkTable(maintenanceTable);
-        }
         else
-        {
             $(this).addClass('row_selected');
-            collectDataNowBtn.button('enable');
-            removeSourceButton.button('enable');
-        }
+
+        updateButtonsBasedOnRowsSelected(getSelectedRows(tableOfAllSources));
     }
 });
 
-function checkTable(oTableLocal)
+function updateButtonsBasedOnRowsSelected(rowsOfData)
 {
-    if (getNumberOfSelectedRows(oTableLocal) === 0)
+    var enableOrDisable_btn = $('#enableOrDisable_btn');
+
+    if (rowsOfData.length === 0)
     {
         $('#collectDataNow').button('disable');
         $('#maintain_RemoveSource').button('disable');
+        enableOrDisable_btn.button('disable');
     }
+    else
+    {
+        $('#collectDataNow').button('enable');
+        $('#maintain_RemoveSource').button('enable');
+        enableOrDisable_btn.button('enable');
+    }
+
+    if (determineIfRowsEnabled(rowsOfData) === true) // all selected rows are enabled
+        enableOrDisable_btn.button("option", "label", "Disable Source(s)");
+    else
+        enableOrDisable_btn.button("option", "label", "Enable Source(s)");
 }
 
 function combineKeys(keys)
@@ -133,6 +157,7 @@ function reloadTable()
 
 function getNumberOfSelectedRows(oTableLocal)
 {
+//    "use strict";
     var aTrs = oTableLocal.fnGetNodes();
     var count = 0;
     for (var i = 0; i < aTrs.length; i++)
@@ -144,7 +169,20 @@ function getNumberOfSelectedRows(oTableLocal)
     return count;
 }
 
-function getRowData(oTableLocal)
+function removeSelectedClassFromRows(oTableLocal)
+{
+    var aTrs = oTableLocal.fnGetNodes();
+
+    for (var i = 0; i < aTrs.length; i++)
+    {
+        if ($(aTrs[i]).hasClass('row_selected'))
+            $(aTrs[i]).removeClass('row_selected');
+    }
+
+    return aTrs;
+}
+
+function getSelectedRows(oTableLocal)
 {
     var aReturn = new Array();
     var aTrs = oTableLocal.fnGetNodes();
@@ -155,4 +193,24 @@ function getRowData(oTableLocal)
             aReturn.push(oTableLocal.fnGetData(i));
     }
     return aReturn;
+}
+
+function determineIfRowsEnabled(keys)
+{
+    var enabledRows = 0;
+    var disabledRows = 0;
+
+    for (var i = 0; i < keys.length; i++)
+    {
+        var singleRow = keys[i];//oTableLocal.fnGetData(i);
+        if (singleRow["isEnabled"] === true)
+            enabledRows++;
+        else
+            disabledRows++;
+    }
+
+    // if all are enabled, return true
+    // else (some are disabled, some may be enabled) -> return false
+
+    return enabledRows !== 0 && disabledRows === 0;
 }

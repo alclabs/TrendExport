@@ -89,20 +89,25 @@ function makeRequestToCollector(objectToSend)
                 else
                 {
                     reloadTable(); // method defined in maintain.ui.js
+
                     var node = $("#treeOfPotentialSources").dynatree("getTree").getNodeByKey(objectToSend["nodeLookupString"]);
-                    var activeNode = getActiveNodeKey();
-                    if (objectToSend['tableName'] != null)
-                        node.data.url = objectToSend['tableName']; // need to update the new name
 
                     if (node != null)
+                    {
+                        if (objectToSend['tableName'] != null)
+                            node.data.url = objectToSend['tableName']; // need to update the new name
+
                         updateUI(node, objectToSend["action"]);
+                    }
                     else
                     {
                         // unfortunate fix to force the tree to reload and redraw
+                        // would very much like a better method -> update nodes?
+                        // on complete, data returns lookups to update would be best...but need to parse each one
+                        // attempt to fix soon
                         var tree = $("#treeOfPotentialSources").dynatree("getTree");
                         tree.reload();
                     }
-
                 }
 
                 $('#workingText').hide();

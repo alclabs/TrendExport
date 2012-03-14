@@ -155,8 +155,13 @@ public class DBAndSchemaSynchronizer
             @Override
             public void execute(@NotNull SystemAccess systemAccess) throws Exception
             {
-                Location loc = systemAccess.getTree(SystemTree.Geographic).resolve(lookupString);
-                String gqlReferencePath = TrendSourceTypeAndPathResolver.getReferencePath(loc);
+                String gqlReferencePath = lookupString;
+                if (lookupString.contains("DBID:"))
+                {
+                    Location loc = systemAccess.getTree(SystemTree.Geographic).resolve(lookupString);
+                    gqlReferencePath = TrendSourceTypeAndPathResolver.getReferencePath(loc);
+                }
+
                 if (sourceMappings.containsSource(gqlReferencePath))
                 {
                     database.setEnabledOrDisabled(gqlReferencePath, enable);

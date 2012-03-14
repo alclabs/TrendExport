@@ -205,11 +205,11 @@ public class AddRemoveServlet extends HttpServlet
         });
     }
 
-    private JSONObject enableSource(List<String> nodeLookups, DBAndSchemaSynchronizer synchronizer, boolean enable) throws JSONException
+    private JSONObject enableSource(List<String> referenceList, DBAndSchemaSynchronizer synchronizer, boolean enable) throws JSONException
     {
         JSONObject object = new JSONObject();
 
-        for (String referencePath : nodeLookups)
+        for (String referencePath : referenceList)
         {
             try
             {
