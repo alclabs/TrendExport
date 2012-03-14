@@ -38,8 +38,6 @@ $(function()
         updateComboSettings($(this).val());
     });
 
-    updateComboSettings($('select').val());
-
     $.getJSON("servlets/settings",
             function(data)
             {
@@ -50,7 +48,7 @@ $(function()
                 $('#user').val(data['user']);
                 $('#pass').val(data['pass']);
 
-                updateComboSettings($('select').val());
+                updateComboSettings(data['dbType']);
 
                 // set collection settings
                 if (data['collectionType'] === 'Interval')

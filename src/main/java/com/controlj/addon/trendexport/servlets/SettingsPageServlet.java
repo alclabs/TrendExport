@@ -6,11 +6,12 @@ import com.controlj.addon.trendexport.config.Configuration;
 import com.controlj.addon.trendexport.util.AlarmHandler;
 import com.controlj.addon.trendexport.util.ErrorHandler;
 import com.controlj.addon.trendexport.util.ScheduledTrendCollector;
-import com.controlj.green.addonsupport.access.ActionExecutionException;
-import com.controlj.green.addonsupport.access.SystemException;
-import com.controlj.green.addonsupport.access.WriteAbortedException;
+import com.controlj.green.addonsupport.access.*;
+import com.controlj.green.addonsupport.access.aspect.AlarmSource;
+import com.controlj.green.addonsupport.access.util.Acceptors;
 import com.controlj.green.addonsupport.xdatabase.DatabaseConnectionException;
 import com.controlj.green.addonsupport.xdatabase.DatabaseType;
+import org.jetbrains.annotations.NotNull;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -46,7 +47,7 @@ public class SettingsPageServlet extends HttpServlet
                 responseObject.put("result", "Settings Saved");
             }
             else if (req.getParameter("action").contains("testAlarm"))
-                testAlarmProgram(manager, req.getParameter("alarmPath"), responseObject);
+                testAlarmProgram(req.getParameter("alarmPath"), responseObject);
         }
         catch (Exception e)
         {
@@ -67,20 +68,32 @@ public class SettingsPageServlet extends HttpServlet
         }
     }
 
-    private JSONObject testAlarmProgram(ConfigManager manager, String alarmPath, JSONObject responseObject) throws JSONException
+    private JSONObject testAlarmProgram(final String alarmPath, JSONObject responseObject)
+            throws JSONException, SystemException, ActionExecutionException
     {
-        String tempPath = ErrorHandler.getAlarmPath();
-        ErrorHandler.setAlarmHandlerPath(alarmPath);
+        SystemConnection connection = DirectAccess.getDirectAccess().getRootSystemConnection();
+        Boolean result = connection.runReadAction(FieldAccessFactory.newDisabledFieldAccess(), new ReadActionResult<Boolean>()
+        {
+            @Override
+            public Boolean execute(@NotNull SystemAccess access) throws Exception
+            {
+                return !access.find(access.resolveGQLPath(alarmPath), AlarmSource.class, Acceptors.potentialAlarmSource()).isEmpty();
+            }
+        });
 
-        if (ErrorHandler.isAlarmHandlerConfigured())
-            responseObject.put("result", "Please check WebCTRL's alarms to see if an alarm has been triggered from this add-on.");
+        if (result != null && result)
+        {
+            ErrorHandler.setAlarmHandlerPath(alarmPath);
+
+            if (ErrorHandler.isAlarmHandlerConfigured())
+                responseObject.put("result", "Please check WebCTRL's alarms to see if an alarm has been triggered from this add-on.");
+            else
+                responseObject.put("result", "Please type path to equipment where alarm control program exists.");
+
+            ErrorHandler.handleError("Testing Alarm...", new Exception("Just a test"), AlarmHandler.TrendExportAlarm.Test);
+        }
         else
-            responseObject.put("result", "Please type path to equipment where alarm control program exists.");
-
-        ErrorHandler.handleError("Testing Alarm...", new Exception("Just a test"), AlarmHandler.TrendExportAlarm.Test);
-
-        if (!tempPath.equals(""))
-            ErrorHandler.setAlarmHandlerPath(tempPath);
+            responseObject.put("result", "No alarm control program exists at this location.");
 
         return responseObject;
     }

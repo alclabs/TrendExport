@@ -69,7 +69,7 @@ public class ConfigManager
 
 
                     String alarmPath = reader.readLine();
-                    if (alarmPath == null || !alarmPath.isEmpty())
+                    if (alarmPath == null || alarmPath.isEmpty())
                         ConfigManager.this.configuration = new Configuration(timeInterval, method);
                     else
                         ConfigManager.this.configuration = new Configuration(timeInterval, method, alarmPath);

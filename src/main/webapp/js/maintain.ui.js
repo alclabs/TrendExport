@@ -32,6 +32,7 @@ $(function()
     });
     collectDataNowBtn.button('disable');
 
+
     var removeSourceButton = $('#maintain_RemoveSource').button().bind("click", function()
     {
         var selected = getSelectedRows(tableOfAllSources);
@@ -39,6 +40,7 @@ $(function()
 
     });
     removeSourceButton.button('disable');
+
 
     var enableOrDisable_btn = $('#enableOrDisable_btn').button().bind("click", function()
     {
@@ -80,12 +82,12 @@ $(function()
 //                    {"sTitle": "Lookup String", "sWidth": "5%",  "mDataProp": "sourceLookupString", "bVisible": false}
 
                 ],
-                "fnCreatedRow": function(nRow, aData, iDisplayIndex)
+                "fnCreatedRow": function(nRow)
                 {
                     $(nRow).live('click', rowClickEvent());
                     return nRow;
                 },
-                "fnInitComplete": function(oSettings)
+                "fnInitComplete": function()
                 {
                     $('#maintenanceTable tbody tr').live('click', function()
                     {
