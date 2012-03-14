@@ -84,29 +84,27 @@ function makeRequestToCollector(objectToSend)
     $.getJSON("servlets/addOrRemoveSource", objectToSend,
             function(data)
             {
+                // if an error exists, handle here
                 if (data["result"] === "Table Name is not valid")
                     alert("Table Name is not valid. Please refer to the help section about valid table names.");
                 else
                 {
                     reloadTable(); // method defined in maintain.ui.js
 
-                    var node = $("#treeOfPotentialSources").dynatree("getTree").getNodeByKey(objectToSend["nodeLookupString"]);
-
-                    if (node != null)
+                    // split the nodes back and get each lookup for the tree to update...I need to improve the servlets
+                    // lesson learned: servlets need to be made easier
+                    var tree = $("#treeOfPotentialSources").dynatree("getTree");
+                    var keys = data["lookups"].split(";;");
+                    for(var i = 0; i < keys.length; i++)
                     {
+                        var node = tree.getNodeByKey(keys[i]);
+                        if (node === null)
+                            continue;
+
                         if (objectToSend['tableName'] != null)
                             node.data.url = objectToSend['tableName']; // need to update the new name
 
                         updateUI(node, objectToSend["action"]);
-                    }
-                    else
-                    {
-                        // unfortunate fix to force the tree to reload and redraw
-                        // would very much like a better method -> update nodes?
-                        // on complete, data returns lookups to update would be best...but need to parse each one
-                        // attempt to fix soon
-                        var tree = $("#treeOfPotentialSources").dynatree("getTree");
-                        tree.reload();
                     }
                 }
 

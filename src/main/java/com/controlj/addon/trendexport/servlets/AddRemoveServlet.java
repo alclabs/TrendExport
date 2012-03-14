@@ -68,32 +68,32 @@ public class AddRemoveServlet extends HttpServlet
                 enableSource(nodeLookupStrings, synchronizer, actionToAttempt.contains("enableSource"));
 
 
-            resp.getWriter().print(writeResult(result));
+            resp.getWriter().print(writeResult(result, nodeLookupStrings));
         }
         catch (DatabaseException e)
         {
-            resp.getWriter().print(writeResult("Action not successful"));
+            resp.getWriter().print(writeResult("Action not successful", nodeLookupStrings));
             ErrorHandler.handleError("AddOrRemoveSerlvet Failed!", e, AlarmHandler.TrendExportAlarm.CollectionDatabaseCommError);
         }
         catch (SystemException e)
         {
-            resp.getWriter().print(writeResult("Action not successful"));
+            resp.getWriter().print(writeResult("Action not successful", nodeLookupStrings));
             ErrorHandler.handleError("AddOrRemoveSerlvet Failed!", e, AlarmHandler.TrendExportAlarm.CollectionFailure);
         }
         catch (ActionExecutionException e)
         {
-            resp.getWriter().print(writeResult("Action not successful"));
+            resp.getWriter().print(writeResult("Action not successful", nodeLookupStrings));
             ErrorHandler.handleError("AddOrRemoveSerlvet Failed!", e);
         }
         catch (DatabaseVersionMismatchException e)
         {
-            resp.getWriter().print(writeResult("Action not successful"));
+            resp.getWriter().print(writeResult("Action not successful", nodeLookupStrings));
             ErrorHandler.handleError("AddOrRemoveSerlvet Failed (Database version mismatch)",
                     e, AlarmHandler.TrendExportAlarm.CollectionDatabaseCommError);
         }
         catch (UpgradeException e)
         {
-            resp.getWriter().print(writeResult("Action not successful"));
+            resp.getWriter().print(writeResult("Action not successful", nodeLookupStrings));
             ErrorHandler.handleError("AddOrRemoveSerlvet Failed!", e,
                     AlarmHandler.TrendExportAlarm.CollectionDatabaseCommError);
         }
@@ -108,17 +108,36 @@ public class AddRemoveServlet extends HttpServlet
         }
     }
 
-    private JSONObject writeResult(String message)
+    private JSONObject writeResult(String message, List<String> nodeLookupStrings)
     {
         JSONObject response = new JSONObject();
 
         try
         {
+            StringBuilder builder = new StringBuilder();
+            for (String singleLookup : nodeLookupStrings)
+            {
+                if (singleLookup.contains("DBID:"))
+                    builder.append(singleLookup);
+                else
+                    builder.append(TrendSourceTypeAndPathResolver.getPersistentLookupString(singleLookup));
+                builder.append(";;");
+            }
+
             response.put("result", message);
+            response.put("lookups", builder.toString());
         }
         catch (JSONException e)
         {
             Logger.println("JSON Failed to write in AddRemoveServlet", e);
+        }
+        catch (ActionExecutionException e)
+        {
+            e.printStackTrace();
+        }
+        catch (SystemException e)
+        {
+            e.printStackTrace();
         }
 
         return response;

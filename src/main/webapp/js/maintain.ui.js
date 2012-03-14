@@ -202,7 +202,7 @@ function determineIfRowsEnabled(keys)
 
     for (var i = 0; i < keys.length; i++)
     {
-        var singleRow = keys[i];//oTableLocal.fnGetData(i);
+        var singleRow = keys[i];
         if (singleRow["isEnabled"] === true)
             enabledRows++;
         else
@@ -211,6 +211,5 @@ function determineIfRowsEnabled(keys)
 
     // if all are enabled, return true
     // else (some are disabled, some may be enabled) -> return false
-
     return enabledRows !== 0 && disabledRows === 0;
 }
