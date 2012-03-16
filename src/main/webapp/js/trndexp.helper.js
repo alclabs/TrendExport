@@ -46,7 +46,8 @@ function askToKeepData(keys)
 {
     $("#removeDialog").show();
     $("#removeDialog").dialog({
-                resizable: true,
+                draggable: true,
+                position: "center",
                 height: 250,
                 width: 400,
                 modal: true,

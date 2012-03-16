@@ -107,7 +107,7 @@ public class DBAndSchemaSynchronizer
     public DataStoreRetriever getRetrieverForTrendSource(String nodeLookupString)
     {
 
-        return new DataStoreRetriever(sourceMappings.getNameFromSource(nodeLookupString), database);
+        return new DataStoreRetriever(sourceMappings.getTableNameFromSource(nodeLookupString), database);
     }
 
     public SourceMappings getSourceMappings()
@@ -285,7 +285,7 @@ public class DBAndSchemaSynchronizer
 
     public void insertTrendSamples(String source, TrendData trendData, int numberOfSamplesToSkip) throws Exception
     {
-        String tableName = sourceMappings.getNameFromSource(source);
+        String tableName = sourceMappings.getTableNameFromSource(source);
         database.insertDataIntoTrendTable(tableName, trendData, numberOfSamplesToSkip);
     }
 

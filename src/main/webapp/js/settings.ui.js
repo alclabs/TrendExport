@@ -164,8 +164,20 @@ function getSettingsObj(action)
     }
     else
     {
+        if ($('#collTime_Hours').val() > 12 || $('#collTime_Hours').val() < 0)
+        {
+            alert("Hours must be between 1 and 12.");
+            return null;
+        }
+
+        if (Math.floor($('#collTime_Minutes').val()) < 0 || Math.floor($('#collTime_Minutes').val()) > 59)
+        {
+            alert("Minutes must be between 0 and 59.");
+            return null;
+        }
+
         var amOrPm = $('#am').is(':checked') ? "AM" : "PM";
-        var timeString = $('#collTime_Hours').val() + ':' + $('#collTime_Minutes').val() + ':' + amOrPm;
+        var timeString = $('#collTime_Hours').val() + ':' + Math.floor($('#collTime_Minutes').val()) + ':' + amOrPm;
 
         return {
             "action"     : action,

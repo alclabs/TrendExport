@@ -43,6 +43,7 @@ public class ScheduledTrendCollector implements ServletContextListener
 
     private final ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
     @Nullable private ScheduledFuture<?> collectionHandler;
+    private static boolean status = false;
 
     @Override
     public void contextInitialized(ServletContextEvent sce)
@@ -100,6 +101,16 @@ public class ScheduledTrendCollector implements ServletContextListener
                     DataCollector.collectData(synchronizer);
                 }
             }, initialDelay, interval, TimeUnit.HOURS);
+    }
+
+    public static boolean getStatus()
+    {
+        return status;
+    }
+
+    public static String getTableName()
+    {
+        return DataCollector.getTableName();
     }
 }
 

@@ -90,7 +90,11 @@ public class TableListServlet extends HttpServlet
             object.put("displayPath", trendPathAndDBTableName.getTrendSourceDisplayPath());
             object.put("tableName", trendPathAndDBTableName.getDbTableName());
 //            object.put("tableEntries", trendPathAndDBTableName.)
-            object.put("isEnabled", trendPathAndDBTableName.getIsEnabled());
+
+            if ( trendPathAndDBTableName.getIsEnabled())
+                object.put("isEnabled", "Enabled");
+            else
+                object.put("isEnabled", "Disabled");
 
             jsonArray.put(object);
         }

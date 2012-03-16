@@ -39,11 +39,15 @@ import java.util.concurrent.locks.ReentrantLock;
 public class DataCollector
 {
     private static final Lock lock = new ReentrantLock(true);
+    private static String tableName = "";
+    private static boolean isBusy;
 
     public static void collectData(DBAndSchemaSynchronizer synchronizer)
     {
         try
         {
+            isBusy = true;
+
             synchronizer.connect();
             Collection<TrendPathAndDBTableName> sources = synchronizer.getSourceMappings().getSourcesAndTableNames();
 
@@ -59,16 +63,30 @@ public class DataCollector
         finally
         {
             synchronizer.disconnect();
+            isBusy = false;
         }
     }
 
     public static void collectDataForSource(String source, DBAndSchemaSynchronizer synchronizer) throws SystemException, ActionExecutionException
     {
         lock.lock();
+
+        tableName = synchronizer.getSourceMappings().getTableNameFromSource(source);
         copyLatestTrendHistory(source, synchronizer);
+        tableName = "";
+
         lock.unlock();
     }
 
+    public static String getTableName()
+    {
+        return tableName;
+    }
+
+    public static boolean isCollectorBusy()
+    {
+        return isBusy;
+    }
 
     private static void copyLatestTrendHistory(final String nodeLookupString, final DBAndSchemaSynchronizer synchronizer)
             throws SystemException, ActionExecutionException
@@ -82,7 +100,6 @@ public class DataCollector
                 try
                 {
 //                    Location startLoc = systemAccess.getTree(SystemTree.Geographic).resolve(nodeLookupString);
-//                    ErrorHandler.handleError("Entering COPY", new Throwable());
                     Location startLoc = systemAccess.resolveGQLPath(nodeLookupString);
                     TrendSource trendSource = startLoc.getAspect(TrendSource.class);
 
@@ -93,12 +110,7 @@ public class DataCollector
                     int numberOfSamplesToSkip = retriever.getNumberOfSamplesToSkip();
                     TrendData trendData = trendSource.getTrendData(TrendRangeFactory.byDateRange(startDate, new Date()));
 
-//                    ErrorHandler.handleError("Entering INSERT", new Throwable());
-
                     synchronizer.insertTrendSamples(nodeLookupString, trendData, numberOfSamplesToSkip);
-
-//                    ErrorHandler.handleError("Leaving INSERT", new Throwable());
-
                 }
                 catch (Exception e)
                 {

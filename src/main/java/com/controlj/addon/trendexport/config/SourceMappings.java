@@ -86,7 +86,7 @@ public class SourceMappings
         return getTrendPathAndDBTableNameObject(source) != null;
     }
 
-    public String getNameFromSource(String source)
+    public String getTableNameFromSource(String source)
     {
         return getTrendPathAndDBTableNameObject(source).getDbTableName();
     }

@@ -73,7 +73,7 @@ $(function()
 
                 },
                 "aoColumns" : [
-                    {"sTitle": "Enabled", "sWidth": "2%", "mDataProp": "isEnabled"},
+                    {"sTitle": "Collection", "sWidth": "2%", "mDataProp": "isEnabled"},
                     {"sTitle": "Source Path",   "sWidth": "50%", "mDataProp": "displayPath"},
                     {"sTitle": "Source Name",   "sWidth": "25%", "mDataProp": "sourceDisplayName"},
                     {"sTitle": "Table Name",    "sWidth": "25%", "mDataProp": "tableName"},
@@ -138,9 +138,9 @@ function updateButtonsBasedOnRowsSelected(rowsOfData)
     }
 
     if (determineIfRowsEnabled(rowsOfData) === true) // all selected rows are enabled
-        enableOrDisable_btn.button("option", "label", "Disable Source(s)");
+        enableOrDisable_btn.button("option", "label", "Disable Collection");
     else
-        enableOrDisable_btn.button("option", "label", "Enable Source(s)");
+        enableOrDisable_btn.button("option", "label", "Enable Collection");
 }
 
 function combineKeys(keys)
@@ -205,7 +205,7 @@ function determineIfRowsEnabled(keys)
     for (var i = 0; i < keys.length; i++)
     {
         var singleRow = keys[i];
-        if (singleRow["isEnabled"] === true)
+        if (singleRow["isEnabled"] === "Enabled")
             enabledRows++;
         else
             disabledRows++;

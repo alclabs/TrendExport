@@ -179,6 +179,8 @@ public class SettingsPageServlet extends HttpServlet
             int start = value.indexOf(':');
             int end = value.lastIndexOf(':');
             int hours = Integer.parseInt(value.substring(0, start));
+
+
             int minutes = Integer.parseInt(value.substring(start + 1, end));
 
             // hours -> ms = 60 * 60 * 1000
