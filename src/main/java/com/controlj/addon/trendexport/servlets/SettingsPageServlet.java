@@ -7,8 +7,6 @@ import com.controlj.addon.trendexport.util.AlarmHandler;
 import com.controlj.addon.trendexport.util.ErrorHandler;
 import com.controlj.addon.trendexport.util.ScheduledTrendCollector;
 import com.controlj.green.addonsupport.access.*;
-import com.controlj.green.addonsupport.access.aspect.AlarmSource;
-import com.controlj.green.addonsupport.access.util.Acceptors;
 import com.controlj.green.addonsupport.xdatabase.DatabaseConnectionException;
 import com.controlj.green.addonsupport.xdatabase.DatabaseType;
 import org.jetbrains.annotations.NotNull;
@@ -86,7 +84,19 @@ public class SettingsPageServlet extends HttpServlet
             @Override
             public Boolean execute(@NotNull SystemAccess access) throws Exception
             {
-                return !access.find(access.resolveGQLPath(alarmPath), AlarmSource.class, Acceptors.potentialAlarmSource()).isEmpty();
+                Location alarmLocation = access.resolveGQLPath(alarmPath);
+
+                try
+                {
+                    return alarmLocation.hasChild("historiandisabled") &&
+                           alarmLocation.hasChild("trendsource_unreachable") &&
+                           alarmLocation.hasChild("trndexprt_dbwritefailure");
+                }
+                catch (Exception e)
+                {
+                    return false;
+                }
+
             }
         });
 
