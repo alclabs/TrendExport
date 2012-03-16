@@ -53,7 +53,7 @@ public class ScheduledConfigurationLoader
         if (manager.getConfiguration().getCollectionMethod() == Configuration.CollectionMethod.Interval)
             return manager.getConfiguration().getCollectionValue();
         else
-            return 24;
+            return 24 * 60 * 60 * 1000;
     }
 
     private long calculateDateDelay()

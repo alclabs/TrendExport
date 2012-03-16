@@ -97,7 +97,6 @@ public class ScheduledTrendCollector implements ServletContextListener
         final long interval = loader.calculateInterval();
 
         nextCollectionDate = loader.getScheduledCalendarDate().getTime();
-//        nextCollectionDate = new Date(interval);
 
         collectionHandler = executor.scheduleAtFixedRate(new Runnable() {
                 @Override public void run()
@@ -105,7 +104,7 @@ public class ScheduledTrendCollector implements ServletContextListener
                     DataCollector.collectData(synchronizer);
                     nextCollectionDate = loader.getScheduledCalendarDate().getTime();
                 }
-            }, initialDelay, interval, TimeUnit.HOURS);
+            }, initialDelay, interval, TimeUnit.MILLISECONDS);
     }
 
     public static Date getNextCollectionDate()

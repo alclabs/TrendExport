@@ -69,16 +69,15 @@ public class DataCollector
 
     public static void collectDataForSource(String source, DBAndSchemaSynchronizer synchronizer) throws SystemException, ActionExecutionException
     {
-        tableName = synchronizer.getSourceMappings().getTableNameFromSource(source);
 
         lock.lock();
 
+        tableName = synchronizer.getSourceMappings().getTableNameFromSource(source);
         isBusy = true;
         copyLatestTrendHistory(source, synchronizer);
-        tableName = "";
-        isBusy = false;
-
         lock.unlock();
+
+        isBusy = false;
     }
 
     public static String getTableName()
