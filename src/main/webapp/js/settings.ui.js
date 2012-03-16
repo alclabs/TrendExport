@@ -192,7 +192,7 @@ function checkInputs()
             alert("Host box is empty");
             return null;
         }
-        else if ($('#port').val() === "")
+        else if ($('#port').val() === "" && $('#port').val() > 0)
         {
             alert("There needs to be a port.");
             return null;

@@ -32,6 +32,7 @@ import com.controlj.addon.trendexport.util.AlarmHandler;
 import com.controlj.addon.trendexport.util.ErrorHandler;
 import com.controlj.green.addonsupport.InvalidConnectionRequestException;
 import com.controlj.green.addonsupport.access.*;
+import com.controlj.green.addonsupport.access.aspect.TrendSource;
 import com.controlj.green.addonsupport.access.util.LocationSort;
 import com.controlj.green.addonsupport.xdatabase.DatabaseException;
 import com.controlj.green.addonsupport.xdatabase.DatabaseVersionMismatchException;
@@ -172,7 +173,7 @@ public class TreeDataServlet extends HttpServlet
     {
         try
         {
-            access.find(location, Aspect.class, new AspectAcceptor<Aspect>()
+            access.find(location, TrendSource.class, new AspectAcceptor<Aspect>()
             {
                 @Override
                 public boolean accept(@NotNull Aspect aspect)

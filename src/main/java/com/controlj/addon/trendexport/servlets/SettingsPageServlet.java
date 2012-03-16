@@ -45,7 +45,12 @@ public class SettingsPageServlet extends HttpServlet
             {
                 try
                 {
-                    saveConfiguration(createConfigManagerFromRequest(req));
+                    // test alarm if there is one
+                    ConfigManager testManager = createConfigManagerFromRequest(req);
+                    if (!testManager.getConfiguration().getAlarmControlProgramPath().isEmpty())
+                        this.testAlarmProgram(testManager.getConfiguration().getAlarmControlProgramPath(), responseObject);
+
+                    saveConfiguration(testManager);
                     responseObject.put("result", "Settings Saved");
                 }
                 catch (NumberFormatException e)
@@ -96,7 +101,6 @@ public class SettingsPageServlet extends HttpServlet
                 {
                     return false;
                 }
-
             }
         });
 
@@ -156,11 +160,17 @@ public class SettingsPageServlet extends HttpServlet
         DatabaseType databaseType = getDatabaseType(dbType);
         String host = req.getParameter("host");
         int port = Integer.valueOf(req.getParameter("port"));
+        if (port < 0)
+            throw new IllegalArgumentException("Port cannot be negative");
+
         String instance = req.getParameter("instance");
         String user = req.getParameter("user");
         String pass = req.getParameter("pass");
         String method = req.getParameter("collMethod");
         String value = req.getParameter("collValue");
+        if (Long.parseLong(value) < 0)
+            throw new IllegalArgumentException("Port cannot be negative");
+
         String alarmPath = req.getParameter("alarmPath");
 
         long time;
