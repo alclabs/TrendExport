@@ -31,6 +31,7 @@ import org.jetbrains.annotations.Nullable;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import java.io.IOException;
+import java.util.Date;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -43,7 +44,7 @@ public class ScheduledTrendCollector implements ServletContextListener
 
     private final ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
     @Nullable private ScheduledFuture<?> collectionHandler;
-    private static boolean status = false;
+    private static Date nextCollectionDate;
 
     @Override
     public void contextInitialized(ServletContextEvent sce)
@@ -75,7 +76,7 @@ public class ScheduledTrendCollector implements ServletContextListener
         }
     }
 
-    private void initializeAndScheduleCollector(ConfigManager manager)
+    private void initializeAndScheduleCollector(final ConfigManager manager)
     {
         if (collectionHandler != null && !collectionHandler.isCancelled())
             collectionHandler.cancel(false);
@@ -91,21 +92,25 @@ public class ScheduledTrendCollector implements ServletContextListener
             return;
         }
 
-        ScheduledConfigurationLoader loader = new ScheduledConfigurationLoader(manager);
+        final ScheduledConfigurationLoader loader = new ScheduledConfigurationLoader(manager);
         long initialDelay = loader.calculateDelay();
-        long interval = loader.calculateInterval();
+        final long interval = loader.calculateInterval();
+
+        nextCollectionDate = loader.getScheduledCalendarDate().getTime();
+//        nextCollectionDate = new Date(interval);
 
         collectionHandler = executor.scheduleAtFixedRate(new Runnable() {
                 @Override public void run()
                 {
                     DataCollector.collectData(synchronizer);
+                    nextCollectionDate = loader.getScheduledCalendarDate().getTime();
                 }
             }, initialDelay, interval, TimeUnit.HOURS);
     }
 
-    public static boolean getStatus()
+    public static Date getNextCollectionDate()
     {
-        return status;
+        return nextCollectionDate;
     }
 
     public static String getTableName()

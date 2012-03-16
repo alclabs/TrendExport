@@ -47,8 +47,8 @@ public class SettingsPageServlet extends HttpServlet
                 {
                     // test alarm if there is one
                     ConfigManager testManager = createConfigManagerFromRequest(req);
-                    if (!testManager.getConfiguration().getAlarmControlProgramPath().isEmpty())
-                        this.testAlarmProgram(testManager.getConfiguration().getAlarmControlProgramPath(), responseObject);
+//                    if (!testManager.getConfiguration().getAlarmControlProgramPath().isEmpty())
+//                        this.testAlarmProgram(testManager.getConfiguration().getAlarmControlProgramPath(), responseObject);
 
                     saveConfiguration(testManager);
                     responseObject.put("result", "Settings Saved");

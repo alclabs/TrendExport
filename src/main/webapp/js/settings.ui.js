@@ -75,7 +75,6 @@ $(function()
                     else
                         $('#pm').prop('checked', true);
 
-
                     var hours = rawTime / 60;
                     var minutes = rawTime % 60;
                     var minute_str = minutes < 10 ? "0" + minutes : minutes;

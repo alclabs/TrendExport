@@ -81,23 +81,17 @@ function createRemoveSourceRequest(nodeKey)
 function getCollectorStatus()
 {
     // make request for status every 15s here...
-    $('#maintainStatusText').text("Status: Getting status...");
     $.getJSON("servlets/addOrRemoveSource", {"action": "getCollectorStatus", "nodeLookupString": ""},
             function(data)
             {
-//                $('#maintainStatusText').text("Status: ");
                 var statusOfResults = data["result"];
-//                alert(data["result"]);
-                $('#maintainStatusText').text("Status: " + statusOfResults);
+                $('#maintainStatusText').text(statusOfResults);
             });
 }
 
 function makeRequestToCollector(objectToSend)
 {
     $('#workingText').show();
-//    $('#maintainStatusText').text("Status: Working...");
-
-
 
     $.getJSON("servlets/addOrRemoveSource", objectToSend,
             function(data)
@@ -127,7 +121,6 @@ function makeRequestToCollector(objectToSend)
                     }
                 }
 
-                $('#maintainStatusText').text("Status: Idle");
                 $('#workingText').hide();
             });
 }

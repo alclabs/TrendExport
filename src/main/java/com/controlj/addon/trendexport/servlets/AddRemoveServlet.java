@@ -9,6 +9,7 @@ import com.controlj.addon.trendexport.helper.TrendTableNameGenerator;
 import com.controlj.addon.trendexport.util.AlarmHandler;
 import com.controlj.addon.trendexport.util.ErrorHandler;
 import com.controlj.addon.trendexport.util.Logger;
+import com.controlj.addon.trendexport.util.ScheduledTrendCollector;
 import com.controlj.green.addonsupport.access.*;
 import com.controlj.green.addonsupport.access.aspect.TrendSource;
 import com.controlj.green.addonsupport.xdatabase.DatabaseException;
@@ -68,9 +69,9 @@ public class AddRemoveServlet extends HttpServlet
                 enableSource(nodeLookupStrings, synchronizer, actionToAttempt.contains("enableSource"));
             else if (actionToAttempt.contains("getCollectorStatus"))
             {
-                result = "Idle...";
+                result = "Next automatic collection time : " + ScheduledTrendCollector.getNextCollectionDate();
                 if (DataCollector.isCollectorBusy())
-                    result = DataCollector.getTableName();
+                    result = "Running Collection for table: " + ScheduledTrendCollector.getTableName();
             }
 
 

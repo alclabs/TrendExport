@@ -58,13 +58,23 @@ public class ScheduledConfigurationLoader
 
     private long calculateDateDelay()
     {
-        // time of collection of this day - schedule will handle the 24hrs...only recalculate on (re)initialize
+        Calendar calendar = getScheduledCalendarDate();
+        return calendar.getTimeInMillis() - new Date().getTime();
+    }
+
+    protected Calendar getScheduledCalendarDate()
+    {
         long rawTimeMilliseconds = manager.getConfiguration().getCollectionValue();
         long rawTimeMinutes = rawTimeMilliseconds / 60000; // convert to minutes
 
         int hours = (int) (rawTimeMinutes / 60);
-        if (hours > 12)
-            hours /= 12;
+//        if (hours > 12)
+//            hours /= 12;
+
+        if (hours < 0)
+            hours *= -1;
+        else
+            hours += 12;
 
         int minutes = (int) (rawTimeMinutes % 60);
 
@@ -75,19 +85,16 @@ public class ScheduledConfigurationLoader
         calendar.set(Calendar.SECOND, 0);
         calendar.set(Calendar.MILLISECOND, 0);
 
-        Date timeOfCollection = calendar.getTime();
-
-        // Current time
+        // correct the time
         Date currentTime = new Date();
 
         // calculate initial delay
-        if (currentTime.before(timeOfCollection))
-            return timeOfCollection.getTime() - currentTime.getTime();
-        else
+        if (currentTime.getTime() > calendar.getTimeInMillis())
         {
             // the current time is after the requested collection time so we need to increment the calendar by one day and wait
             calendar.add(Calendar.DAY_OF_MONTH, 1);
-            return calendar.getTimeInMillis() - currentTime.getTime();
         }
+
+        return calendar;
     }
 }
