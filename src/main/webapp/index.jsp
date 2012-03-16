@@ -109,7 +109,10 @@
             <button id="collectDataNow">Collect Data Now</button>
             <button id="enableOrDisable_btn">Enable Source</button>
             <button id="maintain_RemoveSource">Remove Source...</button>
+
+            <span id="maintainStatusText" style="float: right;padding-right: 5%;padding-top: 5px;">Status: Idle</span>
         </div>
+
 
         <br/><br/>
         <table id="maintenanceTable" class="pretty"></table>

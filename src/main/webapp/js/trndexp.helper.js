@@ -80,6 +80,7 @@ function createRemoveSourceRequest(nodeKey)
 function makeRequestToCollector(objectToSend)
 {
     $('#workingText').show();
+    $('#maintainStatusText').text("Status: Working...");
 
     $.getJSON("servlets/addOrRemoveSource", objectToSend,
             function(data)
@@ -91,10 +92,11 @@ function makeRequestToCollector(objectToSend)
                 {
                     reloadTable(); // method defined in maintain.ui.js
 
-                    // split the nodes back and get each lookup for the tree to update...I need to improve the servlets
-                    // lesson learned: servlets need to be made easier
+                    // split the nodes back and get each lookup for the tree to update...need to improve the servlets
+                    // lesson learned: servlets need to be designed better...
                     var tree = $("#treeOfPotentialSources").dynatree("getTree");
                     var keys = data["lookups"].split(";;");
+
                     for(var i = 0; i < keys.length; i++)
                     {
                         var node = tree.getNodeByKey(keys[i]);
@@ -108,6 +110,7 @@ function makeRequestToCollector(objectToSend)
                     }
                 }
 
+                $('#maintainStatusText').text("Status: Idle");
                 $('#workingText').hide();
             });
 }
