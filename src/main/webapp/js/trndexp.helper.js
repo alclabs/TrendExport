@@ -83,6 +83,10 @@ function makeRequestToCollector(objectToSend)
     $('#workingText').show();
     $('#maintainStatusText').text("Status: Working...");
 
+    // make request for status every 15s here...
+    // var statusOfResults = data["collectorStatus"]; // but it's only on complete so....why bother?
+    // $('#maintainStatusText').text("Status: " + statusOfResults);
+
     $.getJSON("servlets/addOrRemoveSource", objectToSend,
             function(data)
             {

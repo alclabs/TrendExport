@@ -126,6 +126,7 @@ public class AddRemoveServlet extends HttpServlet
 
             response.put("result", message);
             response.put("lookups", builder.toString());
+            response.put("collectorStatus", DataCollector.isCollectorBusy() + ":" + DataCollector.getTableName());
         }
         catch (JSONException e)
         {
