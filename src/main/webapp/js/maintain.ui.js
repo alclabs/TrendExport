@@ -24,6 +24,9 @@ $(function()
 {
     var tableOfAllSources;
 
+    setInterval("getCollectorStatus()", 5000);
+
+
     var collectDataNowBtn = $('#collectDataNow').button().bind("click", function()
     {
         var selected = getSelectedRows(tableOfAllSources);

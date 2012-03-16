@@ -70,10 +70,11 @@ public class DataCollector
     public static void collectDataForSource(String source, DBAndSchemaSynchronizer synchronizer) throws SystemException, ActionExecutionException
     {
         lock.lock();
-
+        isBusy = true;
         tableName = synchronizer.getSourceMappings().getTableNameFromSource(source);
         copyLatestTrendHistory(source, synchronizer);
         tableName = "";
+        isBusy = false;
 
         lock.unlock();
     }

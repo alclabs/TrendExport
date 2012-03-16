@@ -66,6 +66,12 @@ public class AddRemoveServlet extends HttpServlet
                 collectData(nodeLookupStrings, synchronizer);
             else if (actionToAttempt.contains("enableSource") || actionToAttempt.contains("disableSource"))
                 enableSource(nodeLookupStrings, synchronizer, actionToAttempt.contains("enableSource"));
+            else if (actionToAttempt.contains("getCollectorStatus"))
+            {
+                result = "Idle...";
+                if (DataCollector.isCollectorBusy())
+                    result = DataCollector.getTableName();
+            }
 
 
             resp.getWriter().print(writeResult(result, nodeLookupStrings));
@@ -115,6 +121,8 @@ public class AddRemoveServlet extends HttpServlet
         try
         {
             StringBuilder builder = new StringBuilder();
+            response.put("result", message);
+
             for (String singleLookup : nodeLookupStrings)
             {
                 if (singleLookup.contains("DBID:"))
@@ -123,10 +131,9 @@ public class AddRemoveServlet extends HttpServlet
                     builder.append(TrendSourceTypeAndPathResolver.getPersistentLookupString(singleLookup));
                 builder.append(";;");
             }
-
-            response.put("result", message);
             response.put("lookups", builder.toString());
-            response.put("collectorStatus", DataCollector.isCollectorBusy() + ":" + DataCollector.getTableName());
+
+//            response.put("collectorStatus", DataCollector.isCollectorBusy() + ":" + DataCollector.getTableName());
         }
         catch (JSONException e)
         {

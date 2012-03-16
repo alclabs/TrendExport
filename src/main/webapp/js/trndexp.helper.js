@@ -78,14 +78,26 @@ function createRemoveSourceRequest(nodeKey)
     makeRequestToCollector({"action": "removeSource", "nodeLookupString": nodeKey, "keepData" : false});
 }
 
+function getCollectorStatus()
+{
+    // make request for status every 15s here...
+    $('#maintainStatusText').text("Status: Getting status...");
+    $.getJSON("servlets/addOrRemoveSource", {"action": "getCollectorStatus", "nodeLookupString": ""},
+            function(data)
+            {
+//                $('#maintainStatusText').text("Status: ");
+                var statusOfResults = data["result"];
+//                alert(data["result"]);
+                $('#maintainStatusText').text("Status: " + statusOfResults);
+            });
+}
+
 function makeRequestToCollector(objectToSend)
 {
     $('#workingText').show();
-    $('#maintainStatusText').text("Status: Working...");
+//    $('#maintainStatusText').text("Status: Working...");
 
-    // make request for status every 15s here...
-    // var statusOfResults = data["collectorStatus"]; // but it's only on complete so....why bother?
-    // $('#maintainStatusText').text("Status: " + statusOfResults);
+
 
     $.getJSON("servlets/addOrRemoveSource", objectToSend,
             function(data)
@@ -102,7 +114,7 @@ function makeRequestToCollector(objectToSend)
                     var tree = $("#treeOfPotentialSources").dynatree("getTree");
                     var keys = data["lookups"].split(";;");
 
-                    for(var i = 0; i < keys.length; i++)
+                    for (var i = 0; i < keys.length; i++)
                     {
                         var node = tree.getNodeByKey(keys[i]);
                         if (node === null)
