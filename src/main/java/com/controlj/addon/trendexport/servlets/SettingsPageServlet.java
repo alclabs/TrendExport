@@ -168,9 +168,6 @@ public class SettingsPageServlet extends HttpServlet
         String pass = req.getParameter("pass");
         String method = req.getParameter("collMethod");
         String value = req.getParameter("collValue");
-        if (Long.parseLong(value) < 0)
-            throw new IllegalArgumentException("Port cannot be negative");
-
         String alarmPath = req.getParameter("alarmPath");
 
         long time;

@@ -141,11 +141,11 @@ public class AddRemoveServlet extends HttpServlet
         }
         catch (ActionExecutionException e)
         {
-            e.printStackTrace();
+//            e.printStackTrace();
         }
         catch (SystemException e)
         {
-            e.printStackTrace();
+//            e.printStackTrace();
         }
 
         return response;

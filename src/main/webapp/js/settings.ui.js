@@ -72,6 +72,9 @@ $(function()
                         $('#am').prop('checked', true);
                         rawTime *= -1;
                     }
+                    else
+                        $('#pm').prop('checked', true);
+
 
                     var hours = rawTime / 60;
                     var minutes = rawTime % 60;
@@ -164,13 +167,15 @@ function getSettingsObj(action)
     }
     else
     {
-        if ($('#collTime_Hours').val() > 12 || $('#collTime_Hours').val() < 0)
+        var hours = parseInt($('#collTime_Hours').val());
+        var minutes = parseInt(Math.floor($('#collTime_Minutes').val()));
+        if (hours > 12 || hours < 0)
         {
             alert("Hours must be between 1 and 12.");
             return null;
         }
 
-        if (Math.floor($('#collTime_Minutes').val()) < 0 || Math.floor($('#collTime_Minutes').val()) > 59)
+        if (minutes < 0 || minutes > 59)
         {
             alert("Minutes must be between 0 and 59.");
             return null;
@@ -214,7 +219,7 @@ function checkInputs()
             alert("There needs to be an instance to continue.");
             return null;
         }
-        else if ($('#user').val().val() === "")
+        else if ($('#user').val() === "")
         {
             alert("There needs to be a user in order to connect.");
             return null;
