@@ -43,26 +43,32 @@
        <p>This tab shows all exported trend sources that are in the export database.  Because they can be a large number of
        exported trend sources, this data is represented as a table that can be paged through and/or searched.  Rows in the
        table can be selected (by clicking anywhere in the row) and multiple rows can be simultaneously selected.  There are
-       two action buttons that affect selected table rows:</p>
+       three action buttons that affect selected table rows:</p>
        <ul>
           <li>The "Collect Data Now" button allows the add-on to collect the selected sources latest data from the WEBCTRL database as
              soon as possible. If a scheduled collection is taking place, this will interrupt the scheduled collection to until
              the manual collection is complete.</li>
-          <li>The "Remove Source..." button removes a source from the currently collected items and provides two options.  You can
-             either select to clear all associated data from the database or keep the data but stop periodically exported new trend data.</li>
+
+           <li>The "Enable Collection" button (also may be appear as "Disable Collection") enables or disables the periodic collection on any selected
+               sources. If the sources selected are all enabled, the button will appear as "Disable Collection" and will
+               disable the automatic collection on those sources when pressed. Otherwise, if the selected sources are either all disabled or a mixture of
+               enabled and disabled, the button will appear as "Enable Collection" and will enable all the sources selected when pressed.</li>
+
+           <li>The "Remove Source..." button removes the selected sources and all collected data from the database.</li>
        </ul>
    </div>
 
    <div class="helpSubTitle">Add Or Remove Tab</div>
    <div class="helpContent">
        <p>On this tab you can add new sources or remove sources currently being periodically exported. On the left of the page is the
-       system tree.  This tree is a "thin" tree that only shows equipment with trend souces. Any equipment whose text is bold in the
+       system tree.  This tree is a "thin" tree that only shows equipment with trend sources. Any equipment whose text is bold in the
        tree is already being periodically exported. Selecting an item in the tree causes the page to display the the table name and the option
-       to remove the source which provides the same two removal options presented in the Maintain tab's remove button.</p>
+       to remove the source which provides the same two removal options presented in the Maintain tab's remove button. The checkbox next to
+       the table name of the selected source enables or disables collection exactly like the "Enable Collection"/"Disable" Collection button.</p>
+
        <br/>
        <p>The middle of the page contains the data about the selected node - if any. When adding a source, a table name will
        be automatically generated and presented in the text field. The name may be changed if desired.</p>
-       <br/>
 
        <b>Table names must adhere to the following rules:</b>
        <ul>
@@ -77,17 +83,17 @@
 
    <div class="helpSubTitle">Settings Page</div>
    <div class="helpContent">
-       <p>Database Connection Settings<br/>
+       <p>Database Connection Settings:<br/>
        This is where the database connection settings may be checked, changed, and tested. It is possible to check the connection
        without saving by changing any connection-related option and pressing the "Test Connection" button. A message will appear showing the results.</p>
 
-       <p>Automatic Collection Settings<br/>
-       Here there are two options. The first option causes collection to occur every 1 to 320 hours (30 days). The second option causes a
+       <p>Automatic Collection Settings:<br/>
+       Here there are two options. The first option causes collection to occur every 1 to 744 hours (31 days). The second option causes a
        collection to occur at a specified time every day (i.e. the collection occurs every 24 hours).</p>
 
-       <p>Alarm Settings<br/>
+       <p>Alarm Settings:<br/>
        This is the path to the Alarm Control Program that allows the add-on to alert system administrators that something
-       has happened that requires their attention. The control program is provided with this add-on, and it's use is optional but recommended.</p>
+       has happened that requires their attention. The control program is provided with this add-on, and its use is optional but recommended.</p>
    </div>
 </div>
 
@@ -112,6 +118,7 @@
          <tr><td>DisplayPath</td><td>string</td><td>The full display name path to the trend source</td></tr>
          <tr><td>TableName</td><td>string</td><td>The name of the table which has the data for this trend source.</td></tr>
          <tr><td>SourceType</td><td>short integer</td><td>1 for analog trends, 2 for digital trends, or 3 for equipment color (only in WebCTRL v5.5 and later)</td></tr>
+         <tr><td>isEnabled</td><td>short integer</td><td>0 for disabled; 1 for enabled</td></tr>
          </tbody>
       </table>
    </div>

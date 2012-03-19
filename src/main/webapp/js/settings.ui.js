@@ -231,13 +231,21 @@ function checkInputs()
 
 function checkCollectionInputs()
 {
+    var intervalHours = parseInt($('#intervalValue').val());
+
     if ($("input[@name='collectionSettings']:checked").val() === 'interval')
     {
-        if ($('#intervalValue').val() === "" || parseInt($('#intervalValue').val()) <= 0)
+        if ($('#intervalValue').val() === "" || intervalHours <= 0)
         {
-            alert("Collection Interval is not valid. Place a number greater than 0 in the field.");
+            alert("Collection Interval is not valid. Enter a number greater than 0 in the field.");
             $('#intervalValue').val(12);
             return null;
+        }
+        else if (intervalHours > 744) // (744 hours = 31 days)
+        {
+            var days = intervalHours / 24;
+            alert("Warning! You are trying to collect once every " + days + " days. We recommend that this number be lower in order to collect more frequently.");
+            return true;
         }
         else
             return true;
@@ -251,12 +259,12 @@ function checkCollectionInputs()
 
             if ($('#collTime_Hours').val() === "" || hours <= 0 || hours > 12)
             {
-                alert("Collection Hours is not valid. Place a number between 1 and 12 in the field.");
+                alert("Collection Hours is not valid. Enter a number between 1 and 12 in the field.");
                 return null;
             }
             else if ($('#collTime_Minutes').val() === "" || minutes < 0 || minutes > 59)
             {
-                alert("Collection Minutes is not valid. Place a number between 0 and 59 in the field.");
+                alert("Collection Minutes is not valid. Enter a number between 0 and 59 in the field.");
                 return null;
             }
             else

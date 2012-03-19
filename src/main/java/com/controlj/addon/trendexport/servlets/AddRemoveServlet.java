@@ -69,9 +69,9 @@ public class AddRemoveServlet extends HttpServlet
                 enableSource(nodeLookupStrings, synchronizer, actionToAttempt.contains("enableSource"));
             else if (actionToAttempt.contains("getCollectorStatus"))
             {
-                result = "Next automatic collection time : " + ScheduledTrendCollector.getNextCollectionDate();
+                result = "Next automatic collection time:    " + ScheduledTrendCollector.getNextCollectionDate();
                 if (DataCollector.isCollectorBusy())
-                    result = "Running Collection for table: " + ScheduledTrendCollector.getTableName();
+                    result = "Running Collection for table:    " + ScheduledTrendCollector.getTableName();
             }
 
 

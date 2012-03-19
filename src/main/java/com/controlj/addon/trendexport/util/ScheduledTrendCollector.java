@@ -31,7 +31,9 @@ import org.jetbrains.annotations.Nullable;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import java.io.IOException;
-import java.util.Date;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -43,8 +45,9 @@ public class ScheduledTrendCollector implements ServletContextListener
     private static final AtomicReference<ScheduledTrendCollector> collectorRef = new AtomicReference<ScheduledTrendCollector>();
 
     private final ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
-    @Nullable private ScheduledFuture<?> collectionHandler;
-    private static Date nextCollectionDate;
+    @Nullable
+    private ScheduledFuture<?> collectionHandler;
+    private static Calendar nextCollectionDate;
 
     @Override
     public void contextInitialized(ServletContextEvent sce)
@@ -96,25 +99,38 @@ public class ScheduledTrendCollector implements ServletContextListener
         long initialDelay = loader.calculateDelay();
         final long interval = loader.calculateInterval();
 
-        nextCollectionDate = loader.getScheduledCalendarDate().getTime();
+        nextCollectionDate = loader.getScheduledCalendarDate();
 
-        collectionHandler = executor.scheduleAtFixedRate(new Runnable() {
-                @Override public void run()
+        collectionHandler = executor.scheduleAtFixedRate(new Runnable()
                 {
-                    DataCollector.collectData(synchronizer);
-                    nextCollectionDate = loader.getScheduledCalendarDate().getTime();
-                }
-            }, initialDelay, interval, TimeUnit.MILLISECONDS);
+                    @Override
+                    public void run()
+                    {
+                        DataCollector.collectData(synchronizer);
+                        nextCollectionDate = loader.getScheduledCalendarDate();
+                    }
+                }, initialDelay, interval, TimeUnit.MILLISECONDS);
     }
 
-    public static Date getNextCollectionDate()
+    public static String getNextCollectionDate()
     {
-        return nextCollectionDate;
+        // format here
+        String formatPattern = getFormatPattern(nextCollectionDate);
+        return "Today at " + new SimpleDateFormat(formatPattern).format(nextCollectionDate.getTime());
     }
 
     public static String getTableName()
     {
         return DataCollector.getTableName();
+    }
+
+    private static String getFormatPattern(Calendar nextCollectionDate)
+    {
+        Calendar now = new GregorianCalendar();
+        if (nextCollectionDate.get(Calendar.DAY_OF_MONTH) == now.get(Calendar.DAY_OF_MONTH))
+            return "h:mm a"; // format: "Today at " + Time of day + "AM/PM"
+        else
+            return "MM/dd/yy 'at' hh:mm a"; // format "day/month/year at Time + AM/PM
     }
 }
 

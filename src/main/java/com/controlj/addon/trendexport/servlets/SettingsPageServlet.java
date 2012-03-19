@@ -55,7 +55,7 @@ public class SettingsPageServlet extends HttpServlet
                 }
                 catch (NumberFormatException e)
                 {
-                    responseObject.put("result", "Time is not valid. Set the hours and minutes to whole numbers");
+                    responseObject.put("result", "Time is not valid. Set the time or interval correctly.");
                 }
             }
             else if (req.getParameter("action").contains("testAlarm"))

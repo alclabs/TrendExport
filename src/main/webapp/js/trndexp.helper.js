@@ -92,6 +92,7 @@ function getCollectorStatus()
 function makeRequestToCollector(objectToSend)
 {
     $('#workingText').show();
+    getCollectorStatus();
 
     $.getJSON("servlets/addOrRemoveSource", objectToSend,
             function(data)
