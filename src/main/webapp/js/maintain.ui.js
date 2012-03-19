@@ -24,7 +24,8 @@ $(function()
 {
     var tableOfAllSources;
 
-    setInterval("getCollectorStatus()", 5000);
+    getCollectorStatus();
+    setInterval("getCollectorStatus()", 30000);
 
 
     var collectDataNowBtn = $('#collectDataNow').button().bind("click", function()
@@ -70,7 +71,7 @@ $(function()
                     $.getJSON(sSource, aoData, function (json)
                     {
                         removeSelectedClassFromRows(tableOfAllSources);
-                        updateButtonsBasedOnRowsSelected(getSelectedRows(tableOfAllSources));
+                        updateButtonsBasedOnRowsState(getSelectedRows(tableOfAllSources));
                         fnCallback(json)
                     });
 
@@ -106,7 +107,7 @@ $(function()
                         else
                             $(this).addClass('row_selected');
 
-                        updateButtonsBasedOnRowsSelected(getSelectedRows(tableOfAllSources));
+                        updateButtonsBasedOnRowsState(getSelectedRows(tableOfAllSources));
                     });
                 }
             });
@@ -119,11 +120,11 @@ $(function()
         else
             $(this).addClass('row_selected');
 
-        updateButtonsBasedOnRowsSelected(getSelectedRows(tableOfAllSources));
+        updateButtonsBasedOnRowsState(getSelectedRows(tableOfAllSources));
     }
 });
 
-function updateButtonsBasedOnRowsSelected(rowsOfData)
+function updateButtonsBasedOnRowsState(rowsOfData)
 {
     var enableOrDisable_btn = $('#enableOrDisable_btn');
 

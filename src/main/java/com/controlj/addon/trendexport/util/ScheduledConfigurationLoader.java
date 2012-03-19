@@ -68,13 +68,14 @@ public class ScheduledConfigurationLoader
         long rawTimeMinutes = rawTimeMilliseconds / 60000; // convert to minutes
 
         int hours = (int) (rawTimeMinutes / 60);
-//        if (hours > 12)
-//            hours /= 12;
 
         if (hours < 0)
             hours *= -1;
         else
             hours += 12;
+
+        if (rawTimeMinutes < 0)
+            rawTimeMinutes *= -1;
 
         int minutes = (int) (rawTimeMinutes % 60);
 

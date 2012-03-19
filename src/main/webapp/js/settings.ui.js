@@ -97,6 +97,7 @@ $(function()
         $.getJSON("servlets/settings", newInfo,
                 function(data)
                 {
+                    getCollectorStatus();
                     alert(data["result"]);
                 });
     });
