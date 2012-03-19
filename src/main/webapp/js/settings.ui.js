@@ -209,7 +209,7 @@ function checkInputs()
             alert("Host box is empty");
             return null;
         }
-        else if ($('#port').val() === "" && $('#port').val() > 0)
+        else if ($('#port').val() === "" && parseInt($('#port').val()) <= 0)
         {
             alert("There needs to be a port.");
             return null;
@@ -244,18 +244,30 @@ function checkCollectionInputs()
     }
     else
     {
-        if ($('#collTime_Hours').val() === "")
+        try
         {
-            alert("Collection Hours is blank.");
+            var hours = parseInt($('#collTime_Hours').val());
+            var minutes = parseInt($('#collTime_Minutes').val());
+
+            if ($('#collTime_Hours').val() === "" || hours <= 0 || hours > 12)
+            {
+                alert("Collection Hours is not valid. Place a number between 1 and 12 in the field.");
+                return null;
+            }
+            else if ($('#collTime_Minutes').val() === "" || minutes < 0 || minutes > 59)
+            {
+                alert("Collection Minutes is not valid. Place a number between 0 and 59 in the field.");
+                return null;
+            }
+            else
+                return true;
+        }
+        catch (Exception)
+        {
+            alert("A number is not valid. Please enter integers.");
             return null;
         }
-        else if ($('#collTime_Minutes').val()=== "")
-        {
-            alert("Collection Minutes is blank.");
-            return null;
-        }
-        else
-            return true;
+
     }
 }
 
