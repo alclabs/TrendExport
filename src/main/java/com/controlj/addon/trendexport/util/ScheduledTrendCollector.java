@@ -116,7 +116,7 @@ public class ScheduledTrendCollector implements ServletContextListener
     {
         // format here
         String formatPattern = getFormatPattern(nextCollectionDate);
-        return "Today at " + new SimpleDateFormat(formatPattern).format(nextCollectionDate.getTime());
+        return new SimpleDateFormat(formatPattern).format(nextCollectionDate.getTime());
     }
 
     public static String getTableName()
@@ -128,7 +128,7 @@ public class ScheduledTrendCollector implements ServletContextListener
     {
         Calendar now = new GregorianCalendar();
         if (nextCollectionDate.get(Calendar.DAY_OF_MONTH) == now.get(Calendar.DAY_OF_MONTH))
-            return "h:mm a"; // format: "Today at " + Time of day + "AM/PM"
+            return "'Today at' h:mm a"; // format: "Today at " + Time of day + "AM/PM"
         else
             return "MM/dd/yy 'at' hh:mm a"; // format "day/month/year at Time + AM/PM
     }
