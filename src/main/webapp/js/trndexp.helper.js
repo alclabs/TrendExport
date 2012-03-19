@@ -51,6 +51,15 @@ function askToKeepData(keys)
                 height: 250,
                 width: 400,
                 modal: true,
+                open: function(event, ui)
+                {
+                    $('body').css('overflow', 'hidden');
+                    $('.ui-widget-overlay').css('width', '100%');
+                },
+                close: function(event, ui)
+                {
+                    $('body').css('overflow', 'auto');
+                },
                 buttons: {
                     "Yes": function()
                     {
