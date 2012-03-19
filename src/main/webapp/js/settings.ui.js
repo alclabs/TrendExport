@@ -224,8 +224,6 @@ function checkInputs()
             alert("There needs to be a user in order to connect.");
             return null;
         }
-        else
-            return true
     }
 
     return checkCollectionInputs();
@@ -235,9 +233,10 @@ function checkCollectionInputs()
 {
     if ($("input[@name='collectionSettings']:checked").val() === 'interval')
     {
-        if ($('#intervalValue').val() === "")
+        if ($('#intervalValue').val() === "" || parseInt($('#intervalValue').val()) <= 0)
         {
-            alert("Collection Interval is blank.");
+            alert("Collection Interval is not valid. Place a number greater than 0 in the field.");
+            $('#intervalValue').val(12);
             return null;
         }
         else

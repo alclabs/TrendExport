@@ -50,10 +50,11 @@ public class ScheduledConfigurationLoader
 
     public long calculateInterval()
     {
+        long number = 60 * 60 * 1000;
         if (manager.getConfiguration().getCollectionMethod() == Configuration.CollectionMethod.Interval)
-            return manager.getConfiguration().getCollectionValue();
+            return manager.getConfiguration().getCollectionValue() * number;
         else
-            return 24 * 60 * 60 * 1000;
+            return 24 * number; // (24 hrs -> ms)
     }
 
     private long calculateDateDelay()
@@ -64,20 +65,33 @@ public class ScheduledConfigurationLoader
 
     protected Calendar getScheduledCalendarDate()
     {
-        long rawTimeMilliseconds = manager.getConfiguration().getCollectionValue();
-        long rawTimeMinutes = rawTimeMilliseconds / 60000; // convert to minutes
+        long rawValue = manager.getConfiguration().getCollectionValue();
+        int hours, minutes;
+        Date currentTime = new Date();
 
-        int hours = (int) (rawTimeMinutes / 60);
-
-        if (hours < 0)
-            hours *= -1;
+        if (manager.getConfiguration().getCollectionMethod() == Configuration.CollectionMethod.Interval)
+        {
+            Calendar c = Calendar.getInstance();
+            hours = c.get(Calendar.HOUR_OF_DAY);
+            minutes = c.get(Calendar.MINUTE);
+        }
         else
-            hours += 12;
+        {
+            long rawTimeMinutes = rawValue / 60000; // convert to minutes
+            int multiplier = 1;
+            if (rawTimeMinutes < 0)
+            {
+                multiplier = -1;
+                rawTimeMinutes *= multiplier;
+            }
 
-        if (rawTimeMinutes < 0)
-            rawTimeMinutes *= -1;
+            hours = (int) (rawTimeMinutes / 60);
 
-        int minutes = (int) (rawTimeMinutes % 60);
+            if (multiplier == 1)
+                hours += 12;
+
+            minutes = (int) (rawTimeMinutes % 60);
+        }
 
         // Time of collection
         GregorianCalendar calendar = new GregorianCalendar();
@@ -86,14 +100,15 @@ public class ScheduledConfigurationLoader
         calendar.set(Calendar.SECOND, 0);
         calendar.set(Calendar.MILLISECOND, 0);
 
-        // correct the time
-        Date currentTime = new Date();
 
         // calculate initial delay
         if (currentTime.getTime() > calendar.getTimeInMillis())
         {
             // the current time is after the requested collection time so we need to increment the calendar by one day and wait
-            calendar.add(Calendar.DAY_OF_MONTH, 1);
+            if (manager.getConfiguration().getCollectionMethod() == Configuration.CollectionMethod.Interval)
+                calendar.add(Calendar.HOUR_OF_DAY, (int)rawValue);
+            else
+                calendar.add(Calendar.DAY_OF_MONTH, 1);
         }
 
         return calendar;
