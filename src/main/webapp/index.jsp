@@ -72,8 +72,6 @@
     <!--Add/Remove Tab-->
     <div id="addOrRemove">
         <div class="potentialtrends">
-            Select Trends to (something...export?):<br/>
-
             <div id="treeOfPotentialSources" style="display:table;"></div>
         </div>
 
@@ -83,7 +81,8 @@
                     <tbody>
                     <tr>
                         <td>Table Name:&nbsp;&nbsp;</td>
-                        <td><input class="mainPageStretchedTDs" type="text" id="source_tableName_input" value="..."/></td>
+                        <td><input class="mainPageStretchedTDs" type="text" id="source_tableName_input" value="..."/>
+                        </td>
                         <td><input type="checkbox" id="isTrendEnabled" value="yes"/>Collection enabled?</td>
                     </tr>
                     <tr>
@@ -118,10 +117,15 @@
         <div class="groupTitle">
             <button id="Save" class="smallButton">Save</button>
         </div>
-        <br/> <br/>
+        <br/>
+
+        <div class="apiVersionWarningBanner" id="warningText">
+            Warning: Add-on API version 1.1.3 is required for indicies to be correctly created in the target database.
+            <br/>
+        </div>
 
         <!--Connection group-->
-        <div class="groupTitle">Connection Settings:</div>
+        <div class="groupTitle">Database Connection Settings:</div>
         <div class="groupContent">
             <table>
                 <tr>
