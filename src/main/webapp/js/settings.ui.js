@@ -22,6 +22,7 @@
 
 $(function()
 {
+    $("#warningText").prop('hidden', "true");
     $("#dbtypeCombo").hyjack_select();
     $("#alarmPath").removeProp("disabled");
     $('#testAlarm').button().bind("click", function()
@@ -44,6 +45,23 @@ $(function()
     $.getJSON("servlets/settings",
             function(data)
             {
+                var versionNums = data['api_version'].split('.');
+                var major = parseInt(versionNums[0]);
+                var minor = parseInt(versionNums[1]);
+                var update = parseInt(versionNums[2]);
+
+                if (major === 1 && minor === 1 && update < 3)
+                {
+                        $("#warningText").text("Warning: Add-on API version 1.1.3 is required for indicies to be correctly created in the target database. Your current version is v" + data["api_version"]);
+                        $("#warningText").removeProp('hidden');
+                }
+//                else if (major === 1 && minor > 1)
+//                {
+//                    $("#warningText").prop('hidden', "true");
+//                }
+                else
+                    $("#warningText").prop('hidden', "true");
+
                 $('#dbTypeCombo').val(data['dbType']);
                 $('#host').val(data['host']);
                 $('#port').val(data['port']);

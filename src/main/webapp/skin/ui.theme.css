@@ -6,6 +6,11 @@ html, body {
     margin: 0;
 }
 
+div.apiVersionWarningBanner {
+    color: red;
+    margin-bottom: 10px;
+}
+
 div.customTabs {
     min-height: 50%;
     border: none;
@@ -33,9 +38,11 @@ div.potentialtrends {
 
 /*Add Or Remove Buttons*/
 div.addremovebuttons {
-    margin-left: auto;
+    margin-left: 500px;
     margin-right: auto;
-    width: 35%;
+    min-width: 425px;
+    max-width: 500px;
+    width: auto;
     padding: 7px;
 
     /*background: #E0E0E0;*/

@@ -6,6 +6,8 @@ import com.controlj.addon.trendexport.config.Configuration;
 import com.controlj.addon.trendexport.util.AlarmHandler;
 import com.controlj.addon.trendexport.util.ErrorHandler;
 import com.controlj.addon.trendexport.util.ScheduledTrendCollector;
+import com.controlj.green.addonsupport.AddOnInfo;
+import com.controlj.green.addonsupport.Version;
 import com.controlj.green.addonsupport.access.*;
 import com.controlj.green.addonsupport.xdatabase.DatabaseConnectionException;
 import com.controlj.green.addonsupport.xdatabase.DatabaseType;
@@ -217,14 +219,19 @@ public class SettingsPageServlet extends HttpServlet
     private JSONObject getResponseObject(ConfigManager manager) throws IOException, JSONException
     {
         JSONObject responseObject = new JSONObject();
-        responseObject.put("dbType", manager.getCurrentConnectionInfo().getType().toString().toLowerCase());
-        responseObject.put("host", manager.getCurrentConnectionInfo().getHost());
-        responseObject.put("port", manager.getCurrentConnectionInfo().getPort());
-        responseObject.put("instance", manager.getCurrentConnectionInfo().getInstance());
-        responseObject.put("user", manager.getCurrentConnectionInfo().getUser());
-        responseObject.put("pass", manager.getCurrentConnectionInfo().getPasswd());
+        Version apiVersion = AddOnInfo.getAddOnInfo().getApiVersion();
+        responseObject.put("api_version", apiVersion.getMajorVersionNumber() + "." +
+                                          apiVersion.getMinorVersionNumber() + "." +
+                                          apiVersion.getUpdateVersionNumber());
 
-        responseObject.put("collectionType", manager.getConfiguration().getCollectionMethod());
+        responseObject.put("dbType",          manager.getCurrentConnectionInfo().getType().toString().toLowerCase());
+        responseObject.put("host",            manager.getCurrentConnectionInfo().getHost());
+        responseObject.put("port",            manager.getCurrentConnectionInfo().getPort());
+        responseObject.put("instance",        manager.getCurrentConnectionInfo().getInstance());
+        responseObject.put("user",            manager.getCurrentConnectionInfo().getUser());
+        responseObject.put("pass",            manager.getCurrentConnectionInfo().getPasswd());
+
+        responseObject.put("collectionType",  manager.getConfiguration().getCollectionMethod());
         responseObject.put("collectionValue", manager.getConfiguration().getCollectionValue());
 
         String alarmPath = manager.getConfiguration().getAlarmControlProgramPath();
