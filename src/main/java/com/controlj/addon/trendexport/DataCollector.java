@@ -114,7 +114,7 @@ public class DataCollector
 
                     synchronizer.insertTrendSamples(nodeLookupString, trendData, numberOfSamplesToSkip);
                 }
-                catch (Exception e)
+                catch (Exception e) //todo - not needed?
                 {
                     ErrorHandler.handleError("Collector Failure", e);
                 }

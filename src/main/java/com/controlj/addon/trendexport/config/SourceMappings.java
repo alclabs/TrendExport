@@ -51,7 +51,7 @@ public class SourceMappings
                 return obj;
         }
 
-        return null;
+        return null;    //todo - this is an error and null is not handled by caller
     }
 
     public Collection<String> getSources()

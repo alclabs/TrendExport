@@ -151,6 +151,6 @@ public class DynamicDatabase extends Database
                 return table;
         }
 
-        return null; // no null!
+        return null; // no null! //todo - this seems bad
     }
 }

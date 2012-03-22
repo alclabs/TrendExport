@@ -119,7 +119,7 @@
         </div>
         <br/>
 
-        <div class="apiVersionWarningBanner" id="warningText">
+        <div class="apiVersionWarningBanner" id="warningText" style="display:none">
             Warning: Add-on API version 1.1.3 is required for indicies to be correctly created in the target database.
             <br/>
         </div>
