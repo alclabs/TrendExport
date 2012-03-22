@@ -8,7 +8,7 @@ apply from: configurations.gradleScript.resolve().iterator().next()
 info {
   name = 'TrendExport'
   description = 'Periodically copies trend data into an external database for use in 3rd party applications.'
-  version = 'v0.5 Beta'
+  version = '1.0 Beta '+new Date().format('yyyy/MM/dd kk:mm:ss')
   vendor = 'ALC Labs'
 }
 
