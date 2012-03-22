@@ -29,46 +29,50 @@
 
 <body>
 <div>
-   <p>This add-on exports trend data to a secondary database that is available for use by third-party applications.
-   This add-on can be configured to periodically export data from selected trend sources to an external
-   database.</p>
+   <p>This add-on periodically exports selected trend data to a secondary database that is available
+       for use by third-party applications.
+   </p>
 </div>
 
-<div class="helpTitle">Using the Interface</div>
+<div class="helpTitle">Basic Usage</div>
 <div class="helpContent">
-   <p>The user needs to specify the database to which the add-on will exported data and the WebCTRL trend sources which should be exported.
-   This interface also has some simple database maintainance features.</p>
+   <p>
+       In order to begin exporting trend data, you must first specify the database to use and the WebCTRL trend sources which should be exported.
+       The database configuration is done on the <a href="#settings_page">Settings Tab</a>.
+   </p>
    <div class="helpSubTitle">Maintain Tab</div>
    <div class="helpContent">
-       <p>This tab shows all exported trend sources that are in the export database.  Because they can be a large number of
-       exported trend sources, this data is represented as a table that can be paged through and/or searched.  Rows in the
-       table can be selected (by clicking anywhere in the row) and multiple rows can be simultaneously selected.  There are
-       three action buttons that affect selected table rows:</p>
+       <p>This tab shows all the trend sources that have been exported to the database.  There can be a large number of
+       trend sources, so you may need to use the search field to find one.  Click on a row to select it.  You may select
+       multiple rows using SHIFT/CTRL click.  When a row is selected, the three action buttons at the top will be enabled.
+       </p>
        <ul>
-          <li>The "Collect Data Now" button allows the add-on to collect the selected sources latest data from the WEBCTRL database as
-             soon as possible. If a scheduled collection is taking place, this will interrupt the scheduled collection to until
+          <li>The <strong>Collect Data Now</strong> button triggers the immediate collection of data for the selected sources
+             from the WEBCTRL. If a scheduled collection is taking place, this will interrupt the scheduled collection until
              the manual collection is complete.</li>
 
-           <li>The "Enable Collection" button (also may be appear as "Disable Collection") enables or disables the periodic collection on any selected
+           <li>The <strong>Enable/Disable Collection</strong> button enables or disables the periodic collection on any selected
                sources. If the sources selected are all enabled, the button will appear as "Disable Collection" and will
-               disable the automatic collection on those sources when pressed. Otherwise, if the selected sources are either all disabled or a mixture of
-               enabled and disabled, the button will appear as "Enable Collection" and will enable all the sources selected when pressed.</li>
+               disable the automatic collection on those sources when pressed. Otherwise the button will appear as
+               "Enable Collection" and will enable all the sources selected when pressed.</li>
 
-           <li>The "Remove Source..." button removes the selected sources and all collected data from the database.</li>
+           <li>The <strong>Remove Source...</strong> button removes the selected sources and all collected data from the database.</li>
        </ul>
+       <p>
+        Note that if you want to stop collecting data from a source, but leave the existing data in the database, you should use "Disable Collection".
+        When you use "Remove Source" it also will remove all the previously collected data.
+       </p>
    </div>
 
    <div class="helpSubTitle">Add Or Remove Tab</div>
    <div class="helpContent">
-       <p>On this tab you can add new sources or remove sources currently being periodically exported. On the left of the page is the
-       system tree.  This tree is a "thin" tree that only shows equipment with trend sources. Any equipment whose text is bold in the
-       tree is already being periodically exported. Selecting an item in the tree causes the page to display the the table name and the option
-       to remove the source which provides the same two removal options presented in the Maintain tab's remove button. The checkbox next to
-       the table name of the selected source enables or disables collection exactly like the "Enable Collection"/"Disable" Collection button.</p>
+       <p>This tab allows you to add new sources or remove sources currently set to collect data. Select an item in the
+           tree to change collection options for a source.
+           Any equipment displayed in bold in the tree is already selected for collection.  The section in the middle of
+           the page allows you to add or remove a source and enable or disable collection.
+       </p>
 
-       <br/>
-       <p>The middle of the page contains the data about the selected node - if any. When adding a source, a table name will
-       be automatically generated and presented in the text field. The name may be changed if desired.</p>
+       <p>A table name is automatically generated for newly selected sources, but you may edit it if desired.</p>
 
        <b>Table names must adhere to the following rules:</b>
        <ul>
@@ -81,19 +85,33 @@
        </blockquote>
    </div>
 
-   <div class="helpSubTitle">Settings Page</div>
+   <div class="helpSubTitle"><a name="settings_page">Settings Tab</a></div>
    <div class="helpContent">
-       <p>Database Connection Settings:<br/>
-       This is where the database connection settings may be checked, changed, and tested. It is possible to check the connection
-       without saving by changing any connection-related option and pressing the "Test Connection" button. A message will appear showing the results.</p>
+       <p><strong>Important note:</strong> If you make any change to this page, you must use the "Save" button at the top to use your changes.</p>
+       <p>
+           <strong>Database Connection Settings</strong><br/>
+           This section allows you to configure and test the database connection settings.  Make sure that you use the
+           "Test Connection" button to verify your settings.
+       </p>
 
-       <p>Automatic Collection Settings:<br/>
-       Here there are two options. The first option causes collection to occur every 1 to 744 hours (31 days). The second option causes a
-       collection to occur at a specified time every day (i.e. the collection occurs every 24 hours).</p>
+       <p>
+           <strong>Automatic Collection Settings</strong><br/>
+           These options allow you to select either:
+           <ul>
+                <li>A specified period for collection (like every 6 hours)</li>
+                <li>Daily collection starting at a specific time of day</li>
+           </ul>
+        </p>
 
-       <p>Alarm Settings:<br/>
-       This is the path to the Alarm Control Program that allows the add-on to alert system administrators that something
-       has happened that requires their attention. The control program is provided with this add-on, and its use is optional but recommended.</p>
+       <p>
+       <strong>Alarm Settings</strong><br/>
+           The alarm settings section contains a single field for a path to the Trend Export Alarm equipment.
+           The control program for this equipment is provided with this add-on, and its use is optional but recommended.
+           If present, this equipment allows this add-on to alert system administrators that something has happened that
+           requires attention.  You may determine this path by navigating to the Trend Export Alarm equipment in WebCTRL
+           and using the "whereami" manual command.  If the equipment has a global reference name (the default), then this
+           path is typically something like "#trend_export_alarms".
+       </p>
    </div>
 </div>
 
