@@ -26,6 +26,7 @@ package com.controlj.addon.trendexport;
 // adding, removing sources is handled here encapsulating the synchronization between the two objects
 
 import com.controlj.addon.trendexport.config.SourceMappings;
+import com.controlj.addon.trendexport.exceptions.SourceMappingNotFoundException;
 import com.controlj.addon.trendexport.helper.TrendPathAndDBTableName;
 import com.controlj.addon.trendexport.helper.TrendSourceTypeAndPathResolver;
 import com.controlj.addon.trendexport.helper.TrendTableNameGenerator;
@@ -104,9 +105,8 @@ public class DBAndSchemaSynchronizer
 
     }
 
-    public DataStoreRetriever getRetrieverForTrendSource(String nodeLookupString)
+    public DataStoreRetriever getRetrieverForTrendSource(String nodeLookupString) throws SourceMappingNotFoundException
     {
-
         return new DataStoreRetriever(sourceMappings.getTableNameFromSource(nodeLookupString), database);
     }
 
@@ -120,16 +120,16 @@ public class DBAndSchemaSynchronizer
         return sourceMappings.getTableNames().size();
     }
 
-    public boolean isSourceEnabled(String referenceName)
+    public boolean isSourceEnabled(String referenceName) throws SourceMappingNotFoundException
     {
-        return sourceMappings.getTrendPathAndDBTableNameObject(referenceName).getIsEnabled();
+        return sourceMappings.getTableNameObjectFromRefPath(referenceName).getIsEnabled();
     }
 
     // human-generated name - or passed name from another method
     public synchronized void addSourceAndTableName(String referencePath, String displayName, String displayPath, String tableName, TrendSource.Type type)
-            throws DatabaseVersionMismatchException, UpgradeException, DatabaseException
+            throws DatabaseVersionMismatchException, UpgradeException, DatabaseException, SourceMappingNotFoundException
     {
-        if (sourceMappings.containsSource(referencePath))
+        if (sourceMappings.containsSource(referencePath) && sourceMappings.getTableNames().contains(tableName))
             return; // todo: check that tableName matches
 
         sourceMappings.addSourceAndName(new TrendPathAndDBTableName(referencePath, displayName, displayPath, tableName, type, true));
@@ -139,7 +139,8 @@ public class DBAndSchemaSynchronizer
         database = newDatabase;
     }
 
-    public void removeSource(String gqlReferencePath, boolean keepData) throws DatabaseVersionMismatchException, UpgradeException, DatabaseException
+    public void removeSource(String gqlReferencePath, boolean keepData)
+            throws DatabaseVersionMismatchException, UpgradeException, DatabaseException, SourceMappingNotFoundException
     {
         // will need to use lookup string :(
 

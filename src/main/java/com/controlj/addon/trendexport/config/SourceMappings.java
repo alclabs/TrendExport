@@ -2,6 +2,7 @@ package com.controlj.addon.trendexport.config;
 
 // Holds sourceMappings for
 
+import com.controlj.addon.trendexport.exceptions.SourceMappingNotFoundException;
 import com.controlj.addon.trendexport.helper.TrendPathAndDBTableName;
 
 import java.util.Collection;
@@ -22,6 +23,17 @@ public class SourceMappings
         sourcesAndTableNames = loadedPathsAndNames;
     }
 
+    public TrendPathAndDBTableName getTableNameObjectFromRefPath(String source) throws SourceMappingNotFoundException
+    {
+        for (TrendPathAndDBTableName obj : sourcesAndTableNames)
+        {
+            if (obj.getTrendSourceReferencePath().equalsIgnoreCase(source))
+                return obj;
+        }
+
+        throw new SourceMappingNotFoundException("Source Not Found: " + source);
+    }
+
     public Collection<TrendPathAndDBTableName> getSourcesAndTableNames()
     {
         return sourcesAndTableNames;
@@ -32,26 +44,12 @@ public class SourceMappings
         sourcesAndTableNames.add(t);
     }
 
-    public void removeSource(String source)
+    public void removeSource(String source) throws SourceMappingNotFoundException
     {
-        TrendPathAndDBTableName temp = getTrendPathAndDBTableNameObject(source);
+        TrendPathAndDBTableName temp = getTableNameObjectFromRefPath(source);
 
-        if (temp != null)
-        {
-            temp.setIsEnabled(false);
-            sourcesAndTableNames.remove(temp);
-        }
-    }
-
-    public TrendPathAndDBTableName getTrendPathAndDBTableNameObject(String source)
-    {
-        for (TrendPathAndDBTableName obj : sourcesAndTableNames)
-        {
-            if (obj.getTrendSourceReferencePath().equalsIgnoreCase(source))
-                return obj;
-        }
-
-        return null;    //todo - this is an error and null is not handled by caller
+        temp.setIsEnabled(false);
+        sourcesAndTableNames.remove(temp);
     }
 
     public Collection<String> getSources()
@@ -83,12 +81,19 @@ public class SourceMappings
 
     public boolean containsSource(String source)
     {
-        return getTrendPathAndDBTableNameObject(source) != null;
+        try
+        {
+            return getTableNameObjectFromRefPath(source) != null;
+        }
+        catch (SourceMappingNotFoundException e)
+        {
+            return false;
+        }
     }
 
-    public String getTableNameFromSource(String source)
+    public String getTableNameFromSource(String source) throws SourceMappingNotFoundException
     {
-        return getTrendPathAndDBTableNameObject(source).getDbTableName();
+        return getTableNameObjectFromRefPath(source).getDbTableName();
     }
 
     public String getSourceFromTableName(String tableName)
@@ -124,9 +129,9 @@ public class SourceMappings
         return null;
     }
 
-    public void setIsEnabled(String source, boolean isEnabled)
+    public void setIsEnabled(String source, boolean isEnabled) throws SourceMappingNotFoundException
     {
-        getTrendPathAndDBTableNameObject(source).setIsEnabled(isEnabled);
+        getTableNameObjectFromRefPath(source).setIsEnabled(isEnabled);
     }
 
     public boolean getIsEnabled(String tableName)

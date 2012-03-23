@@ -26,9 +26,9 @@ import com.controlj.addon.trendexport.DBAndSchemaSynchronizer;
 import com.controlj.addon.trendexport.DataStoreRetriever;
 import com.controlj.addon.trendexport.config.ConfigManager;
 import com.controlj.addon.trendexport.config.ConfigManagerLoader;
+import com.controlj.addon.trendexport.exceptions.SourceMappingNotFoundException;
 import com.controlj.addon.trendexport.helper.TrendSourceTypeAndPathResolver;
 import com.controlj.addon.trendexport.helper.TrendTableNameGenerator;
-import com.controlj.addon.trendexport.util.AlarmHandler;
 import com.controlj.addon.trendexport.util.ErrorHandler;
 import com.controlj.green.addonsupport.InvalidConnectionRequestException;
 import com.controlj.green.addonsupport.access.*;
@@ -58,80 +58,114 @@ import static com.controlj.green.addonsupport.access.LocationType.System;
 public class TreeDataServlet extends HttpServlet
 {
     @Override
-    protected void doGet(final HttpServletRequest req, final HttpServletResponse resp)
-            throws ServletException, IOException
+    protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException
     {
         resp.setContentType("application/json");
-
         try
         {
+            final ConfigManager manager = new ConfigManagerLoader().loadConnectionInfoFromDataStore();
+            final String key = req.getParameter("key");
+            final String mode = req.getParameter("mode");
+
             SystemConnection connection = DirectAccess.getDirectAccess().getUserSystemConnection(req);
-            connection.runReadAction(new ReadAction()
+            JSONArray treeArray = connection.runReadAction(new ReadActionResult<JSONArray>()
             {
                 @Override
-                public void execute(@NotNull SystemAccess access) throws Exception
+                public JSONArray execute(@NotNull SystemAccess access) throws JSONException, IOException
                 {
-                    ConfigManager manager = new ConfigManagerLoader().loadConnectionInfoFromDataStore();
-                    DBAndSchemaSynchronizer synchronizer = DBAndSchemaSynchronizer.getSynchronizer(manager.getCurrentConnectionInfo());
+                    DBAndSchemaSynchronizer synchronizer = null;
+                    JSONArray jsonArray = new JSONArray();
 
                     try
                     {
+                        synchronizer = DBAndSchemaSynchronizer.getSynchronizer(manager.getCurrentConnectionInfo());
                         synchronizer.connect();
+
                         Tree geoTree = access.getTree(SystemTree.Geographic);
 
-                        if (req.getParameterMap().size() == 1)
+                        if (key == null)
                         {
-                            // initialize tree
-                            Collection<Location> treeChildren = getEntries(geoTree, req.getParameter("key"), access);
-
-                            JSONArray arrayData = toJSON(treeChildren, synchronizer);
-                            arrayData.write(resp.getWriter());
+                            Collection<Location> treeChildren = getTreeFromNodeKey(geoTree, key, access);
+                            jsonArray = toJSON(treeChildren, synchronizer);
                         }
                         else if (req.getParameter("mode").contains("lazyTree"))
                         {
-                            // lazyRead tree
-                            Collection<Location> treeChildren = getEntries(geoTree, req.getParameter("key"), access);
-                            JSONArray arrayData = toJSON(treeChildren, synchronizer);
-
-                            arrayData.write(resp.getWriter());
+                            Collection<Location> treeChildren = getTreeFromNodeKey(geoTree, key, access);
+                            jsonArray = toJSON(treeChildren, synchronizer);
                         }
-                        else if (req.getParameter("mode").contains("data"))
-                        {
-                            // get data about a node
-                            Location location = geoTree.resolve(req.getParameter("key"));
-                            String referencePath = TrendSourceTypeAndPathResolver.getReferencePath(location);
 
-                            getTreeData(referencePath, synchronizer);
-                        }
+//                        Test error throwing and being caught on the web pages
+//                        throw new IOException();
                     }
-                    catch (Exception e)
+                    catch (IOException e)
                     {
-                        ErrorHandler.handleError("System Error", e);
-                        e.printStackTrace();
+                        ErrorHandler.handleError("TreeData IOException", e);
+                        resp.sendError(500, "Configuration was not able to load.");
+
+                    }
+                    catch (UnresolvableException e)
+                    {
+                        ErrorHandler.handleError("TreeData UnresolvableException", e);
+                        resp.sendError(500, "The source could not be resolved.");
+
+                    }
+                    catch (UpgradeException e)
+                    {
+                        ErrorHandler.handleError("TreeData UpgradeException", e);
+                        resp.sendError(500, "The database is not the correct version.");
+
+                    }
+                    catch (DatabaseException e)
+                    {
+                        ErrorHandler.handleError("TreeData IOException", e);
+                        resp.sendError(500, "The database has encountered an error.");
+                    }
+                    catch (DatabaseVersionMismatchException e)
+                    {
+                        ErrorHandler.handleError("TreeData IOException", e);
+                        resp.sendError(500, "The database is not the correct version.");
                     }
                     finally
                     {
-                        synchronizer.disconnect();
+                        if (synchronizer != null)
+                            synchronizer.disconnect();
                     }
+
+                    return jsonArray;
                 }
             });
+
+            assert treeArray != null;
+            if (key == null || !mode.contains("data"))
+                treeArray.write(resp.getWriter());
         }
         catch (SystemException e)
         {
-            ErrorHandler.handleError("System Error", e, AlarmHandler.TrendExportAlarm.CollectionDatabaseCommError);
+            // An error occured. This may be temporary. Please refresh the page
+            resp.sendError(500, "A System error occurred. Ensure that the system is running before continuing.");
+            ErrorHandler.handleError("TreeData System Error - ", e);
         }
         catch (InvalidConnectionRequestException e)
         {
-            ErrorHandler.handleError("Invalid Connection", e);
+            resp.sendError(500, "Invalid login. Refresh the page to login.");
+            ErrorHandler.handleError("TreeData System Error - ", e);
         }
         catch (ActionExecutionException e)
         {
-            ErrorHandler.handleError("ActionExecution", e);
+            // error occurred while handling the tree
+            ErrorHandler.handleError("TreeData System Error - ", e);
+        }
+        catch (JSONException e)
+        {
+            ErrorHandler.handleError("TreeData JSON Error - ", e);
+        }
+        catch (IOException e)
+        {
+            ErrorHandler.handleError("TreeData IOException Error - ", e);
         }
     }
 
-
-    private Collection<Location> getEntries(Tree tree, String lookupString, SystemAccess access)
+    private Collection<Location> getTreeFromNodeKey(Tree tree, String lookupString, SystemAccess access)
     {
         if (lookupString == null)
             return getRoot(tree);
@@ -153,19 +187,18 @@ public class TreeDataServlet extends HttpServlet
 
     private Collection<Location> getChildren(Location location, SystemAccess access)
     {
-        // return all enabled children
         List<Location> treeChildren = new ArrayList<Location>();
         Collection<Location> locChildren = location.getChildren(LocationSort.PRESENTATION);
         for (Location child : locChildren)
         {
-//            if (!child.find(TrendSource.class, Acceptors.enabledTrendSource()).isEmpty())
             if (quickFind(child, access))
                 treeChildren.add(child);
 
-//            API 1.2.0 (WebCTRL 5.5+) optimization - not supported in API v1.1.+ or WebCTRL 5.2
+//            API 1.2.x (WebCTRL 5.5+) optimization - not supported in API v1.1.+ or WebCTRL 5.2
 //            if (child.has(TrendSource.class, Acceptors.enabledTrendSource()))
 //                treeChildren.add(child);
         }
+
         return treeChildren;
     }
 
@@ -181,6 +214,7 @@ public class TreeDataServlet extends HttpServlet
                     throw new RuntimeException();
                 }
             });
+
             return false;
         }
         catch (RuntimeException e)
@@ -194,30 +228,26 @@ public class TreeDataServlet extends HttpServlet
         return TreeIcon.findIcon(type).getImageUrl();
     }
 
-    private void getTreeData(String referencePath, DBAndSchemaSynchronizer synchronizer)
+    private JSONObject getTreeData(String referencePath, DBAndSchemaSynchronizer synchronizer) throws SourceMappingNotFoundException, JSONException
     {
-        try
+        JSONObject next = new JSONObject();
+
+        if (synchronizer.containsSource(referencePath))
         {
-            JSONObject next = new JSONObject();
-            if (synchronizer.containsSource(referencePath))
-            {
-                DataStoreRetriever retriever = synchronizer.getRetrieverForTrendSource(referencePath);
-                next.put("addClass", "selectedNode");
-                next.put("selected", "true");
-                next.put("url", retriever.getTableName());
-            }
-            else
-            {
-                next.put("addClass", "notSelected");
-                next.put("selected", "false");
-                next.put("target", "N/A");
-                next.put("url", "N/A");
-            }
+            DataStoreRetriever retriever = synchronizer.getRetrieverForTrendSource(referencePath);
+            next.put("addClass", "selectedNode");
+            next.put("selected", "true");
+            next.put("url", retriever.getTableName());
         }
-        catch (JSONException e)
+        else
         {
-            ErrorHandler.handleError("TreeData JSON Write error", e);
+            next.put("addClass", "notSelected");
+            next.put("selected", "false");
+            next.put("target", "N/A");
+            next.put("url", "N/A");
         }
+
+        return next;
     }
 
     private JSONArray toJSON(Collection<Location> treeEntries, DBAndSchemaSynchronizer synchronizer)
@@ -226,58 +256,75 @@ public class TreeDataServlet extends HttpServlet
         JSONArray arrayData = new JSONArray();
         for (Location location : treeEntries)
         {
-            JSONObject next = new JSONObject();
-            String lookup = location.getPersistentLookupString(true);
-            String displayName = location.getDisplayName();
-
-            if (!location.hasParent())
-                next.put("activate", true);
-
-            next.put("title", displayName);
-            next.put("key", lookup);
-
-            if (location.getChildren().size() > 0)
+            try
             {
-                next.put("hideCheckbox", true);
-                next.put("isLazy", true);
-                next.put("isFolder", true);
-                next.put("url", "N/A");
+                JSONObject next = new JSONObject();
+                String lookup = location.getPersistentLookupString(true);
+                String displayName = location.getDisplayName();
+
+                if (!location.hasParent())
+                    next.put("activate", true);
+
+                next.put("title", displayName);
+                next.put("key", lookup);
+
+                if (location.getChildren().size() > 0)
+                {
+                    next.put("hideCheckbox", true);
+                    next.put("isLazy", true);
+                    next.put("isFolder", true);
+                    next.put("url", "N/A");
+                }
+                else
+                {
+                    next.put("hideCheckbox", false);
+                    next.put("isFolder", false);
+                    next.put("url", getTableName(location, displayName, synchronizer));
+                }
+
+                // Convert persistent lookup to reference name here because the synchronizer only maintains a list of
+                // active trend sources via GQLPaths
+                String referencePath = TrendSourceTypeAndPathResolver.getReferencePath(location);
+
+                if (synchronizer.containsSource(referencePath) && synchronizer.isSourceEnabled(referencePath))
+                    next.put("addClass", "selectedNode");
+                else if (synchronizer.containsSource(referencePath) && !synchronizer.isSourceEnabled(referencePath))
+                    next.put("addClass", "disabledNode");
+                else
+                    next.put("addClass", "null");
+
+                next.put("nodeDisplayPath", location.getDisplayPath());
+                next.put("nodeType", location.getType());
+
+                next.put("icon", getIconForType(location.getType()));
+                arrayData.put(next);
             }
-            else
+            catch (SourceMappingNotFoundException e)
             {
-                next.put("hideCheckbox", false);
-                next.put("isFolder", false);
-                next.put("url", getTableName(location, displayName, synchronizer));
+                // ignored because we're loading lazy data
             }
-
-            // Convert persstent lookup to reference name here because the synchronizer only maintains a list of
-            // active trend sources via GQLPaths
-            String referencePath = TrendSourceTypeAndPathResolver.getReferencePath(location);
-
-            if (synchronizer.containsSource(referencePath) && synchronizer.isSourceEnabled(referencePath))
-                next.put("addClass", "selectedNode");
-            else if (synchronizer.containsSource(referencePath) && !synchronizer.isSourceEnabled(referencePath))
-                next.put("addClass", "disabledNode");
-            else
-                next.put("addClass", "null");
-
-            next.put("nodeDisplayPath", location.getDisplayPath());
-            next.put("nodeType", location.getType());
-
-            next.put("icon", getIconForType(location.getType()));
-            arrayData.put(next);
         }
+
         return arrayData;
     }
 
-    private String getTableName(Location location, String displayName, DBAndSchemaSynchronizer synchronizer) throws UnresolvableException
+    private String getTableName(Location location, String displayName, DBAndSchemaSynchronizer synchronizer)
+            throws UnresolvableException
     {
         // get table name if one exists if not, get it from the table name generator
+
         String referencePath = TrendSourceTypeAndPathResolver.getReferencePath(location);
-        if (synchronizer.containsSource(referencePath))
-            return synchronizer.getRetrieverForTrendSource(referencePath).getTableName();
-        else
+        try
+        {
+            if (synchronizer.containsSource(referencePath))
+                return synchronizer.getRetrieverForTrendSource(referencePath).getTableName();
+            else
+                return TrendTableNameGenerator.generateUniqueTableName(displayName, synchronizer.getSourceMappings().getTableNames());
+        }
+        catch (SourceMappingNotFoundException e)
+        {
             return TrendTableNameGenerator.generateUniqueTableName(displayName, synchronizer.getSourceMappings().getTableNames());
+        }
     }
 
     public enum TreeIcon

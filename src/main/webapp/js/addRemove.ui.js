@@ -63,6 +63,11 @@ function initializeTree()
                 cache: false,
 
                 initAjax: { url: "servlets/treedata" },
+                onPostInit: function(isReloading, isError , XMLHttpRequest, textStatus, errorThrown)
+                {
+                    if (isError)
+                        alert(errorThrown);
+                },
                 onLazyRead: function(dtnode)
                 {
                     dtnode.appendAjax({
@@ -76,7 +81,8 @@ function initializeTree()
                                     if (dtnode.hasChildren === true)
                                         dtnode.expand();
 
-                                    updateUI(dtnode, 'lazy');
+                                    if (dtnode.title != null)
+                                        updateUI(dtnode, 'lazy');
                                 }
                             });
                 },
@@ -94,7 +100,8 @@ function initializeTree()
                                 },
                                 success: function(dtnode)
                                 {
-                                    updateUI(dtnode, 'activate');
+                                    if (dtnode.title != null)
+                                        updateUI(dtnode, 'activate');
                                 }
                             });
                 }

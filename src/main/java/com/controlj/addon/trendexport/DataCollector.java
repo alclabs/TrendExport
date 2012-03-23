@@ -22,6 +22,7 @@
 
 package com.controlj.addon.trendexport;
 
+import com.controlj.addon.trendexport.exceptions.SourceMappingNotFoundException;
 import com.controlj.addon.trendexport.helper.TrendPathAndDBTableName;
 import com.controlj.addon.trendexport.util.AlarmHandler;
 import com.controlj.addon.trendexport.util.ErrorHandler;
@@ -67,7 +68,7 @@ public class DataCollector
         }
     }
 
-    public static void collectDataForSource(String source, DBAndSchemaSynchronizer synchronizer) throws SystemException, ActionExecutionException
+    public static void collectDataForSource(String source, DBAndSchemaSynchronizer synchronizer) throws SystemException, ActionExecutionException, SourceMappingNotFoundException
     {
 
         lock.lock();

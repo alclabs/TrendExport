@@ -4,6 +4,7 @@ import com.controlj.addon.trendexport.DBAndSchemaSynchronizer;
 import com.controlj.addon.trendexport.DataCollector;
 import com.controlj.addon.trendexport.config.ConfigManager;
 import com.controlj.addon.trendexport.config.ConfigManagerLoader;
+import com.controlj.addon.trendexport.exceptions.SourceMappingNotFoundException;
 import com.controlj.addon.trendexport.helper.TrendSourceTypeAndPathResolver;
 import com.controlj.addon.trendexport.helper.TrendTableNameGenerator;
 import com.controlj.addon.trendexport.util.AlarmHandler;
@@ -108,6 +109,10 @@ public class AddRemoveServlet extends HttpServlet
         {
             e.printStackTrace();
         }
+        catch (SourceMappingNotFoundException e)
+        {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        }
         finally
         {
             if (synchronizer != null)
@@ -177,6 +182,10 @@ public class AddRemoveServlet extends HttpServlet
             {
                 ErrorHandler.handleError("AddRemove - ActionExecution Error", e);
             }
+            catch (SourceMappingNotFoundException e)
+            {
+                ErrorHandler.handleError("AddRemove Servlet", e);
+            }
         }
     }
 
@@ -206,7 +215,7 @@ public class AddRemoveServlet extends HttpServlet
     }
 
     private void removeSource(final List<String> nodeLookups, final DBAndSchemaSynchronizer synchronizer)
-            throws DatabaseVersionMismatchException, UpgradeException, DatabaseException, SystemException, ActionExecutionException
+            throws DatabaseVersionMismatchException, UpgradeException, DatabaseException, SystemException, ActionExecutionException, SourceMappingNotFoundException
     {
         // resolve any DBIDS to GQL reference paths as well
         for (String referencePath : nodeLookups)
