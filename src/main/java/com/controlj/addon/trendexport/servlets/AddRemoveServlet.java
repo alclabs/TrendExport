@@ -5,6 +5,7 @@ import com.controlj.addon.trendexport.DataCollector;
 import com.controlj.addon.trendexport.config.ConfigManager;
 import com.controlj.addon.trendexport.config.ConfigManagerLoader;
 import com.controlj.addon.trendexport.exceptions.SourceMappingNotFoundException;
+import com.controlj.addon.trendexport.exceptions.SynchronizerConnectionException;
 import com.controlj.addon.trendexport.helper.TrendSourceTypeAndPathResolver;
 import com.controlj.addon.trendexport.helper.TrendTableNameGenerator;
 import com.controlj.addon.trendexport.util.AlarmHandler;
@@ -111,7 +112,13 @@ public class AddRemoveServlet extends HttpServlet
         }
         catch (SourceMappingNotFoundException e)
         {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            ErrorHandler.handleError("TreeData - SourceMapping not found", e);
+            resp.sendError(500, "Source Mapping does not exist.");
+        }
+        catch (SynchronizerConnectionException e)
+        {
+            ErrorHandler.handleError("AddOrRemove - Unable to connect to data synchronizer", e);
+            resp.sendError(500, "Unable to access database.");
         }
         finally
         {

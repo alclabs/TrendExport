@@ -22,6 +22,7 @@
 
 package com.controlj.addon.trendexport;
 
+import com.controlj.addon.trendexport.exceptions.TableNotInDatabaseException;
 import com.controlj.addon.trendexport.tables.TrendDataTable;
 import com.controlj.green.addonsupport.xdatabase.DatabaseException;
 import com.controlj.green.addonsupport.xdatabase.DatabaseReadAccess;
@@ -38,7 +39,7 @@ public class DataStoreRetriever
     private DynamicDatabase database;
     private TrendDataTable trendDataTable;
 
-    public DataStoreRetriever(String nameFromSource, DynamicDatabase database)
+    public DataStoreRetriever(String nameFromSource, DynamicDatabase database) throws TableNotInDatabaseException
     {
         this.tableName = nameFromSource;
         this.database = database;
@@ -78,12 +79,12 @@ public class DataStoreRetriever
         return tableName;
     }
 
-    public Integer getNumberOfSamplesToSkip() throws Exception
+    public Integer getNumberOfSamplesToSkip() throws DatabaseException
     {
         return getSamplesToSkip();
     }
 
-    private Integer getSamplesToSkip() throws Exception
+    private Integer getSamplesToSkip() throws DatabaseException
     {
         return database.runQuery(new QueryTask<Integer>()
         {

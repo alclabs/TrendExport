@@ -32,15 +32,15 @@ import java.util.Map;
 
 public class AlarmHandler
 {
-    private static final String REFNAME_UNREACHABLE = "unreachable";
-    private static final String REFNAME_HISTORIAN_DISABLED = "historian_disabled";
+    private static final String REFNAME_SOURCEMAPPING_NOT_FOUND_FAIL = "unreachable";
+    private static final String REFNAME_SYSTEM_ERROR = "system_exception";
     private static final String REFNAME_COLLECTION_FAIL = "collection_fail";
     private static final String REFNAME_DATABASE_ERROR = "database_error";
     private static final String REFNAME_TEST = "test";
 
     private String alarmLocation;
 
-    public enum TrendExportAlarm {TrendSourceUnreachable, HistorianDisabled, CollectionFailure, Test, CollectionDatabaseCommError}
+    public enum TrendExportAlarm {SourceMappingNotFound, SystemFailure, CollectionFailure, Test, CollectionDatabaseCommError}
     private Map<TrendExportAlarm, String> alarmMap;
 
     protected AlarmHandler(String location)
@@ -48,8 +48,8 @@ public class AlarmHandler
         this.alarmLocation = location;
 
         alarmMap = new HashMap<TrendExportAlarm, String>();
-        alarmMap.put(TrendExportAlarm.TrendSourceUnreachable, REFNAME_COLLECTION_FAIL);  // todo - not used?
-        alarmMap.put(TrendExportAlarm.HistorianDisabled, REFNAME_HISTORIAN_DISABLED);    // todo - not used?
+        alarmMap.put(TrendExportAlarm.SourceMappingNotFound, REFNAME_SOURCEMAPPING_NOT_FOUND_FAIL);  // todo - not used?
+        alarmMap.put(TrendExportAlarm.SystemFailure, REFNAME_SYSTEM_ERROR);    // todo - not used?
         alarmMap.put(TrendExportAlarm.CollectionFailure, REFNAME_COLLECTION_FAIL);
         alarmMap.put(TrendExportAlarm.CollectionDatabaseCommError, REFNAME_DATABASE_ERROR);  //todo - not used in right places?
         alarmMap.put(TrendExportAlarm.Test, REFNAME_TEST);

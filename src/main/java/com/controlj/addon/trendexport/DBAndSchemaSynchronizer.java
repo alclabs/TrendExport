@@ -27,10 +27,11 @@ package com.controlj.addon.trendexport;
 
 import com.controlj.addon.trendexport.config.SourceMappings;
 import com.controlj.addon.trendexport.exceptions.SourceMappingNotFoundException;
+import com.controlj.addon.trendexport.exceptions.SynchronizerConnectionException;
+import com.controlj.addon.trendexport.exceptions.TableNotInDatabaseException;
 import com.controlj.addon.trendexport.helper.TrendPathAndDBTableName;
 import com.controlj.addon.trendexport.helper.TrendSourceTypeAndPathResolver;
 import com.controlj.addon.trendexport.helper.TrendTableNameGenerator;
-import com.controlj.addon.trendexport.util.ErrorHandler;
 import com.controlj.green.addonsupport.access.*;
 import com.controlj.green.addonsupport.access.aspect.TrendSource;
 import com.controlj.green.addonsupport.access.trend.TrendData;
@@ -105,7 +106,7 @@ public class DBAndSchemaSynchronizer
 
     }
 
-    public DataStoreRetriever getRetrieverForTrendSource(String nodeLookupString) throws SourceMappingNotFoundException
+    public DataStoreRetriever getRetrieverForTrendSource(String nodeLookupString) throws SourceMappingNotFoundException, TableNotInDatabaseException
     {
         return new DataStoreRetriever(sourceMappings.getTableNameFromSource(nodeLookupString), database);
     }
@@ -178,9 +179,8 @@ public class DBAndSchemaSynchronizer
         sourceMappings = new SourceMappings();
     }
 
-    public synchronized void connect() throws DatabaseVersionMismatchException, DatabaseException, UpgradeException
+    public synchronized void connect() throws SynchronizerConnectionException
     {
-//        ErrorHandler.handleError("Attempt CONNECT ", new Throwable());
         connections++;
         if (isConnected)
             return;
@@ -191,26 +191,39 @@ public class DBAndSchemaSynchronizer
         // load the metadata table)
         try
         {
-//            ErrorHandler.handleError("Attempt CONNECTION ", new Throwable());
+            try
+            {
+                database.connect(connectionInfo);
+                sourceMappings = readMappingsFromDatabase();
+            }
+            catch (DatabaseVersionMismatchException e)
+            {
+                // either doesn't exist or need to be upgraded
+                create();
+            }
 
-            database.connect(connectionInfo);
-            sourceMappings = readMappingsFromDatabase();
+            database.close();
 
-//            ErrorHandler.handleError("Connection Successful", new Throwable());
+            try
+            {
+                database = new DynamicDatabase(sourceMappings);
+                database.connect(connectionInfo);
+                database.upgradeSchema(sourceMappings, true);
+                isConnected = true;
+            }
+            catch (UpgradeException e)
+            {
+                throw new SynchronizerConnectionException("Unable to upgrade the database", e);
+            }
         }
-        catch (Exception e)
+        catch (DatabaseException e)
         {
-            ErrorHandler.handleError("Error Connecting...recreating database ", e);
-            create();
+            throw new SynchronizerConnectionException("Unable to connect to Synchronizer", e);
         }
-        database.close();
-
-        database = new DynamicDatabase(sourceMappings);
-        database.connect(connectionInfo);
-        database.upgradeSchema(sourceMappings, true);
-        isConnected = true;
-
-//        ErrorHandler.handleError("Number of connections: " + connections, new Throwable());
+        catch (DatabaseVersionMismatchException e)
+        {
+            throw new SynchronizerConnectionException("Unable to upgrade the database", e);
+        }
     }
 
     public synchronized void disconnect()
@@ -284,7 +297,7 @@ public class DBAndSchemaSynchronizer
         return mappings;
     }
 
-    public void insertTrendSamples(String source, TrendData trendData, int numberOfSamplesToSkip) throws Exception
+    public void insertTrendSamples(String source, TrendData trendData, int numberOfSamplesToSkip) throws SourceMappingNotFoundException, TableNotInDatabaseException, TrendException
     {
         String tableName = sourceMappings.getTableNameFromSource(source);
         database.insertDataIntoTrendTable(tableName, trendData, numberOfSamplesToSkip);

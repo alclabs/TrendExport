@@ -23,6 +23,8 @@
 package com.controlj.addon.trendexport;
 
 import com.controlj.addon.trendexport.exceptions.SourceMappingNotFoundException;
+import com.controlj.addon.trendexport.exceptions.SynchronizerConnectionException;
+import com.controlj.addon.trendexport.exceptions.TableNotInDatabaseException;
 import com.controlj.addon.trendexport.helper.TrendPathAndDBTableName;
 import com.controlj.addon.trendexport.util.AlarmHandler;
 import com.controlj.addon.trendexport.util.ErrorHandler;
@@ -30,6 +32,7 @@ import com.controlj.green.addonsupport.access.*;
 import com.controlj.green.addonsupport.access.aspect.TrendSource;
 import com.controlj.green.addonsupport.access.trend.TrendData;
 import com.controlj.green.addonsupport.access.trend.TrendRangeFactory;
+import com.controlj.green.addonsupport.xdatabase.DatabaseException;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
@@ -53,13 +56,23 @@ public class DataCollector
             Collection<TrendPathAndDBTableName> sources = synchronizer.getSourceMappings().getSourcesAndTableNames();
 
             for (TrendPathAndDBTableName source : sources)
-            {
                 collectDataForSource(source.getTrendSourceReferencePath(), synchronizer);
-            }
         }
-        catch (Exception e)
+        catch (SourceMappingNotFoundException e)
+        {
+            ErrorHandler.handleError("Data Collection Failed!", e, AlarmHandler.TrendExportAlarm.SourceMappingNotFound);
+        }
+        catch (SystemException e)
+        {
+            ErrorHandler.handleError("DataCollector Collection Failed -> SystemException!", e, AlarmHandler.TrendExportAlarm.SystemFailure);
+        }
+        catch (ActionExecutionException e)
         {
             ErrorHandler.handleError("Data Collection Failed!", e, AlarmHandler.TrendExportAlarm.CollectionFailure);
+        }
+        catch (SynchronizerConnectionException e)
+        {
+            ErrorHandler.handleError("Unable to connect to the data synchronizer", e, AlarmHandler.TrendExportAlarm.CollectionDatabaseCommError);
         }
         finally
         {
@@ -68,17 +81,16 @@ public class DataCollector
         }
     }
 
-    public static void collectDataForSource(String source, DBAndSchemaSynchronizer synchronizer) throws SystemException, ActionExecutionException, SourceMappingNotFoundException
+    public static void collectDataForSource(String source, DBAndSchemaSynchronizer synchronizer)
+            throws SourceMappingNotFoundException, SystemException, ActionExecutionException
     {
 
-        lock.lock();
-
+        lock.lock(); isBusy = true;
         tableName = synchronizer.getSourceMappings().getTableNameFromSource(source);
-        isBusy = true;
-        copyLatestTrendHistory(source, synchronizer);
-        lock.unlock();
 
-        isBusy = false;
+        copyLatestTrendHistory(source, synchronizer);
+
+        lock.unlock(); isBusy = false;
     }
 
     public static String getTableName()
@@ -98,27 +110,19 @@ public class DataCollector
         connection.runReadAction(FieldAccessFactory.newDisabledFieldAccess(), new ReadAction()
         {
             @Override
-            public void execute(@NotNull SystemAccess systemAccess) throws Exception
+            public void execute(@NotNull SystemAccess systemAccess)
+                    throws NoSuchAspectException, SourceMappingNotFoundException, DatabaseException, UnresolvableException, TableNotInDatabaseException, TrendException
             {
-                try
-                {
-//                    Location startLoc = systemAccess.getTree(SystemTree.Geographic).resolve(nodeLookupString);
-                    Location startLoc = systemAccess.resolveGQLPath(nodeLookupString);
-                    TrendSource trendSource = startLoc.getAspect(TrendSource.class);
+                Location startLoc = systemAccess.resolveGQLPath(nodeLookupString);
+                TrendSource trendSource = startLoc.getAspect(TrendSource.class);
 
+                // start using the retriever
+                DataStoreRetriever retriever = synchronizer.getRetrieverForTrendSource(nodeLookupString);
+                Date startDate = retriever.getLastRecordedDate();
+                int numberOfSamplesToSkip = retriever.getNumberOfSamplesToSkip();
+                TrendData trendData = trendSource.getTrendData(TrendRangeFactory.byDateRange(startDate, new Date()));
 
-                    // start using the retriever
-                    DataStoreRetriever retriever = synchronizer.getRetrieverForTrendSource(nodeLookupString);
-                    Date startDate = retriever.getLastRecordedDate();
-                    int numberOfSamplesToSkip = retriever.getNumberOfSamplesToSkip();
-                    TrendData trendData = trendSource.getTrendData(TrendRangeFactory.byDateRange(startDate, new Date()));
-
-                    synchronizer.insertTrendSamples(nodeLookupString, trendData, numberOfSamplesToSkip);
-                }
-                catch (Exception e) //todo - not needed?
-                {
-                    ErrorHandler.handleError("Collector Failure", e);
-                }
+                synchronizer.insertTrendSamples(nodeLookupString, trendData, numberOfSamplesToSkip);
             }
         });
     }

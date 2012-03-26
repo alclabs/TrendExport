@@ -23,10 +23,11 @@
 package com.controlj.addon.trendexport.servlets;
 
 import com.controlj.addon.trendexport.DBAndSchemaSynchronizer;
-import com.controlj.addon.trendexport.DataStoreRetriever;
 import com.controlj.addon.trendexport.config.ConfigManager;
 import com.controlj.addon.trendexport.config.ConfigManagerLoader;
 import com.controlj.addon.trendexport.exceptions.SourceMappingNotFoundException;
+import com.controlj.addon.trendexport.exceptions.SynchronizerConnectionException;
+import com.controlj.addon.trendexport.exceptions.TableNotInDatabaseException;
 import com.controlj.addon.trendexport.helper.TrendSourceTypeAndPathResolver;
 import com.controlj.addon.trendexport.helper.TrendTableNameGenerator;
 import com.controlj.addon.trendexport.util.ErrorHandler;
@@ -124,6 +125,16 @@ public class TreeDataServlet extends HttpServlet
                     {
                         ErrorHandler.handleError("TreeData IOException", e);
                         resp.sendError(500, "The database is not the correct version.");
+                    }
+                    catch (TableNotInDatabaseException e)
+                    {
+                        ErrorHandler.handleError("TreeData TableNotInDatabaseException", e);
+                        resp.sendError(500, "Table was not found in the database.");
+                    }
+                    catch (SynchronizerConnectionException e)
+                    {
+                        ErrorHandler.handleError("TreeData - Unable to connect to data synchronizer", e);
+                        resp.sendError(500, "Unable to access database.");
                     }
                     finally
                     {
@@ -228,30 +239,30 @@ public class TreeDataServlet extends HttpServlet
         return TreeIcon.findIcon(type).getImageUrl();
     }
 
-    private JSONObject getTreeData(String referencePath, DBAndSchemaSynchronizer synchronizer) throws SourceMappingNotFoundException, JSONException
-    {
-        JSONObject next = new JSONObject();
-
-        if (synchronizer.containsSource(referencePath))
-        {
-            DataStoreRetriever retriever = synchronizer.getRetrieverForTrendSource(referencePath);
-            next.put("addClass", "selectedNode");
-            next.put("selected", "true");
-            next.put("url", retriever.getTableName());
-        }
-        else
-        {
-            next.put("addClass", "notSelected");
-            next.put("selected", "false");
-            next.put("target", "N/A");
-            next.put("url", "N/A");
-        }
-
-        return next;
-    }
+//    private JSONObject getTreeData(String referencePath, DBAndSchemaSynchronizer synchronizer) throws SourceMappingNotFoundException, JSONException, TableNotInDatabaseException
+//    {
+//        JSONObject next = new JSONObject();
+//
+//        if (synchronizer.containsSource(referencePath))
+//        {
+//            DataStoreRetriever retriever = synchronizer.getRetrieverForTrendSource(referencePath);
+//            next.put("addClass", "selectedNode");
+//            next.put("selected", "true");
+//            next.put("url", retriever.getTableName());
+//        }
+//        else
+//        {
+//            next.put("addClass", "notSelected");
+//            next.put("selected", "false");
+//            next.put("target", "N/A");
+//            next.put("url", "N/A");
+//        }
+//
+//        return next;
+//    }
 
     private JSONArray toJSON(Collection<Location> treeEntries, DBAndSchemaSynchronizer synchronizer)
-            throws JSONException, DatabaseVersionMismatchException, UpgradeException, DatabaseException, UnresolvableException
+            throws JSONException, DatabaseVersionMismatchException, UpgradeException, DatabaseException, UnresolvableException, TableNotInDatabaseException
     {
         JSONArray arrayData = new JSONArray();
         for (Location location : treeEntries)
@@ -309,7 +320,7 @@ public class TreeDataServlet extends HttpServlet
     }
 
     private String getTableName(Location location, String displayName, DBAndSchemaSynchronizer synchronizer)
-            throws UnresolvableException
+            throws UnresolvableException, TableNotInDatabaseException
     {
         // get table name if one exists if not, get it from the table name generator
 

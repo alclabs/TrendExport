@@ -23,9 +23,11 @@
 package com.controlj.addon.trendexport;
 
 import com.controlj.addon.trendexport.config.SourceMappings;
+import com.controlj.addon.trendexport.exceptions.TableNotInDatabaseException;
 import com.controlj.addon.trendexport.helper.TrendDataProcessor;
 import com.controlj.addon.trendexport.tables.MetaDataTable;
 import com.controlj.addon.trendexport.tables.TrendDataTable;
+import com.controlj.green.addonsupport.access.TrendException;
 import com.controlj.green.addonsupport.access.trend.TrendData;
 import com.controlj.green.addonsupport.xdatabase.*;
 import org.jetbrains.annotations.NotNull;
@@ -133,17 +135,13 @@ public class DynamicDatabase extends Database
         metaDataTable.setEnabledByReferenceName(this, referencePath, enabled);
     }
 
-    public void insertDataIntoTrendTable(String tableName, TrendData<?> data, int numberOfSamplesToSkip) throws Exception
+    public void insertDataIntoTrendTable(String tableName, TrendData<?> data, int numberOfSamplesToSkip) throws TrendException, TableNotInDatabaseException
     {
-        // get the table that the data needs to be inserted
         TrendDataTable table = getDataTableByTableName(tableName);
-        if (table == null)
-            throw new Exception("Cannot find table"); // should never happen but can
-
         data.process(new TrendDataProcessor(this, table, numberOfSamplesToSkip));
     }
 
-    public TrendDataTable getDataTableByTableName(String name)
+    public TrendDataTable getDataTableByTableName(String name) throws TableNotInDatabaseException
     {
         for (TrendDataTable table : this.dataTables)
         {
@@ -151,6 +149,6 @@ public class DynamicDatabase extends Database
                 return table;
         }
 
-        return null; // no null! //todo - this seems bad
+        throw new TableNotInDatabaseException();
     }
 }
