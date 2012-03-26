@@ -132,5 +132,8 @@ function makeRequestToCollector(objectToSend)
                 }
 
                 $('#workingText').hide();
+            }).error(function(e, jqxhr, settings, exception)
+            {
+                alert('Error: ' + settings);
             });
 }

@@ -52,6 +52,7 @@ public class AddRemoveServlet extends HttpServlet
             synchronizer = initializeSynchronizer();
             synchronizer.connect();
 
+
             // perform action
             if (actionToAttempt.contains("addSource"))
             {
@@ -66,9 +67,13 @@ public class AddRemoveServlet extends HttpServlet
                 removeSource(nodeLookupStrings, synchronizer);
             }
             else if (actionToAttempt.contains("collectData"))
+            {
                 collectData(nodeLookupStrings, synchronizer);
+            }
             else if (actionToAttempt.contains("enableSource") || actionToAttempt.contains("disableSource"))
+            {
                 enableSource(nodeLookupStrings, synchronizer, actionToAttempt.contains("enableSource"));
+            }
             else if (actionToAttempt.contains("getCollectorStatus"))
             {
                 result = "Next automatic collection time:    " + ScheduledTrendCollector.getNextCollectionDate();
@@ -79,36 +84,22 @@ public class AddRemoveServlet extends HttpServlet
 
             resp.getWriter().print(writeResult(result, nodeLookupStrings));
         }
-        catch (DatabaseException e)
-        {
-            resp.getWriter().print(writeResult("Action not successful", nodeLookupStrings));
-            ErrorHandler.handleError("AddOrRemoveSerlvet Failed!", e, AlarmHandler.TrendExportAlarm.CollectionDatabaseCommError);
-        }
         catch (SystemException e)
         {
             resp.getWriter().print(writeResult("Action not successful", nodeLookupStrings));
             ErrorHandler.handleError("AddOrRemoveSerlvet Failed!", e, AlarmHandler.TrendExportAlarm.CollectionFailure);
+            resp.sendError(500, "Unable to access database.");
         }
         catch (ActionExecutionException e)
         {
             resp.getWriter().print(writeResult("Action not successful", nodeLookupStrings));
             ErrorHandler.handleError("AddOrRemoveSerlvet Failed!", e);
-        }
-        catch (DatabaseVersionMismatchException e)
-        {
-            resp.getWriter().print(writeResult("Action not successful", nodeLookupStrings));
-            ErrorHandler.handleError("AddOrRemoveSerlvet Failed (Database version mismatch)",
-                    e, AlarmHandler.TrendExportAlarm.CollectionDatabaseCommError);
-        }
-        catch (UpgradeException e)
-        {
-            resp.getWriter().print(writeResult("Action not successful", nodeLookupStrings));
-            ErrorHandler.handleError("AddOrRemoveSerlvet Failed!", e,
-                    AlarmHandler.TrendExportAlarm.CollectionDatabaseCommError);
+            resp.sendError(500, "Unable to access database.");
+
         }
         catch (JSONException e)
         {
-            e.printStackTrace();
+            resp.sendError(500, "Error compiling response.");
         }
         catch (SourceMappingNotFoundException e)
         {
@@ -118,6 +109,21 @@ public class AddRemoveServlet extends HttpServlet
         catch (SynchronizerConnectionException e)
         {
             ErrorHandler.handleError("AddOrRemove - Unable to connect to data synchronizer", e);
+            resp.sendError(500, "Unable to access database.");
+        }
+        catch (DatabaseVersionMismatchException e)
+        {
+            ErrorHandler.handleError("AddOrRemove - Out of sync", e);
+            resp.sendError(500, "Database out of sync. Restart the application.");
+        }
+        catch (UpgradeException e)
+        {
+            ErrorHandler.handleError("AddOrRemove - Unable to upgrade data synchronizer", e);
+            resp.sendError(500, "Unable to upgrade database.");
+        }
+        catch (DatabaseException e)
+        {
+            ErrorHandler.handleError("AddOrRemove - Database error", e);
             resp.sendError(500, "Unable to access database.");
         }
         finally
@@ -174,25 +180,11 @@ public class AddRemoveServlet extends HttpServlet
     }
 
     private void collectData(List<String> sources, DBAndSchemaSynchronizer synchronizer)
+            throws SystemException, ActionExecutionException, SourceMappingNotFoundException
     {
         for (String source : sources)
         {
-            try
-            {
-                DataCollector.collectDataForSource(source, synchronizer);
-            }
-            catch (SystemException e)
-            {
-                ErrorHandler.handleError("AddRemove - System Error", e);
-            }
-            catch (ActionExecutionException e)
-            {
-                ErrorHandler.handleError("AddRemove - ActionExecution Error", e);
-            }
-            catch (SourceMappingNotFoundException e)
-            {
-                ErrorHandler.handleError("AddRemove Servlet", e);
-            }
+            DataCollector.collectDataForSource(source, synchronizer);
         }
     }
 
@@ -222,7 +214,7 @@ public class AddRemoveServlet extends HttpServlet
     }
 
     private void removeSource(final List<String> nodeLookups, final DBAndSchemaSynchronizer synchronizer)
-            throws DatabaseVersionMismatchException, UpgradeException, DatabaseException, SystemException, ActionExecutionException, SourceMappingNotFoundException
+            throws SystemException, ActionExecutionException, DatabaseVersionMismatchException, UpgradeException, SourceMappingNotFoundException, DatabaseException
     {
         // resolve any DBIDS to GQL reference paths as well
         for (String referencePath : nodeLookups)
@@ -249,10 +241,9 @@ public class AddRemoveServlet extends HttpServlet
         });
     }
 
-    private JSONObject enableSource(List<String> referenceList, DBAndSchemaSynchronizer synchronizer, boolean enable) throws JSONException
+    private JSONObject enableSource(List<String> referenceList, DBAndSchemaSynchronizer synchronizer, boolean enable) throws JSONException, SourceMappingNotFoundException
     {
         JSONObject object = new JSONObject();
-
         for (String referencePath : referenceList)
         {
             try
@@ -264,7 +255,6 @@ public class AddRemoveServlet extends HttpServlet
                 ErrorHandler.handleError("Error enabling source: " + referencePath, e);
                 object.put("result", "Error enabling/disabling source: " + referencePath);
                 return object;
-//                e.printStackTrace();
             }
             catch (ActionExecutionException e)
             {
@@ -279,6 +269,7 @@ public class AddRemoveServlet extends HttpServlet
         object.put("result", "Success!");
         //require reverse lookup to get persistent lookup string for updating tree....
         //object.put("nodeLookupString", )
+
         return object; // needs to be results if successful or failure
     }
 

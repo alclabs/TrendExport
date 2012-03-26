@@ -3,6 +3,7 @@ package com.controlj.addon.trendexport.config;
 // Holds sourceMappings for
 
 import com.controlj.addon.trendexport.exceptions.SourceMappingNotFoundException;
+import com.controlj.addon.trendexport.exceptions.TableNotInDatabaseException;
 import com.controlj.addon.trendexport.helper.TrendPathAndDBTableName;
 
 import java.util.Collection;
@@ -96,7 +97,7 @@ public class SourceMappings
         return getTableNameObjectFromRefPath(source).getDbTableName();
     }
 
-    public String getSourceFromTableName(String tableName)
+    public String getSourceFromTableName(String tableName) throws TableNotInDatabaseException
     {
         for (TrendPathAndDBTableName t : sourcesAndTableNames)
         {
@@ -104,7 +105,7 @@ public class SourceMappings
                 return t.getTrendSourceReferencePath();
         }
 
-        return null;
+        throw new TableNotInDatabaseException("SourceMappings: Table " + tableName + " not in source mappings.");
     }
 
     public short getTypeFromTableName(String tableName)
@@ -118,7 +119,7 @@ public class SourceMappings
         return -2;
     }
 
-    public String getDisplayNameFromTableName(String tableName)
+    public String getDisplayNameFromTableName(String tableName) throws SourceMappingNotFoundException
     {
         for (TrendPathAndDBTableName t : sourcesAndTableNames)
         {
@@ -126,7 +127,7 @@ public class SourceMappings
                 return t.getDisplayName();
         }
 
-        return null;
+        throw new SourceMappingNotFoundException("SourceMapping - displayNameFromTableName(" + tableName + ") not found in sourcemappings");
     }
 
     public void setIsEnabled(String source, boolean isEnabled) throws SourceMappingNotFoundException
@@ -145,7 +146,7 @@ public class SourceMappings
         return false;
     }
 
-    public String getDisplayPathFromTableName(String tableName)
+    public String getDisplayPathFromTableName(String tableName) throws SourceMappingNotFoundException
     {
         for (TrendPathAndDBTableName t : sourcesAndTableNames)
         {
@@ -153,6 +154,6 @@ public class SourceMappings
                 return t.getTrendSourceDisplayPath();
         }
 
-        return null;
+        throw new SourceMappingNotFoundException("SourceMapping - displayPathFromTableName(" + tableName + ") not found in sourcemappings");
     }
 }

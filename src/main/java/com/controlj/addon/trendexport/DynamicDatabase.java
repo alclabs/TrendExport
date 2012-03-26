@@ -23,6 +23,7 @@
 package com.controlj.addon.trendexport;
 
 import com.controlj.addon.trendexport.config.SourceMappings;
+import com.controlj.addon.trendexport.exceptions.SourceMappingNotFoundException;
 import com.controlj.addon.trendexport.exceptions.TableNotInDatabaseException;
 import com.controlj.addon.trendexport.helper.TrendDataProcessor;
 import com.controlj.addon.trendexport.tables.MetaDataTable;
@@ -68,7 +69,7 @@ public class DynamicDatabase extends Database
         schema.runUpgrade(newDatabase.schema, new UpgradeTask()
         {
             @Override
-            public void execute(@NotNull DatabaseUpgradeAccess dbAccess) throws DatabaseException
+            public void execute(@NotNull DatabaseUpgradeAccess dbAccess) throws DatabaseException, SourceMappingNotFoundException, TableNotInDatabaseException
             {
                 // add new tables
                 for (TrendDataTable newDataTable : newDatabase.dataTables)

@@ -94,16 +94,16 @@ public class DataStoreRetriever
                 Result result;
                 TrendDataTable table = trendDataTable;//database.getDataTableByTableName(tableName);
                 //if (lastRecordedDate == null)
-                    result = databaseReadAccess.execute(database.buildSelect(table.dateColumn).where(table.dateColumn.eq(lastRecordedDate)));
+                result = databaseReadAccess.execute(database.buildSelect(table.dateColumn).where(table.dateColumn.eq(lastRecordedDate)));
                 //else
-                    //result = databaseReadAccess.execute(database.buildSelect(table.dateColumn).where(table.dateColumn.notBefore(lastRecordedDate))); // needs to include the
+                //result = databaseReadAccess.execute(database.buildSelect(table.dateColumn).where(table.dateColumn.notBefore(lastRecordedDate))); // needs to include the
 
                 int skipCount = 1; // start with 1 bc we need to skip the date itself
                 if (lastRecordedDate.equals(new Date(0))) // no need for the epoch time
                     skipCount = 2;
 
                 while (result.next())
-                        skipCount++;
+                    skipCount++;
 
                 return skipCount;
             }

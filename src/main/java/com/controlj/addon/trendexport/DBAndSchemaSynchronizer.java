@@ -143,8 +143,6 @@ public class DBAndSchemaSynchronizer
     public void removeSource(String gqlReferencePath, boolean keepData)
             throws DatabaseVersionMismatchException, UpgradeException, DatabaseException, SourceMappingNotFoundException
     {
-        // will need to use lookup string :(
-
         sourceMappings.removeSource(gqlReferencePath);
         database.upgradeSchema(sourceMappings, keepData);
     }
