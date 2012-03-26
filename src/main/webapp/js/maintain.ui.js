@@ -73,7 +73,10 @@ $(function()
                         removeSelectedClassFromRows(tableOfAllSources);
                         updateButtonsBasedOnRowsState(getSelectedRows(tableOfAllSources));
                         fnCallback(json)
-                    });
+                    }).error(function(e, jqxhr, settings, exception)
+                            {
+                                alert("Something went wrong on loading the list of sources: " + settings);
+                            });
 
                 },
                 "aoColumns" : [

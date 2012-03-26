@@ -66,15 +66,8 @@ public class SettingsPageServlet extends HttpServlet
         }
         catch (Exception e)
         {
-            try
-            {
-                responseObject.put("result", "Action Failed");
-                ErrorHandler.handleError("Settings Servlet - failed", e);
-            }
-            catch (JSONException e1)
-            {
-                ErrorHandler.handleError("Settings Servlet - JSON Failed", e1);
-            }
+            ErrorHandler.handleError("Configuration exception", e);
+            resp.sendError(500, "Unable to process request.");
         }
         finally
         {
@@ -83,29 +76,38 @@ public class SettingsPageServlet extends HttpServlet
         }
     }
 
-    private JSONObject testAlarmProgram(final String alarmPath, JSONObject responseObject)
-            throws JSONException, SystemException, ActionExecutionException
+    private JSONObject testAlarmProgram(final String alarmPath, JSONObject responseObject) throws JSONException
     {
-        SystemConnection connection = DirectAccess.getDirectAccess().getRootSystemConnection();
-        Boolean result = connection.runReadAction(FieldAccessFactory.newDisabledFieldAccess(), new ReadActionResult<Boolean>()
-        {
-            @Override
-            public Boolean execute(@NotNull SystemAccess access) throws Exception
-            {
-                Location alarmLocation = access.resolveGQLPath(alarmPath);
 
-                try
+        SystemConnection connection = DirectAccess.getDirectAccess().getRootSystemConnection();
+        Boolean result = false;
+        try
+        {
+            result = connection.runReadAction(FieldAccessFactory.newDisabledFieldAccess(), new ReadActionResult<Boolean>()
+            {
+                @Override
+                public Boolean execute(@NotNull SystemAccess access) throws UnresolvableException
                 {
-                    return alarmLocation.hasChild("historiandisabled") &&
-                           alarmLocation.hasChild("trendsource_unreachable") &&
-                           alarmLocation.hasChild("trndexprt_dbwritefailure");
+                    Location alarmLocation = access.resolveGQLPath(alarmPath);
+
+                    try
+                    {
+                        return alarmLocation.hasChild("historiandisabled") &&
+                                alarmLocation.hasChild("trendsource_unreachable") &&
+                                alarmLocation.hasChild("trndexprt_dbwritefailure");
+                    }
+                    catch (Exception e)
+                    {
+                        return false;
+                    }
                 }
-                catch (Exception e)
-                {
-                    return false;
-                }
-            }
-        });
+            });
+        }
+        catch (Exception e)
+        {
+            if (e.getCause() instanceof UnresolvableException)
+                result = false;
+        }
 
         if (result != null && result)
         {
@@ -157,7 +159,7 @@ public class SettingsPageServlet extends HttpServlet
         }
     }
 
-    private ConfigManager createConfigManagerFromRequest(HttpServletRequest req) throws SystemException, IOException, ActionExecutionException, WriteAbortedException
+    private ConfigManager createConfigManagerFromRequest(HttpServletRequest req)
     {
         String dbType = req.getParameter("dbType");
         DatabaseType databaseType = getDatabaseType(dbType);
@@ -179,8 +181,6 @@ public class SettingsPageServlet extends HttpServlet
             int start = value.indexOf(':');
             int end = value.lastIndexOf(':');
             int hours = Integer.parseInt(value.substring(0, start));
-
-
             int minutes = Integer.parseInt(value.substring(start + 1, end));
 
             // hours -> ms = 60 * 60 * 1000
@@ -211,28 +211,29 @@ public class SettingsPageServlet extends HttpServlet
     }
 
     private void saveConfiguration(ConfigManager newConfigManager)
-            throws SystemException, IOException, ActionExecutionException, WriteAbortedException
+            throws IOException
     {
         newConfigManager.save();
         ScheduledTrendCollector.restartCollector(newConfigManager);
     }
 
-    private JSONObject getResponseObject(ConfigManager manager) throws IOException, JSONException
+    private JSONObject getResponseObject(ConfigManager manager)
+            throws IOException, JSONException
     {
         JSONObject responseObject = new JSONObject();
         Version apiVersion = AddOnInfo.getAddOnInfo().getApiVersion();
         responseObject.put("api_version", apiVersion.getMajorVersionNumber() + "." +
-                                          apiVersion.getMinorVersionNumber() + "." +
-                                          apiVersion.getUpdateVersionNumber());
+                apiVersion.getMinorVersionNumber() + "." +
+                apiVersion.getUpdateVersionNumber());
 
-        responseObject.put("dbType",          manager.getCurrentConnectionInfo().getType().toString().toLowerCase());
-        responseObject.put("host",            manager.getCurrentConnectionInfo().getHost());
-        responseObject.put("port",            manager.getCurrentConnectionInfo().getPort());
-        responseObject.put("instance",        manager.getCurrentConnectionInfo().getInstance());
-        responseObject.put("user",            manager.getCurrentConnectionInfo().getUser());
-        responseObject.put("pass",            manager.getCurrentConnectionInfo().getPasswd());
+        responseObject.put("dbType", manager.getCurrentConnectionInfo().getType().toString().toLowerCase());
+        responseObject.put("host", manager.getCurrentConnectionInfo().getHost());
+        responseObject.put("port", manager.getCurrentConnectionInfo().getPort());
+        responseObject.put("instance", manager.getCurrentConnectionInfo().getInstance());
+        responseObject.put("user", manager.getCurrentConnectionInfo().getUser());
+        responseObject.put("pass", manager.getCurrentConnectionInfo().getPasswd());
 
-        responseObject.put("collectionType",  manager.getConfiguration().getCollectionMethod());
+        responseObject.put("collectionType", manager.getConfiguration().getCollectionMethod());
         responseObject.put("collectionValue", manager.getConfiguration().getCollectionValue());
 
         String alarmPath = manager.getConfiguration().getAlarmControlProgramPath();

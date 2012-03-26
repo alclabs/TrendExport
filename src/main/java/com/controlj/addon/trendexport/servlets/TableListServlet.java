@@ -3,10 +3,10 @@ package com.controlj.addon.trendexport.servlets;
 import com.controlj.addon.trendexport.DBAndSchemaSynchronizer;
 import com.controlj.addon.trendexport.config.ConfigManager;
 import com.controlj.addon.trendexport.config.ConfigManagerLoader;
+import com.controlj.addon.trendexport.exceptions.SynchronizerConnectionException;
 import com.controlj.addon.trendexport.helper.TrendPathAndDBTableName;
 import com.controlj.addon.trendexport.helper.TrendSourceTypeAndPathResolver;
 import com.controlj.addon.trendexport.util.ErrorHandler;
-import com.controlj.green.addonsupport.access.ActionExecutionException;
 import com.controlj.green.addonsupport.access.SystemException;
 import com.controlj.green.addonsupport.xdatabase.DatabaseException;
 import org.json.JSONArray;
@@ -46,10 +46,14 @@ public class TableListServlet extends HttpServlet
 
             resp.getWriter().print(object);
         }
+        catch (IOException e)
+        {
+            ErrorHandler.handleError("Unable to load configuration.", e);
+            resp.sendError(500, "Unable to load configuration.");
+        }
         catch (Exception e)
         {
-            ErrorHandler.handleError("Error", e);
-            resp.getWriter().print(e);
+            resp.sendError(500, "Unable to load list of sources.");
         }
         finally
         {
@@ -59,7 +63,7 @@ public class TableListServlet extends HttpServlet
     }
 
     private JSONObject getCurrentList(DBAndSchemaSynchronizer synchronizer)
-            throws JSONException, SystemException, ActionExecutionException, DatabaseException
+            throws JSONException, DatabaseException, SystemException, com.controlj.green.addonsupport.access.UnresolvableException
     {
         JSONArray jsonArray = new JSONArray();
         Collection<TrendPathAndDBTableName> stuffs = synchronizer.getAllTrends();

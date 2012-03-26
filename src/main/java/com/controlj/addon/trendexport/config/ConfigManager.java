@@ -85,27 +85,34 @@ public class ConfigManager
         }
     }
 
-    public void save() throws SystemException, IOException, ActionExecutionException, WriteAbortedException
+    public void save() throws IOException
     {
         XDatabase.getXDatabase().saveDatabaseConnectionInfo("connection", currentConnectionInfo);
 
-        SystemConnection connection = DirectAccess.getDirectAccess().getRootSystemConnection();
-        connection.runWriteAction("TRENDEXP_CONFIG", new WriteAction()
+        try
         {
-            @Override
-            public void execute(@NotNull WritableSystemAccess access) throws Exception
+            SystemConnection connection = DirectAccess.getDirectAccess().getRootSystemConnection();
+            connection.runWriteAction("TRENDEXP_CONFIG", new WriteAction()
             {
-                DataStore store = access.getSystemDataStore("TrendExportConfig");
-                PrintWriter writer = store.getWriter();
+                @Override
+                public void execute(@NotNull WritableSystemAccess access) throws IOException
+                {
+                    DataStore store = access.getSystemDataStore("TrendExportConfig");
+                    PrintWriter writer = store.getWriter();
 
-                writer.println(ConfigManager.this.configuration.getCollectionValue());
-                writer.println(ConfigManager.this.configuration.getCollectionMethod());
-                writer.println(ConfigManager.this.configuration.getAlarmControlProgramPath());
+                    writer.println(ConfigManager.this.configuration.getCollectionValue());
+                    writer.println(ConfigManager.this.configuration.getCollectionMethod());
+                    writer.println(ConfigManager.this.configuration.getAlarmControlProgramPath());
 
-                writer.flush();
-                writer.close();
-            }
-        });
+                    writer.flush();
+                    writer.close();
+                }
+            });
+        }
+        catch (Exception e)
+        {
+            throw new IOException("Saving configuration failed.", e);
+        }
     }
 
     public DatabaseConnectionInfo getCurrentConnectionInfo() throws IOException
@@ -113,8 +120,6 @@ public class ConfigManager
         if (currentConnectionInfo == null)
             if (XDatabase.getXDatabase().canReadDatabaseConnectionInfo("connection"))
                 currentConnectionInfo = XDatabase.getXDatabase().readDatabaseConnectionInfo("connection");
-
-        // and if nothing? default (derby) connection or error?
 
         return currentConnectionInfo;
     }

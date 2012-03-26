@@ -60,18 +60,25 @@ public class TrendSourceTypeAndPathResolver
             return 4;
     }
 
-    public static String getPersistentLookupString(final String referencePath) throws SystemException, ActionExecutionException
+    public static String getPersistentLookupString(final String referencePath) throws SystemException, UnresolvableException
     {
+        try
+        {
         SystemConnection connection = DirectAccess.getDirectAccess().getRootSystemConnection();
         return connection.runReadAction(FieldAccessFactory.newDisabledFieldAccess(), new ReadActionResult<String>()
         {
             @Override
-            public String execute(@NotNull SystemAccess access) throws Exception
+            public String execute(@NotNull SystemAccess access) throws UnresolvableException
             {
 //                    Location startLoc = access.getTree(SystemTree.Geographic).resolve(nodeLookupString);
                 Location location = access.resolveGQLPath(referencePath);
                 return location.getPersistentLookupString(true);
             }
         });
+        }
+        catch (ActionExecutionException e)
+        {
+            throw new UnresolvableException("Unable to resolve reference to path.");
+        }
     }
 }

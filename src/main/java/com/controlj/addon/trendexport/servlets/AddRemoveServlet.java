@@ -106,7 +106,7 @@ public class AddRemoveServlet extends HttpServlet
         }
     }
 
-    private JSONObject writeResult(String message, List<String> nodeLookupStrings)
+    private JSONObject writeResult(String message, List<String> nodeLookupStrings) throws SystemException, UnresolvableException
     {
         JSONObject response = new JSONObject();
 
@@ -130,14 +130,6 @@ public class AddRemoveServlet extends HttpServlet
         catch (JSONException e)
         {
             Logger.println("JSON Failed to write in AddRemoveServlet", e);
-        }
-        catch (ActionExecutionException e)
-        {
-//            e.printStackTrace();
-        }
-        catch (SystemException e)
-        {
-//            e.printStackTrace();
         }
 
         return response;

@@ -100,11 +100,11 @@ public class TreeDataServlet extends HttpServlet
                         resp.sendError(500, "Configuration was not able to load.");
 
                     }
-                    catch (UnresolvableException e)
-                    {
-                        ErrorHandler.handleError("TreeData UnresolvableException", e);
-                        resp.sendError(500, "The source could not be resolved.");
-                    }
+//                    catch (UnresolvableException e) // todo - why does the user care? likely doesn't
+//                    {
+//                        ErrorHandler.handleError("TreeData UnresolvableException", e);
+//                        resp.sendError(500, "The source could not be resolved.");
+//                    }
                     catch (DatabaseException e)
                     {
                         ErrorHandler.handleError("TreeData IOException", e);
