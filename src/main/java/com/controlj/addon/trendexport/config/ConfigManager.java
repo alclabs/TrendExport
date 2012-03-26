@@ -50,10 +50,10 @@ public class ConfigManager
             currentConnectionInfo = XDatabase.getXDatabase().readDatabaseConnectionInfo("connection");
 
             SystemConnection connection = DirectAccess.getDirectAccess().getRootSystemConnection();
-            connection.runReadAction(new ReadAction()
+            configuration = connection.runReadAction(new ReadActionResult<Configuration>()
             {
                 @Override
-                public void execute(@NotNull SystemAccess systemAccess) throws IOException
+                public Configuration execute(@NotNull SystemAccess systemAccess) throws IOException
                 {
                     DataStore store = systemAccess.getSystemDataStore("TrendExportConfig");
                     BufferedReader reader = store.getReader();
@@ -70,11 +70,9 @@ public class ConfigManager
 
                     String alarmPath = reader.readLine();
                     if (alarmPath == null || alarmPath.isEmpty())
-                        ConfigManager.this.configuration = new Configuration(timeInterval, method);
+                        return new Configuration(timeInterval, method);
                     else
-                        ConfigManager.this.configuration = new Configuration(timeInterval, method, alarmPath);
-
-                    reader.close();
+                        return new Configuration(timeInterval, method, alarmPath);
                 }
             });
 
@@ -87,7 +85,7 @@ public class ConfigManager
 
     public void save() throws IOException
     {
-        XDatabase.getXDatabase().saveDatabaseConnectionInfo("connection", currentConnectionInfo);
+        XDatabase.getXDatabase().saveDatabaseConnectionInfo("connection", getCurrentConnectionInfo());
 
         try
         {

@@ -71,11 +71,6 @@ public class DataCollector
                 {
                     ErrorHandler.handleError("Unexpected system exception", e, AlarmHandler.TrendExportAlarm.CollectionFailure);
                 }
-//                catch (ActionExecutionException e)
-//                {
-//                    todo
-//                    ErrorHandler.handleError("Data Collection Failed!", e, AlarmHandler.TrendExportAlarm.CollectionFailure);
-//                }
                 catch (TrendException e)
                 {
                     ErrorHandler.handleError("Trend Source exception", e, AlarmHandler.TrendExportAlarm.CollectionFailure);
@@ -125,8 +120,6 @@ public class DataCollector
     private static void copyLatestTrendHistory(final String nodeLookupString, final DBAndSchemaSynchronizer synchronizer)
             throws DatabaseException, TrendException, TableNotInDatabaseException, SourceMappingNotFoundException, SystemException
     {
-        // throw - Unresolvable -> catch above to continue after
-
         try
         {
             SystemConnection connection = DirectAccess.getDirectAccess().getRootSystemConnection();

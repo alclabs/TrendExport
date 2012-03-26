@@ -41,14 +41,14 @@ public class AlarmHandler
         public String getParameterRefName() { return parameterRefName; }
     }
 
-    private String alarmLocation;
+    private final String alarmLocation;
 
-    protected AlarmHandler(String location)
+    public AlarmHandler(String location)
     {
         this.alarmLocation = location;
     }
 
-    protected void triggerAlarm(final TrendExportAlarm alarmLabel)
+    public void triggerAlarm(final TrendExportAlarm alarmLabel)
     {
         SystemConnection connection = DirectAccess.getDirectAccess().getRootSystemConnection();
         try
@@ -82,12 +82,12 @@ public class AlarmHandler
         }
     }
 
-    protected boolean isConfigured()
+    public boolean isConfigured()
     {
         return !this.alarmLocation.isEmpty();
     }
 
-    protected String getAlarmLocation()
+    public String getAlarmLocation()
     {
         return this.alarmLocation;
     }

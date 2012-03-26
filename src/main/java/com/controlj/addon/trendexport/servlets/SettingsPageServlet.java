@@ -78,7 +78,6 @@ public class SettingsPageServlet extends HttpServlet
 
     private JSONObject testAlarmProgram(final String alarmPath, JSONObject responseObject) throws JSONException
     {
-
         SystemConnection connection = DirectAccess.getDirectAccess().getRootSystemConnection();
         Boolean result = false;
         try
@@ -92,9 +91,10 @@ public class SettingsPageServlet extends HttpServlet
 
                     try
                     {
-                        return alarmLocation.hasChild("historiandisabled") &&
-                                alarmLocation.hasChild("trendsource_unreachable") &&
-                                alarmLocation.hasChild("trndexprt_dbwritefailure");
+                        return alarmLocation.hasChild(AlarmHandler.TrendExportAlarm.Test.getParameterRefName()) &&
+                                alarmLocation.hasChild(AlarmHandler.TrendExportAlarm.CollectionFailure.getParameterRefName()) &&
+                                alarmLocation.hasChild(AlarmHandler.TrendExportAlarm.HistorianDisabled.getParameterRefName()) &&
+                                alarmLocation.hasChild(AlarmHandler.TrendExportAlarm.DatabaseWriteFailure.getParameterRefName());
                     }
                     catch (Exception e)
                     {
@@ -111,14 +111,9 @@ public class SettingsPageServlet extends HttpServlet
 
         if (result != null && result)
         {
-            ErrorHandler.setAlarmHandlerPath(alarmPath);
-
-            if (ErrorHandler.isAlarmHandlerConfigured())
-                responseObject.put("result", "Please check WebCTRL's alarms to see if an alarm has been triggered from this add-on.");
-            else
-                responseObject.put("result", "Please type path to equipment where alarm control program exists.");
-
-            ErrorHandler.handleError("Testing Alarm...", new Exception("Just a test"), AlarmHandler.TrendExportAlarm.Test);
+            AlarmHandler alarmHandler = new AlarmHandler(alarmPath);
+            responseObject.put("result", "Please check WebCTRL's alarms to see if an alarm has been triggered from this add-on.");
+            alarmHandler.triggerAlarm(AlarmHandler.TrendExportAlarm.Test);
         }
         else
             responseObject.put("result", "No alarm control program exists at this location.");

@@ -82,7 +82,7 @@ public class AddRemoveServlet extends HttpServlet
         }
 //        catch (TrendException e)
 //        {
-            // not able to retrieve from WebCTRL
+        // not able to retrieve from WebCTRL
 //            ErrorHandler.handleError("AddOrRemoveSerlvet error", e);
 //            resp.sendError(500, "WebCTRL Database collection error.");
 //        }
@@ -137,10 +137,13 @@ public class AddRemoveServlet extends HttpServlet
 
     private List<String> sanitizeLookupStrings(String input)
     {
+        if (input.isEmpty())
+            return Collections.emptyList();
+
         List<String> collection = new ArrayList<String>();
         String[] split = input.split(";;");
-
         Collections.addAll(collection, split);
+
         return collection;
     }
 
@@ -248,7 +251,7 @@ public class AddRemoveServlet extends HttpServlet
         catch (ActionExecutionException e)
         {
             if (e.getCause() instanceof UnresolvableException)
-                throw (UnresolvableException)e.getCause();
+                throw (UnresolvableException) e.getCause();
             else
                 throw new UnresolvableException("Cannot resolve because of unexpected error", e);
         }

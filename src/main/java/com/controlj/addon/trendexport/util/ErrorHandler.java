@@ -33,11 +33,6 @@ public class ErrorHandler
         alarmHandler = new AlarmHandler(path);
     }
 
-    public static void setAlarmHandlerPath(String path)
-    {
-        alarmHandler = new AlarmHandler(path);
-    }
-
     public static boolean isAlarmHandlerConfigured()
     {
         return alarmHandler.isConfigured();
