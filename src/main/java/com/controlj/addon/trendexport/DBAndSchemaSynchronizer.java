@@ -128,7 +128,7 @@ public class DBAndSchemaSynchronizer
 
     // human-generated name - or passed name from another method
     public synchronized void addSourceAndTableName(String referencePath, String displayName, String displayPath, String tableName, TrendSource.Type type)
-            throws DatabaseVersionMismatchException, UpgradeException, DatabaseException, SourceMappingNotFoundException
+            throws DatabaseException
     {
         if (sourceMappings.containsSource(referencePath) && sourceMappings.getTableNames().contains(tableName))
             return; // todo: check that tableName matches
@@ -136,12 +136,19 @@ public class DBAndSchemaSynchronizer
         sourceMappings.addSourceAndName(new TrendPathAndDBTableName(referencePath, displayName, displayPath, tableName, type, true));
         DynamicDatabase newDatabase = database.upgradeSchema(sourceMappings, true);
         database.close();
-        newDatabase.connect(connectionInfo);
+        try
+        {
+            newDatabase.connect(connectionInfo);
+        }
+        catch (DatabaseVersionMismatchException e)
+        {
+            throw new DatabaseException("After adding table, database is wrong version!", e);
+        }
         database = newDatabase;
     }
 
     public void removeSource(String gqlReferencePath, boolean keepData)
-            throws DatabaseVersionMismatchException, UpgradeException, DatabaseException, SourceMappingNotFoundException
+            throws DatabaseException
     {
         sourceMappings.removeSource(gqlReferencePath);
         database.upgradeSchema(sourceMappings, keepData);
@@ -202,17 +209,10 @@ public class DBAndSchemaSynchronizer
 
             database.close();
 
-            try
-            {
-                database = new DynamicDatabase(sourceMappings);
-                database.connect(connectionInfo);
-                database.upgradeSchema(sourceMappings, true);
-                isConnected = true;
-            }
-            catch (UpgradeException e)
-            {
-                throw new SynchronizerConnectionException("Unable to upgrade the database", e);
-            }
+            database = new DynamicDatabase(sourceMappings);
+            database.connect(connectionInfo);
+            database.upgradeSchema(sourceMappings, true);
+            isConnected = true;
         }
         catch (DatabaseException e)
         {
@@ -295,7 +295,8 @@ public class DBAndSchemaSynchronizer
         return mappings;
     }
 
-    public void insertTrendSamples(String source, TrendData trendData, int numberOfSamplesToSkip) throws SourceMappingNotFoundException, TableNotInDatabaseException, TrendException
+    public void insertTrendSamples(String source, TrendData trendData, int numberOfSamplesToSkip)
+            throws SourceMappingNotFoundException, TableNotInDatabaseException, TrendException
     {
         String tableName = sourceMappings.getTableNameFromSource(source);
         database.insertDataIntoTrendTable(tableName, trendData, numberOfSamplesToSkip);

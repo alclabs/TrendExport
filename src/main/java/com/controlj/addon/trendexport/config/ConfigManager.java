@@ -53,7 +53,7 @@ public class ConfigManager
             connection.runReadAction(new ReadAction()
             {
                 @Override
-                public void execute(@NotNull SystemAccess systemAccess) throws Exception
+                public void execute(@NotNull SystemAccess systemAccess) throws IOException
                 {
                     DataStore store = systemAccess.getSystemDataStore("TrendExportConfig");
                     BufferedReader reader = store.getReader();

@@ -27,32 +27,25 @@ import com.controlj.green.addonsupport.access.aspect.PresentValue;
 import com.controlj.green.addonsupport.access.value.BoolValue;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.HashMap;
-import java.util.Map;
-
 public class AlarmHandler
 {
-    private static final String REFNAME_SOURCEMAPPING_NOT_FOUND_FAIL = "unreachable";
-    private static final String REFNAME_SYSTEM_ERROR = "system_exception";
-    private static final String REFNAME_COLLECTION_FAIL = "collection_fail";
-    private static final String REFNAME_DATABASE_ERROR = "database_error";
-    private static final String REFNAME_TEST = "test";
+    public enum TrendExportAlarm
+    {
+        HistorianDisabled("system_exception"),
+        CollectionFailure("collection_fail"),
+        DatabaseWriteFailure("database_error"),
+        Test("test");
+
+        private final String parameterRefName;
+        TrendExportAlarm(String parameterRefName) { this.parameterRefName = parameterRefName; }
+        public String getParameterRefName() { return parameterRefName; }
+    }
 
     private String alarmLocation;
-
-    public enum TrendExportAlarm {SourceMappingNotFound, SystemFailure, CollectionFailure, Test, CollectionDatabaseCommError}
-    private Map<TrendExportAlarm, String> alarmMap;
 
     protected AlarmHandler(String location)
     {
         this.alarmLocation = location;
-
-        alarmMap = new HashMap<TrendExportAlarm, String>();
-        alarmMap.put(TrendExportAlarm.SourceMappingNotFound, REFNAME_SOURCEMAPPING_NOT_FOUND_FAIL);  // todo - not used?
-        alarmMap.put(TrendExportAlarm.SystemFailure, REFNAME_SYSTEM_ERROR);    // todo - not used?
-        alarmMap.put(TrendExportAlarm.CollectionFailure, REFNAME_COLLECTION_FAIL);
-        alarmMap.put(TrendExportAlarm.CollectionDatabaseCommError, REFNAME_DATABASE_ERROR);  //todo - not used in right places?
-        alarmMap.put(TrendExportAlarm.Test, REFNAME_TEST);
     }
 
     protected void triggerAlarm(final TrendExportAlarm alarmLabel)
@@ -65,7 +58,7 @@ public class AlarmHandler
                 @Override
                 public void execute(@NotNull WritableSystemAccess access) throws Exception
                 {
-                    String refName = alarmMap.get(alarmLabel);
+                    String refName = alarmLabel.getParameterRefName();
                     Location location = access.resolveGQLPath(alarmLocation);
                     PresentValue alarmTrigger = location.getChild(refName).getAspect(PresentValue.class);
                     BoolValue value = (BoolValue)alarmTrigger.getValue();

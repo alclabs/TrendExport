@@ -81,7 +81,7 @@ function initializeTree()
                                     if (dtnode.hasChildren === true)
                                         dtnode.expand();
 
-                                    if (dtnode.title != null)
+                                    if (dtnode.data.title != null)
                                         updateUI(dtnode, 'lazy');
                                 }
                             });
@@ -100,7 +100,7 @@ function initializeTree()
                                 },
                                 success: function(dtnode)
                                 {
-                                    if (dtnode.title != null)
+                                    if (dtnode.data.title != null)
                                         updateUI(dtnode, 'activate');
                                 }
                             });

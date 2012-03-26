@@ -62,71 +62,78 @@ public class DynamicDatabase extends Database
     }
 
     public DynamicDatabase upgradeSchema(final SourceMappings newConfig, final boolean keepData)
-            throws UpgradeException, DatabaseVersionMismatchException, DatabaseException
+            throws DatabaseException
     {
         final DynamicDatabase newDatabase = new DynamicDatabase(newConfig);
 
-        schema.runUpgrade(newDatabase.schema, new UpgradeTask()
+        try
         {
-            @Override
-            public void execute(@NotNull DatabaseUpgradeAccess dbAccess) throws DatabaseException, SourceMappingNotFoundException, TableNotInDatabaseException
+            schema.runUpgrade(newDatabase.schema, new UpgradeTask()
             {
-                // add new tables
-                for (TrendDataTable newDataTable : newDatabase.dataTables)
+                @Override
+                public void execute(@NotNull DatabaseUpgradeAccess dbAccess) throws DatabaseException, SourceMappingNotFoundException, TableNotInDatabaseException
                 {
-                    String tableName = newDataTable.getTableSchema().getName();
-                    // set enabled
-//                    if (keepData != newConfig.getIsEnabled(tableName))
-//                        metaDataTable.setEnabled(DynamicDatabase.this, tableName, keepData);
-
-                    if (!dataTables.contains(newDataTable))
+                    // add new tables
+                    for (TrendDataTable newDataTable : newDatabase.dataTables)
                     {
-                        String displayName = newConfig.getDisplayNameFromTableName(tableName);
-                        String displayPath = newConfig.getDisplayPathFromTableName(tableName);
-                        String source = newConfig.getSourceFromTableName(tableName);
-                        short type = newConfig.getTypeFromTableName(tableName);
-                        boolean enabled = newConfig.getIsEnabled(tableName);
+                        String tableName = newDataTable.getTableSchema().getName();
+                        // set enabled
+    //                    if (keepData != newConfig.getIsEnabled(tableName))
+    //                        metaDataTable.setEnabled(DynamicDatabase.this, tableName, keepData);
 
-                        if (source == null)
-                            throw new DatabaseException("Source does not exist for table: " + tableName);
-
-                        dbAccess.addTable(new TrendDataTable(schema, tableName, type).getTableSchema());
-                        metaDataTable.insertRow(DynamicDatabase.this, source, displayName, displayPath, tableName, type, enabled);
-                    }
-                }
-
-                // drop old tables no longer needed
-                for (TrendDataTable oldDataTable : dataTables)
-                {
-
-                    if (!newDatabase.dataTables.contains(oldDataTable))
-                    {
-                        // get the source to delete the row in the metadata table
-                        String tableName = oldDataTable.getTableSchema().getName();
-                        Query q = buildSelect(DynamicDatabase.this.metaDataTable.referencePath).
-                                where(DynamicDatabase.this.metaDataTable.tableName.eq(tableName));
-
-                        Result r = dbAccess.execute(q);
-                        String source = null;
-
-                        if (r.next())
-                            source = r.get(DynamicDatabase.this.metaDataTable.referencePath);
-
-                        if (source != null)
+                        if (!dataTables.contains(newDataTable))
                         {
-                            metaDataTable.setEnabled(DynamicDatabase.this, tableName, false);
+                            String displayName = newConfig.getDisplayNameFromTableName(tableName);
+                            String displayPath = newConfig.getDisplayPathFromTableName(tableName);
+                            String source = newConfig.getSourceFromTableName(tableName);
+                            short type = newConfig.getTypeFromTableName(tableName);
+                            boolean enabled = newConfig.getIsEnabled(tableName);
 
-                            if (!keepData)
+                            if (source == null)
+                                throw new DatabaseException("Source does not exist for table: " + tableName);
+
+                            dbAccess.addTable(new TrendDataTable(schema, tableName, type).getTableSchema());
+                            metaDataTable.insertRow(DynamicDatabase.this, source, displayName, displayPath, tableName, type, enabled);
+                        }
+                    }
+
+                    // drop old tables no longer needed
+                    for (TrendDataTable oldDataTable : dataTables)
+                    {
+
+                        if (!newDatabase.dataTables.contains(oldDataTable))
+                        {
+                            // get the source to delete the row in the metadata table
+                            String tableName = oldDataTable.getTableSchema().getName();
+                            Query q = buildSelect(DynamicDatabase.this.metaDataTable.referencePath).
+                                    where(DynamicDatabase.this.metaDataTable.tableName.eq(tableName));
+
+                            Result r = dbAccess.execute(q);
+                            String source = null;
+
+                            if (r.next())
+                                source = r.get(DynamicDatabase.this.metaDataTable.referencePath);
+
+                            if (source != null)
                             {
-                                dbAccess.dropTable(oldDataTable.getTableSchema());
-                                metaDataTable.deleteRow(DynamicDatabase.this, source);
-                            }
+                                metaDataTable.setEnabled(DynamicDatabase.this, tableName, false);
 
+                                if (!keepData)
+                                {
+                                    dbAccess.dropTable(oldDataTable.getTableSchema());
+                                    metaDataTable.deleteRow(DynamicDatabase.this, source);
+                                }
+
+                            }
                         }
                     }
                 }
-            }
-        });
+            });
+        }
+        catch (UpgradeException e)
+        {
+            throw new DatabaseException("Error adding/removing tables to match new schema", e);
+        }
 
         return newDatabase;
     }
@@ -136,7 +143,8 @@ public class DynamicDatabase extends Database
         metaDataTable.setEnabledByReferenceName(this, referencePath, enabled);
     }
 
-    public void insertDataIntoTrendTable(String tableName, TrendData<?> data, int numberOfSamplesToSkip) throws TrendException, TableNotInDatabaseException
+    public void insertDataIntoTrendTable(String tableName, TrendData<?> data, int numberOfSamplesToSkip)
+            throws TableNotInDatabaseException, TrendException
     {
         TrendDataTable table = getDataTableByTableName(tableName);
         data.process(new TrendDataProcessor(this, table, numberOfSamplesToSkip));

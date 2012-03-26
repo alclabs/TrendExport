@@ -29,11 +29,12 @@ public class SettingsPageServlet extends HttpServlet
             throws ServletException, IOException
     {
         resp.setContentType("application/json");
-        ConfigManager manager = new ConfigManagerLoader().loadConnectionInfoFromDataStore();
         JSONObject responseObject = new JSONObject();
 
         try
         {
+            ConfigManager manager = new ConfigManagerLoader().loadConnectionInfoFromDataStore();
+
             if (req.getParameterMap().isEmpty())
             {
                 responseObject = getResponseObject(manager);

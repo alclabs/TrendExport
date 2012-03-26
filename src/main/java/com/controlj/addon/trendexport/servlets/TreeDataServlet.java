@@ -26,7 +26,6 @@ import com.controlj.addon.trendexport.DBAndSchemaSynchronizer;
 import com.controlj.addon.trendexport.config.ConfigManager;
 import com.controlj.addon.trendexport.config.ConfigManagerLoader;
 import com.controlj.addon.trendexport.exceptions.SourceMappingNotFoundException;
-import com.controlj.addon.trendexport.exceptions.SynchronizerConnectionException;
 import com.controlj.addon.trendexport.exceptions.TableNotInDatabaseException;
 import com.controlj.addon.trendexport.helper.TrendSourceTypeAndPathResolver;
 import com.controlj.addon.trendexport.helper.TrendTableNameGenerator;
@@ -89,14 +88,11 @@ public class TreeDataServlet extends HttpServlet
                             Collection<Location> treeChildren = getTreeFromNodeKey(geoTree, key, access);
                             jsonArray = toJSON(treeChildren, synchronizer);
                         }
-                        else if (req.getParameter("mode").contains("lazyTree"))
+                        else if (req.getParameter("mode").contains("lazyTree") || req.getParameter("mode").contains("data"))
                         {
                             Collection<Location> treeChildren = getTreeFromNodeKey(geoTree, key, access);
                             jsonArray = toJSON(treeChildren, synchronizer);
                         }
-
-//                        Test error throwing and being caught on the web pages
-//                        throw new IOException();
                     }
                     catch (IOException e)
                     {
@@ -108,33 +104,15 @@ public class TreeDataServlet extends HttpServlet
                     {
                         ErrorHandler.handleError("TreeData UnresolvableException", e);
                         resp.sendError(500, "The source could not be resolved.");
-
-                    }
-                    catch (UpgradeException e)
-                    {
-                        ErrorHandler.handleError("TreeData UpgradeException", e);
-                        resp.sendError(500, "The database is not the correct version.");
-
                     }
                     catch (DatabaseException e)
                     {
                         ErrorHandler.handleError("TreeData IOException", e);
                         resp.sendError(500, "The database has encountered an error.");
                     }
-                    catch (DatabaseVersionMismatchException e)
-                    {
-                        ErrorHandler.handleError("TreeData IOException", e);
-                        resp.sendError(500, "The database is not the correct version.");
-                    }
-                    catch (TableNotInDatabaseException e)
-                    {
-                        ErrorHandler.handleError("TreeData TableNotInDatabaseException", e);
-                        resp.sendError(500, "Table was not found in the database.");
-                    }
-                    catch (SynchronizerConnectionException e)
+                    catch (Exception e)
                     {
                         ErrorHandler.handleError("TreeData - Unable to connect to data synchronizer", e);
-                        resp.sendError(500, "Unable to access database.");
                     }
                     finally
                     {
@@ -161,18 +139,10 @@ public class TreeDataServlet extends HttpServlet
             resp.sendError(500, "Invalid login. Refresh the page to login.");
             ErrorHandler.handleError("TreeData System Error - ", e);
         }
-        catch (ActionExecutionException e)
+        catch (Exception e)
         {
             // error occurred while handling the tree
-            ErrorHandler.handleError("TreeData System Error - ", e);
-        }
-        catch (JSONException e)
-        {
-            ErrorHandler.handleError("TreeData JSON Error - ", e);
-        }
-        catch (IOException e)
-        {
-            ErrorHandler.handleError("TreeData IOException Error - ", e);
+            ErrorHandler.handleError("TreeData Error - ", e);
         }
     }
 
@@ -238,28 +208,6 @@ public class TreeDataServlet extends HttpServlet
     {
         return TreeIcon.findIcon(type).getImageUrl();
     }
-
-//    private JSONObject getTreeData(String referencePath, DBAndSchemaSynchronizer synchronizer) throws SourceMappingNotFoundException, JSONException, TableNotInDatabaseException
-//    {
-//        JSONObject next = new JSONObject();
-//
-//        if (synchronizer.containsSource(referencePath))
-//        {
-//            DataStoreRetriever retriever = synchronizer.getRetrieverForTrendSource(referencePath);
-//            next.put("addClass", "selectedNode");
-//            next.put("selected", "true");
-//            next.put("url", retriever.getTableName());
-//        }
-//        else
-//        {
-//            next.put("addClass", "notSelected");
-//            next.put("selected", "false");
-//            next.put("target", "N/A");
-//            next.put("url", "N/A");
-//        }
-//
-//        return next;
-//    }
 
     private JSONArray toJSON(Collection<Location> treeEntries, DBAndSchemaSynchronizer synchronizer)
             throws JSONException, DatabaseVersionMismatchException, UpgradeException, DatabaseException, UnresolvableException, TableNotInDatabaseException

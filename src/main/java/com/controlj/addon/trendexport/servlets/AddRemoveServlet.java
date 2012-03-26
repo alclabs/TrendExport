@@ -5,7 +5,7 @@ import com.controlj.addon.trendexport.DataCollector;
 import com.controlj.addon.trendexport.config.ConfigManager;
 import com.controlj.addon.trendexport.config.ConfigManagerLoader;
 import com.controlj.addon.trendexport.exceptions.SourceMappingNotFoundException;
-import com.controlj.addon.trendexport.exceptions.SynchronizerConnectionException;
+import com.controlj.addon.trendexport.exceptions.TableNotInDatabaseException;
 import com.controlj.addon.trendexport.helper.TrendSourceTypeAndPathResolver;
 import com.controlj.addon.trendexport.helper.TrendTableNameGenerator;
 import com.controlj.addon.trendexport.util.AlarmHandler;
@@ -15,8 +15,6 @@ import com.controlj.addon.trendexport.util.ScheduledTrendCollector;
 import com.controlj.green.addonsupport.access.*;
 import com.controlj.green.addonsupport.access.aspect.TrendSource;
 import com.controlj.green.addonsupport.xdatabase.DatabaseException;
-import com.controlj.green.addonsupport.xdatabase.DatabaseVersionMismatchException;
-import com.controlj.green.addonsupport.xdatabase.UpgradeException;
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -52,7 +50,6 @@ public class AddRemoveServlet extends HttpServlet
             synchronizer = initializeSynchronizer();
             synchronizer.connect();
 
-
             // perform action
             if (actionToAttempt.contains("addSource"))
             {
@@ -81,51 +78,27 @@ public class AddRemoveServlet extends HttpServlet
                     result = "Running Collection for table:    " + ScheduledTrendCollector.getTableName();
             }
 
-
             resp.getWriter().print(writeResult(result, nodeLookupStrings));
         }
-        catch (SystemException e)
+//        catch (TrendException e)
+//        {
+            // not able to retrieve from WebCTRL
+//            ErrorHandler.handleError("AddOrRemoveSerlvet error", e);
+//            resp.sendError(500, "WebCTRL Database collection error.");
+//        }
+//        catch (DatabaseException e)
+//        {
+//            resp.getWriter().print(writeResult("Action not successful", nodeLookupStrings)); // todo: needed?
+//            ErrorHandler.handleError("AddOrRemoveSerlvet error", e);
+//            resp.sendError(500, "Database communications error.  Make sure the database server is running.");
+//        }
+        catch (Exception e)
         {
-            resp.getWriter().print(writeResult("Action not successful", nodeLookupStrings));
-            ErrorHandler.handleError("AddOrRemoveSerlvet Failed!", e, AlarmHandler.TrendExportAlarm.CollectionFailure);
-            resp.sendError(500, "Unable to access database.");
+            // resp.getWriter().print(writeResult("Action not successful", nodeLookupStrings)); // todo: needed?
+            ErrorHandler.handleError("AddOrRemoveSerlvet error", e);
+            resp.sendError(500, "Error processing request");
         }
-        catch (ActionExecutionException e)
-        {
-            resp.getWriter().print(writeResult("Action not successful", nodeLookupStrings));
-            ErrorHandler.handleError("AddOrRemoveSerlvet Failed!", e);
-            resp.sendError(500, "Unable to access database.");
 
-        }
-        catch (JSONException e)
-        {
-            resp.sendError(500, "Error compiling response.");
-        }
-        catch (SourceMappingNotFoundException e)
-        {
-            ErrorHandler.handleError("TreeData - SourceMapping not found", e);
-            resp.sendError(500, "Source Mapping does not exist.");
-        }
-        catch (SynchronizerConnectionException e)
-        {
-            ErrorHandler.handleError("AddOrRemove - Unable to connect to data synchronizer", e);
-            resp.sendError(500, "Unable to access database.");
-        }
-        catch (DatabaseVersionMismatchException e)
-        {
-            ErrorHandler.handleError("AddOrRemove - Out of sync", e);
-            resp.sendError(500, "Database out of sync. Restart the application.");
-        }
-        catch (UpgradeException e)
-        {
-            ErrorHandler.handleError("AddOrRemove - Unable to upgrade data synchronizer", e);
-            resp.sendError(500, "Unable to upgrade database.");
-        }
-        catch (DatabaseException e)
-        {
-            ErrorHandler.handleError("AddOrRemove - Database error", e);
-            resp.sendError(500, "Unable to access database.");
-        }
         finally
         {
             if (synchronizer != null)
@@ -180,41 +153,79 @@ public class AddRemoveServlet extends HttpServlet
     }
 
     private void collectData(List<String> sources, DBAndSchemaSynchronizer synchronizer)
-            throws SystemException, ActionExecutionException, SourceMappingNotFoundException
     {
         for (String source : sources)
         {
-            DataCollector.collectDataForSource(source, synchronizer);
+            try
+            {
+                DataCollector.collectDataForSource(source, synchronizer);
+            }
+            catch (SourceMappingNotFoundException e)
+            {
+                ErrorHandler.handleError("SourceMapping not found", e);
+            }
+            catch (SystemException e)
+            {
+                ErrorHandler.handleError("", e, AlarmHandler.TrendExportAlarm.CollectionFailure);
+            }
+            catch (TrendException e)
+            {
+                ErrorHandler.handleError("Unable to retrieve TrendSource data from WebCTRL database", e, AlarmHandler.TrendExportAlarm.CollectionFailure);
+            }
+            catch (TableNotInDatabaseException e)
+            {
+                ErrorHandler.handleError("Table not present in database", e, AlarmHandler.TrendExportAlarm.DatabaseWriteFailure);
+            }
+            catch (DatabaseException e)
+            {
+                ErrorHandler.handleError("Database communication error", e, AlarmHandler.TrendExportAlarm.DatabaseWriteFailure);
+            }
         }
     }
 
     private void addSource(final List<String> nodeLookups, final DBAndSchemaSynchronizer synchronizer, final String tableName)
-            throws SystemException, ActionExecutionException
+            throws DatabaseException, UnresolvableException, NoSuchAspectException
     {
         SystemConnection connection = DirectAccess.getDirectAccess().getRootSystemConnection();
-        connection.runReadAction(FieldAccessFactory.newDisabledFieldAccess(), new ReadAction()
+        try
         {
-            @Override
-            public void execute(@NotNull SystemAccess access) throws Exception
+            connection.runReadAction(FieldAccessFactory.newDisabledFieldAccess(), new ReadAction()
             {
-                for (String nodeLookupString : nodeLookups)
+                @Override
+                public void execute(@NotNull SystemAccess access) throws DatabaseException, UnresolvableException, NoSuchAspectException
                 {
-                    Location startLoc = access.getTree(SystemTree.Geographic).resolve(nodeLookupString);
-                    TrendSource trendSource = startLoc.getAspect(TrendSource.class);
-                    TrendSource.Type type = trendSource.getType();
-                    String referencePath = TrendSourceTypeAndPathResolver.getReferencePath(startLoc);
-                    String fullDisplayPath = TrendSourceTypeAndPathResolver.getFullDisplayPath(startLoc, new StringBuilder()).toString();
+                    for (String nodeLookupString : nodeLookups)
+                    {
+                        Location startLoc = access.getTree(SystemTree.Geographic).resolve(nodeLookupString);
+                        TrendSource trendSource = startLoc.getAspect(TrendSource.class);
+                        TrendSource.Type type = trendSource.getType();
+                        String referencePath = TrendSourceTypeAndPathResolver.getReferencePath(startLoc);
+                        String fullDisplayPath = TrendSourceTypeAndPathResolver.getFullDisplayPath(startLoc, new StringBuilder()).toString();
 
-                    synchronizer.addSourceAndTableName(referencePath, startLoc.getDisplayName(), fullDisplayPath, tableName, type);
+                        synchronizer.addSourceAndTableName(referencePath, startLoc.getDisplayName(), fullDisplayPath, tableName, type);
+                    }
                 }
-            }
-        });
-
-
+            });
+        }
+        catch (ActionExecutionException e)
+        {
+            if (e.getCause() instanceof DatabaseException)
+                throw (DatabaseException) e.getCause();
+            else if (e.getCause() instanceof UnresolvableException)
+                throw (UnresolvableException) e.getCause();
+            else if (e.getCause() instanceof NoSuchAspectException)
+                throw (NoSuchAspectException) e.getCause();
+            else
+                throw new DatabaseException("Unexpected error", e); // todo
+        }
+        catch (SystemException e)
+        {
+            throw new DatabaseException("Unexpected system error", e); // todo
+        }
     }
 
     private void removeSource(final List<String> nodeLookups, final DBAndSchemaSynchronizer synchronizer)
-            throws SystemException, ActionExecutionException, DatabaseVersionMismatchException, UpgradeException, SourceMappingNotFoundException, DatabaseException
+            throws DatabaseException, UnresolvableException
     {
         // resolve any DBIDS to GQL reference paths as well
         for (String referencePath : nodeLookups)
@@ -227,18 +238,32 @@ public class AddRemoveServlet extends HttpServlet
         }
     }
 
-    private String resolveLookupStringToReferencePath(final String lookupString) throws SystemException, ActionExecutionException
+    private String resolveLookupStringToReferencePath(final String lookupString) throws UnresolvableException
     {
         SystemConnection connection = DirectAccess.getDirectAccess().getRootSystemConnection();
-        return connection.runReadAction(FieldAccessFactory.newDisabledFieldAccess(), new ReadActionResult<String>()
+        try
         {
-            @Override
-            public String execute(@NotNull SystemAccess access) throws Exception
+            return connection.runReadAction(FieldAccessFactory.newDisabledFieldAccess(), new ReadActionResult<String>()
             {
-                Location location = access.getTree(SystemTree.Geographic).resolve(lookupString);
-                return TrendSourceTypeAndPathResolver.getReferencePath(location);
-            }
-        });
+                @Override
+                public String execute(@NotNull SystemAccess access) throws Exception
+                {
+                    Location location = access.getTree(SystemTree.Geographic).resolve(lookupString);
+                    return TrendSourceTypeAndPathResolver.getReferencePath(location);
+                }
+            });
+        }
+        catch (ActionExecutionException e)
+        {
+            if (e.getCause() instanceof UnresolvableException)
+                throw (UnresolvableException)e.getCause();
+            else
+                throw new UnresolvableException("Cannot resolve because of unexpected error", e);
+        }
+        catch (SystemException e)
+        {
+            throw new UnresolvableException("Cannot resolve because of unexpected system error", e);
+        }
     }
 
     private JSONObject enableSource(List<String> referenceList, DBAndSchemaSynchronizer synchronizer, boolean enable) throws JSONException, SourceMappingNotFoundException
@@ -273,7 +298,7 @@ public class AddRemoveServlet extends HttpServlet
         return object; // needs to be results if successful or failure
     }
 
-    private DBAndSchemaSynchronizer initializeSynchronizer() throws IOException
+    private DBAndSchemaSynchronizer initializeSynchronizer() throws Exception
     {
         ConfigManager manager = new ConfigManagerLoader().loadConnectionInfoFromDataStore();
         return DBAndSchemaSynchronizer.getSynchronizer(manager.getCurrentConnectionInfo());

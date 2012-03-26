@@ -45,12 +45,19 @@ public class SourceMappings
         sourcesAndTableNames.add(t);
     }
 
-    public void removeSource(String source) throws SourceMappingNotFoundException
+    public void removeSource(String source)
     {
-        TrendPathAndDBTableName temp = getTableNameObjectFromRefPath(source);
+        try
+        {
+            TrendPathAndDBTableName temp = getTableNameObjectFromRefPath(source);
 
-        temp.setIsEnabled(false);
-        sourcesAndTableNames.remove(temp);
+            temp.setIsEnabled(false);
+            sourcesAndTableNames.remove(temp);
+        }
+        catch (SourceMappingNotFoundException ignored)
+        {
+            // hmm, not there, must have already been removed!
+        }
     }
 
     public Collection<String> getSources()

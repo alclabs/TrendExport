@@ -45,8 +45,7 @@ public class ScheduledTrendCollector implements ServletContextListener
     private static final AtomicReference<ScheduledTrendCollector> collectorRef = new AtomicReference<ScheduledTrendCollector>();
 
     private final ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
-    @Nullable
-    private ScheduledFuture<?> collectionHandler;
+    @Nullable private ScheduledFuture<?> collectionHandler;
     private static Calendar nextCollectionDate;
 
     @Override
@@ -54,8 +53,15 @@ public class ScheduledTrendCollector implements ServletContextListener
     {
         collectorRef.set(this);
 
-        ConfigManager configManager = new ConfigManagerLoader().loadConnectionInfoFromDataStore();
-        initializeAndScheduleCollector(configManager);
+        try
+        {
+            ConfigManager configManager = new ConfigManagerLoader().loadConnectionInfoFromDataStore();
+            initializeAndScheduleCollector(configManager);
+        }
+        catch (Exception e)
+        {
+            ErrorHandler.handleError("Error reading configuration data", e, AlarmHandler.TrendExportAlarm.CollectionFailure);
+        }
     }
 
     @Override

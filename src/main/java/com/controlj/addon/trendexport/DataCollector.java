@@ -37,93 +37,130 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 import java.util.Date;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class DataCollector
 {
     private static final Lock lock = new ReentrantLock(true);
-    private static String tableName = "";
-    private static boolean isBusy;
+    private static final AtomicReference<String> tableName = new AtomicReference<String>("");
+    private static final AtomicBoolean isBusy = new AtomicBoolean();
 
     public static void collectData(DBAndSchemaSynchronizer synchronizer)
     {
         try
         {
-            isBusy = true;
+            isBusy.set(true);
 
             synchronizer.connect();
             Collection<TrendPathAndDBTableName> sources = synchronizer.getSourceMappings().getSourcesAndTableNames();
 
             for (TrendPathAndDBTableName source : sources)
-                collectDataForSource(source.getTrendSourceReferencePath(), synchronizer);
-        }
-        catch (SourceMappingNotFoundException e)
-        {
-            ErrorHandler.handleError("Data Collection Failed!", e, AlarmHandler.TrendExportAlarm.SourceMappingNotFound);
-        }
-        catch (SystemException e)
-        {
-            ErrorHandler.handleError("DataCollector Collection Failed -> SystemException!", e, AlarmHandler.TrendExportAlarm.SystemFailure);
-        }
-        catch (ActionExecutionException e)
-        {
-            ErrorHandler.handleError("Data Collection Failed!", e, AlarmHandler.TrendExportAlarm.CollectionFailure);
+            {
+                try
+                {
+                    collectDataForSource(source.getTrendSourceReferencePath(), synchronizer);
+                }
+                catch (SourceMappingNotFoundException e)
+                {
+                    ErrorHandler.handleError("Source mapping missing", e, AlarmHandler.TrendExportAlarm.CollectionFailure);
+                }
+                catch (SystemException e)
+                {
+                    ErrorHandler.handleError("Unexpected system exception", e, AlarmHandler.TrendExportAlarm.CollectionFailure);
+                }
+//                catch (ActionExecutionException e)
+//                {
+//                    todo
+//                    ErrorHandler.handleError("Data Collection Failed!", e, AlarmHandler.TrendExportAlarm.CollectionFailure);
+//                }
+                catch (TrendException e)
+                {
+                    ErrorHandler.handleError("Trend Source exception", e, AlarmHandler.TrendExportAlarm.CollectionFailure);
+                }
+                catch (TableNotInDatabaseException e)
+                {
+                    ErrorHandler.handleError("Table not found in collection database", e, AlarmHandler.TrendExportAlarm.DatabaseWriteFailure);
+                }
+                catch (DatabaseException e)
+                {
+                    ErrorHandler.handleError("Database error exception", e, AlarmHandler.TrendExportAlarm.DatabaseWriteFailure);
+                }
+            }
         }
         catch (SynchronizerConnectionException e)
         {
-            ErrorHandler.handleError("Unable to connect to the data synchronizer", e, AlarmHandler.TrendExportAlarm.CollectionDatabaseCommError);
+            ErrorHandler.handleError("Cannot connect to collection database", e, AlarmHandler.TrendExportAlarm.DatabaseWriteFailure);
         }
         finally
         {
             synchronizer.disconnect();
-            isBusy = false;
+            isBusy.set(false);
         }
     }
 
     public static void collectDataForSource(String source, DBAndSchemaSynchronizer synchronizer)
-            throws SourceMappingNotFoundException, SystemException, ActionExecutionException
+            throws SourceMappingNotFoundException, TableNotInDatabaseException, TrendException, DatabaseException, SystemException
     {
-
-        lock.lock(); isBusy = true;
-        tableName = synchronizer.getSourceMappings().getTableNameFromSource(source);
+        lock.lock(); isBusy.set(true);
+        tableName.set(synchronizer.getSourceMappings().getTableNameFromSource(source));
 
         copyLatestTrendHistory(source, synchronizer);
 
-        lock.unlock(); isBusy = false;
+        lock.unlock(); isBusy.set(false);
     }
 
     public static String getTableName()
     {
-        return tableName;
+        return tableName.get();
     }
 
     public static boolean isCollectorBusy()
     {
-        return isBusy;
+        return isBusy.get();
     }
 
     private static void copyLatestTrendHistory(final String nodeLookupString, final DBAndSchemaSynchronizer synchronizer)
-            throws SystemException, ActionExecutionException
+            throws DatabaseException, TrendException, TableNotInDatabaseException, SourceMappingNotFoundException, SystemException
     {
-        SystemConnection connection = DirectAccess.getDirectAccess().getRootSystemConnection();
-        connection.runReadAction(FieldAccessFactory.newDisabledFieldAccess(), new ReadAction()
+        // throw - Unresolvable -> catch above to continue after
+
+        try
         {
-            @Override
-            public void execute(@NotNull SystemAccess systemAccess)
-                    throws NoSuchAspectException, SourceMappingNotFoundException, DatabaseException, UnresolvableException, TableNotInDatabaseException, TrendException
+            SystemConnection connection = DirectAccess.getDirectAccess().getRootSystemConnection();
+            connection.runReadAction(FieldAccessFactory.newDisabledFieldAccess(), new ReadAction()
             {
-                Location startLoc = systemAccess.resolveGQLPath(nodeLookupString);
-                TrendSource trendSource = startLoc.getAspect(TrendSource.class);
+                @Override
+                public void execute(@NotNull SystemAccess systemAccess)
+                        throws DatabaseException, NoSuchAspectException, TrendException, TableNotInDatabaseException, UnresolvableException, SourceMappingNotFoundException
+                {
+                    Location startLoc = systemAccess.resolveGQLPath(nodeLookupString);
+                    TrendSource trendSource = startLoc.getAspect(TrendSource.class);
 
-                // start using the retriever
-                DataStoreRetriever retriever = synchronizer.getRetrieverForTrendSource(nodeLookupString);
-                Date startDate = retriever.getLastRecordedDate();
-                int numberOfSamplesToSkip = retriever.getNumberOfSamplesToSkip();
-                TrendData trendData = trendSource.getTrendData(TrendRangeFactory.byDateRange(startDate, new Date()));
+                    // start using the retriever
+                    DataStoreRetriever retriever = synchronizer.getRetrieverForTrendSource(nodeLookupString);
+                    Date startDate = retriever.getLastRecordedDate();
+                    int numberOfSamplesToSkip = retriever.getNumberOfSamplesToSkip();
+                    TrendData trendData = trendSource.getTrendData(TrendRangeFactory.byDateRange(startDate, new Date()));
 
-                synchronizer.insertTrendSamples(nodeLookupString, trendData, numberOfSamplesToSkip);
-            }
-        });
+                    synchronizer.insertTrendSamples(nodeLookupString, trendData, numberOfSamplesToSkip);
+                }
+            });
+        }
+        catch (ActionExecutionException e)
+        {
+            if (e.getCause() instanceof DatabaseException)
+                throw new DatabaseException("Database Error", e);
+            else if (e.getCause() instanceof NoSuchAspectException)
+                throw new DatabaseException("Database Error", e);
+            else if (e.getCause() instanceof TrendException)
+                throw new TrendException("WebCTRL Database Error", e);
+            else if (e.getCause() instanceof TableNotInDatabaseException)
+                throw new TableNotInDatabaseException("Database Error", e);
+            else if (e.getCause() instanceof SourceMappingNotFoundException)
+                throw new SourceMappingNotFoundException("Source Mapping not found");
+        }
     }
 }
