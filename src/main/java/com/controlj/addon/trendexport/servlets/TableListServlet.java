@@ -84,22 +84,29 @@ public class TableListServlet extends HttpServlet
 
         for (TrendPathAndDBTableName trendPathAndDBTableName : stuffs)
         {
-            JSONObject object = new JSONObject();
+            try
+            {
+                JSONObject object = new JSONObject();
 
-            String referencePath = trendPathAndDBTableName.getTrendSourceReferencePath();
-            object.put("sourceLookupString", TrendSourceTypeAndPathResolver.getPersistentLookupString(referencePath));
-            object.put("sourceReferencePath", referencePath);
-            object.put("sourceDisplayName", trendPathAndDBTableName.getDisplayName());
-            object.put("displayPath", trendPathAndDBTableName.getTrendSourceDisplayPath());
-            object.put("tableName", trendPathAndDBTableName.getDbTableName());
+                String referencePath = trendPathAndDBTableName.getTrendSourceReferencePath();
+                object.put("sourceLookupString", TrendSourceTypeAndPathResolver.getPersistentLookupString(referencePath));
+                object.put("sourceReferencePath", referencePath);
+                object.put("sourceDisplayName", trendPathAndDBTableName.getDisplayName());
+                object.put("displayPath", trendPathAndDBTableName.getTrendSourceDisplayPath());
+                object.put("tableName", trendPathAndDBTableName.getDbTableName());
 //            object.put("tableEntries", trendPathAndDBTableName.)
 
-            if ( trendPathAndDBTableName.getIsEnabled())
-                object.put("isEnabled", "Enabled");
-            else
-                object.put("isEnabled", "Disabled");
+                if (trendPathAndDBTableName.getIsEnabled())
+                    object.put("isEnabled", "Enabled");
+                else
+                    object.put("isEnabled", "Disabled");
 
-            jsonArray.put(object);
+                jsonArray.put(object);
+            }
+            catch (com.controlj.green.addonsupport.access.UnresolvableException e)
+            {
+                ErrorHandler.handleError(e.getMessage(), e);
+            }
         }
 
         JSONObject responseObject = new JSONObject();
