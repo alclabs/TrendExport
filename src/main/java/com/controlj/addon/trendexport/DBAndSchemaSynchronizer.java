@@ -27,7 +27,6 @@ package com.controlj.addon.trendexport;
 
 import com.controlj.addon.trendexport.config.SourceMappings;
 import com.controlj.addon.trendexport.exceptions.SourceMappingNotFoundException;
-import com.controlj.addon.trendexport.exceptions.SynchronizerConnectionException;
 import com.controlj.addon.trendexport.exceptions.TableNotInDatabaseException;
 import com.controlj.addon.trendexport.helper.TrendPathAndDBTableName;
 import com.controlj.addon.trendexport.helper.TrendSourceTypeAndPathResolver;
@@ -184,7 +183,7 @@ public class DBAndSchemaSynchronizer
         sourceMappings = new SourceMappings();
     }
 
-    public synchronized void connect() throws SynchronizerConnectionException
+    public synchronized void connect() throws DatabaseException
     {
         connections++;
         if (isConnected)
@@ -214,13 +213,9 @@ public class DBAndSchemaSynchronizer
             database.upgradeSchema(sourceMappings, true);
             isConnected = true;
         }
-        catch (DatabaseException e)
-        {
-            throw new SynchronizerConnectionException("Unable to connect to Synchronizer", e);
-        }
         catch (DatabaseVersionMismatchException e)
         {
-            throw new SynchronizerConnectionException("Unable to upgrade the database", e);
+            throw new DatabaseException("Unable to upgrade the database", e);
         }
     }
 

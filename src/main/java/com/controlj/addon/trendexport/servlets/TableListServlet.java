@@ -3,7 +3,6 @@ package com.controlj.addon.trendexport.servlets;
 import com.controlj.addon.trendexport.DBAndSchemaSynchronizer;
 import com.controlj.addon.trendexport.config.ConfigManager;
 import com.controlj.addon.trendexport.config.ConfigManagerLoader;
-import com.controlj.addon.trendexport.exceptions.SynchronizerConnectionException;
 import com.controlj.addon.trendexport.helper.TrendPathAndDBTableName;
 import com.controlj.addon.trendexport.helper.TrendSourceTypeAndPathResolver;
 import com.controlj.addon.trendexport.util.ErrorHandler;

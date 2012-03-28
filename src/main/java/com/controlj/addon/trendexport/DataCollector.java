@@ -23,7 +23,6 @@
 package com.controlj.addon.trendexport;
 
 import com.controlj.addon.trendexport.exceptions.SourceMappingNotFoundException;
-import com.controlj.addon.trendexport.exceptions.SynchronizerConnectionException;
 import com.controlj.addon.trendexport.exceptions.TableNotInDatabaseException;
 import com.controlj.addon.trendexport.helper.TrendPathAndDBTableName;
 import com.controlj.addon.trendexport.util.AlarmHandler;
@@ -85,7 +84,7 @@ public class DataCollector
                 }
             }
         }
-        catch (SynchronizerConnectionException e)
+        catch (DatabaseException e)
         {
             ErrorHandler.handleError("Cannot connect to collection database", e, AlarmHandler.TrendExportAlarm.DatabaseWriteFailure);
         }
@@ -131,6 +130,8 @@ public class DataCollector
                 {
                     Location startLoc = systemAccess.resolveGQLPath(nodeLookupString);
                     TrendSource trendSource = startLoc.getAspect(TrendSource.class);
+                    if (! trendSource.isHistorianEnabled())
+                        ErrorHandler.handleError("Trend Historian Disabled", new Exception(), AlarmHandler.TrendExportAlarm.HistorianDisabled);
 
                     // start using the retriever
                     DataStoreRetriever retriever = synchronizer.getRetrieverForTrendSource(nodeLookupString);

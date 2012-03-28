@@ -48,7 +48,17 @@ public class AddRemoveServlet extends HttpServlet
         try
         {
             synchronizer = initializeSynchronizer();
-            synchronizer.connect();
+
+            try
+            {
+                synchronizer.connect();
+            }
+            catch (DatabaseException e)
+            {
+                ErrorHandler.handleError("Database connection error", e, AlarmHandler.TrendExportAlarm.DatabaseWriteFailure);
+                resp.sendError(500, "Error processing request");
+                return;
+            }
 
             // perform action
             if (actionToAttempt.contains("addSource"))
@@ -98,7 +108,6 @@ public class AddRemoveServlet extends HttpServlet
             ErrorHandler.handleError("AddOrRemoveSerlvet error", e);
             resp.sendError(500, "Error processing request");
         }
-
         finally
         {
             if (synchronizer != null)
