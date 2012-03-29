@@ -187,12 +187,14 @@ public class TreeDataServlet extends HttpServlet
     {
         try
         {
-            access.find(location, TrendSource.class, new AspectAcceptor<Aspect>()
+            access.find(location, TrendSource.class, new AspectAcceptor<TrendSource>()
             {
                 @Override
-                public boolean accept(@NotNull Aspect aspect)
+                public boolean accept(@NotNull TrendSource aspect)
                 {
-                    throw new RuntimeException();
+                   if (aspect.isEnabled() && aspect.isHistorianEnabled())
+                      throw new RuntimeException();
+                   return false;
                 }
             });
 
