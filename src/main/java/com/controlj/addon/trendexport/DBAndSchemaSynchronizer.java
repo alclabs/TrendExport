@@ -129,8 +129,17 @@ public class DBAndSchemaSynchronizer
     public synchronized void addSourceAndTableName(String referencePath, String displayName, String displayPath, String tableName, TrendSource.Type type)
             throws DatabaseException
     {
+        if (referencePath.length() > 2000)
+            throw new DatabaseException("Reference path exceeds 2000 characters");
+
         if (sourceMappings.containsSource(referencePath) && sourceMappings.getTableNames().contains(tableName))
             return; // todo: check that tableName matches
+
+        if (displayName.length() > 100)
+            displayName = displayName.substring(0, 100);
+
+        if (displayPath.length() > 2000)
+            displayPath = displayPath.substring(0, 2000);
 
         sourceMappings.addSourceAndName(new TrendPathAndDBTableName(referencePath, displayName, displayPath, tableName, type, true));
         DynamicDatabase newDatabase = database.upgradeSchema(sourceMappings, true);

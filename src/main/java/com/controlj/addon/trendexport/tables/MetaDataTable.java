@@ -22,9 +22,9 @@ public class MetaDataTable
         this.tableSchema = db.addTable("Metadata");
 
         id = tableSchema.addIntColumn("ID");
-        referencePath = tableSchema.addStringColumn("ReferencePath", 200);
-        displayName = tableSchema.addStringColumn("DisplayName", 200);
-        displayPath = tableSchema.addStringColumn("DisplayPath", 200);
+        referencePath = tableSchema.addStringColumn("ReferencePath", 2000);
+        displayName = tableSchema.addStringColumn("DisplayName", 100);
+        displayPath = tableSchema.addStringColumn("DisplayPath", 2000);
         tableName = tableSchema.addStringColumn("TableName", 18);
         sourceType = tableSchema.addShortColumn("SourceType");
         isTrendEnabled = tableSchema.addBoolColumn("IsEnabled");
