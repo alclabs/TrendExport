@@ -69,6 +69,7 @@ public class ScheduledConfigurationLoader
         int hours, minutes;
         Date currentTime = new Date();
 
+        GregorianCalendar calendar = new GregorianCalendar();
         if (manager.getConfiguration().getCollectionMethod() == Configuration.CollectionMethod.Interval)
         {
             Calendar c = Calendar.getInstance();
@@ -88,13 +89,14 @@ public class ScheduledConfigurationLoader
             hours = (int) (rawTimeMinutes / 60);
 
             if (multiplier == 1)
-                hours += 12;
+                calendar.set(Calendar.AM_PM, Calendar.PM);
+            else
+                calendar.set(Calendar.AM_PM, Calendar.AM);
 
             minutes = (int) (rawTimeMinutes % 60);
         }
 
         // Time of collection
-        GregorianCalendar calendar = new GregorianCalendar();
         calendar.set(Calendar.HOUR_OF_DAY, hours);
         calendar.set(Calendar.MINUTE, minutes);
         calendar.set(Calendar.SECOND, 0);
