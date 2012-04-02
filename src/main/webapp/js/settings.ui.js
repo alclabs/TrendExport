@@ -78,18 +78,33 @@ $(function()
                     $('#collTime').prop('checked', true);
                     enableTimeSettings(true);
 
-                    var rawTime = data['collectionValue'] / 60000;
-                    if (rawTime < 0)
-                    {
-                        $('#am').prop('checked', true);
-                        rawTime *= -1;
-                    }
-                    else
-                        $('#pm').prop('checked', true);
+                    var rawTimeString = data['collectionValue'];
 
-                    var hours = rawTime / 60;
-                    var minutes = rawTime % 60;
-                    var minute_str = minutes < 10 ? "0" + minutes : minutes;
+                    var timeValues = rawTimeString.split(':');
+                    var hours = timeValues[0];
+                    var minute_str = timeValues[1];
+
+                    // format minutes a bit better
+                    if (parseInt(minute_str) < 10)
+                        minute_str = '0' + minute_str;
+
+                    if (timeValues[2] == 'PM')
+                        $('#pm').prop('checked', true);
+                    else
+                        $('#am').prop('checked', true);
+
+//                    var rawTime = data['collectionValue'] / 60000;
+//                    if (rawTime < 0)
+//                    {
+//                        $('#am').prop('checked', true);
+//                        rawTime *= -1;
+//                    }
+//                    else
+//                        $('#pm').prop('checked', true);
+//
+//                    var hours = rawTime / 60;
+//                    var minutes = rawTime % 60;
+//                    var minute_str = minutes < 10 ? "0" + minutes : minutes;
 
                     $('#collTime_Hours').val(Math.floor(hours));
                     $('#collTime_Minutes').val(minute_str);

@@ -227,7 +227,7 @@ public class SettingsPageServlet extends HttpServlet
         responseObject.put("pass", manager.getCurrentConnectionInfo().getPasswd());
 
         responseObject.put("collectionType", manager.getConfiguration().getCollectionMethod());
-        responseObject.put("collectionValue", manager.getConfiguration().getCollectionValue() / (60*60*1000));
+        responseObject.put("collectionValue", manager.getConfiguration().getCollectionString());
 
         String alarmPath = manager.getConfiguration().getAlarmControlProgramPath();
         responseObject.put("alarmPath", alarmPath);
