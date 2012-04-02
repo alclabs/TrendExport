@@ -64,17 +64,17 @@ public class TrendSourceTypeAndPathResolver
     {
         try
         {
-        SystemConnection connection = DirectAccess.getDirectAccess().getRootSystemConnection();
-        return connection.runReadAction(FieldAccessFactory.newDisabledFieldAccess(), new ReadActionResult<String>()
-        {
-            @Override
-            public String execute(@NotNull SystemAccess access) throws UnresolvableException
+            SystemConnection connection = DirectAccess.getDirectAccess().getRootSystemConnection();
+            return connection.runReadAction(FieldAccessFactory.newDisabledFieldAccess(), new ReadActionResult<String>()
             {
+                @Override
+                public String execute(@NotNull SystemAccess access) throws UnresolvableException
+                {
 //                    Location startLoc = access.getTree(SystemTree.Geographic).resolve(nodeLookupString);
-                Location location = access.resolveGQLPath(referencePath);
-                return location.getPersistentLookupString(true);
-            }
-        });
+                    Location location = access.resolveGQLPath(referencePath);
+                    return location.getPersistentLookupString(true);
+                }
+            });
         }
         catch (ActionExecutionException e)
         {

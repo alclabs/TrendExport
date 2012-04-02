@@ -60,29 +60,11 @@ public class SourceMappings
         }
     }
 
-    public Collection<String> getSources()
-    {
-        Collection<String> names = new HashSet<String>(sourcesAndTableNames.size());
-        for (TrendPathAndDBTableName t : sourcesAndTableNames)
-            names.add(t.getTrendSourceReferencePath());
-
-        return names;
-    }
-
     public Collection<String> getTableNames()
     {
         Collection<String> names = new HashSet<String>(sourcesAndTableNames.size());
         for (TrendPathAndDBTableName t : sourcesAndTableNames)
             names.add(t.getDbTableName());
-
-        return names;
-    }
-
-    public Collection<String> getDisplayNames()
-    {
-        Collection<String> names = new HashSet<String>(sourcesAndTableNames.size());
-        for (TrendPathAndDBTableName t : sourcesAndTableNames)
-            names.add(t.getDisplayName());
 
         return names;
     }
@@ -135,11 +117,6 @@ public class SourceMappings
         }
 
         throw new SourceMappingNotFoundException("SourceMapping - displayNameFromTableName(" + tableName + ") not found in sourcemappings");
-    }
-
-    public void setIsEnabled(String source, boolean isEnabled) throws SourceMappingNotFoundException
-    {
-        getTableNameObjectFromRefPath(source).setIsEnabled(isEnabled);
     }
 
     public boolean getIsEnabled(String tableName)
