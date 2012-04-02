@@ -11,21 +11,24 @@ public class Configuration
     }
 
     private long collectionValue;
+
+    private String collectionString;
     private CollectionMethod collectionMethod;
-    @NotNull private String alarmControlProgramPath = "";
+    @NotNull
+    private String alarmControlProgramPath = "";
     private ErrorHandler errorHandler;
 
-    public Configuration(long collVal, CollectionMethod method)
+    public Configuration(String collVal, CollectionMethod method)
     {
-        this.collectionValue = collVal;
+        this.collectionString = collVal;
         this.collectionMethod = method;
 
         this.errorHandler = new ErrorHandler();
     }
 
-    public Configuration(long collVal, CollectionMethod method, @NotNull String alarmPath)
+    public Configuration(String collVal, CollectionMethod method, @NotNull String alarmPath)
     {
-        this.collectionValue = collVal;
+        this.collectionString = collVal;
         this.collectionMethod = method;
         this.alarmControlProgramPath = alarmPath;
 
@@ -39,10 +42,27 @@ public class Configuration
 
     public long getCollectionValue()
     {
-        return this.collectionValue;
+        if (!this.collectionString.contains(":"))
+            return Long.parseLong(this.collectionString) * 60 * 60 * 1000;
+        else
+        {
+            long time;
+            int start = collectionString.indexOf(':');
+            int end = collectionString.lastIndexOf(':');
+            int hours = Integer.parseInt(collectionString.substring(0, start));
+            int minutes = Integer.parseInt(collectionString.substring(start + 1, end));
+
+            // hours -> ms = 60 * 60 * 1000
+            time = hours * 3600000 + (minutes * 60000);
+            if (collectionString.contains("AM"))
+                time *= -1;
+
+            return time;
+        }
     }
 
-    @NotNull public String getAlarmControlProgramPath()
+    @NotNull
+    public String getAlarmControlProgramPath()
     {
         return alarmControlProgramPath;
     }
@@ -51,4 +71,10 @@ public class Configuration
     {
         return errorHandler;
     }
+
+    public String getCollectionString()
+    {
+        return collectionString;
+    }
+
 }

@@ -27,7 +27,7 @@ public class ConfigManager
         currentConnectionInfo.setPasswd(password);
         currentConnectionInfo.setInstance(instance);
 
-        configuration = new Configuration(12L, Configuration.CollectionMethod.Interval);
+        configuration = new Configuration("12", Configuration.CollectionMethod.Interval);
     }
 
     public ConfigManager(String location, int port, String user, String passwd, DatabaseType type, String instance, Configuration config)
@@ -58,7 +58,8 @@ public class ConfigManager
                     DataStore store = systemAccess.getSystemDataStore("TrendExportConfig");
                     BufferedReader reader = store.getReader();
 
-                    long timeInterval = Long.valueOf(reader.readLine());
+//                    long timeInterval = Long.valueOf(reader.readLine());
+                    String timeInterval = reader.readLine();
                     String collMethod = reader.readLine();
 
                     Configuration.CollectionMethod method;
@@ -79,7 +80,7 @@ public class ConfigManager
         }
         catch (IOException e)
         {
-            configuration = new Configuration(12L, Configuration.CollectionMethod.Interval);
+            configuration = new Configuration("12", Configuration.CollectionMethod.Interval);
         }
     }
 
@@ -98,7 +99,7 @@ public class ConfigManager
                     DataStore store = access.getSystemDataStore("TrendExportConfig");
                     PrintWriter writer = store.getWriter();
 
-                    writer.println(ConfigManager.this.configuration.getCollectionValue());
+                    writer.println(ConfigManager.this.configuration.getCollectionString());
                     writer.println(ConfigManager.this.configuration.getCollectionMethod());
                     writer.println(ConfigManager.this.configuration.getAlarmControlProgramPath());
 

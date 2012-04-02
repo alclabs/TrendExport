@@ -25,7 +25,7 @@ $(function()
     var tableOfAllSources;
 
     getCollectorStatus();
-    setInterval("getCollectorStatus()", 30000);
+    setInterval("getCollectorStatus()", 15000);
 
 
     var collectDataNowBtn = $('#collectDataNow').button().bind("click", function()

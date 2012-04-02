@@ -27,7 +27,6 @@ import com.controlj.addon.trendexport.config.Configuration;
 
 import java.util.Calendar;
 import java.util.Date;
-import java.util.GregorianCalendar;
 
 public class ScheduledConfigurationLoader
 {
@@ -52,9 +51,9 @@ public class ScheduledConfigurationLoader
     {
         long number = 60 * 60 * 1000;
         if (manager.getConfiguration().getCollectionMethod() == Configuration.CollectionMethod.Interval)
-            return manager.getConfiguration().getCollectionValue() * number;
+            return manager.getConfiguration().getCollectionValue();
         else
-            return 24 * number; // (24 hrs -> ms)
+            return 24 * 60 * 60 * 1000; // (24 hrs -> ms)
     }
 
     private long calculateDateDelay()
@@ -67,40 +66,43 @@ public class ScheduledConfigurationLoader
     {
         long rawValue = manager.getConfiguration().getCollectionValue();
         int hours, minutes;
+        boolean isAfternoon = false;
         Date currentTime = new Date();
 
-        GregorianCalendar calendar = new GregorianCalendar();
+        Calendar calendar = Calendar.getInstance();
         if (manager.getConfiguration().getCollectionMethod() == Configuration.CollectionMethod.Interval)
         {
             Calendar c = Calendar.getInstance();
-            hours = c.get(Calendar.HOUR_OF_DAY);
-            minutes = c.get(Calendar.MINUTE);
+            hours = c.get(Calendar.HOUR);
+            if (c.get(Calendar.HOUR_OF_DAY) > 12)
+                isAfternoon = true;
+            minutes = c.get(Calendar.MINUTE) + 1;
         }
         else
         {
             long rawTimeMinutes = rawValue / 60000; // convert to minutes
-            int multiplier = 1;
+
             if (rawTimeMinutes < 0)
             {
-                multiplier = -1;
-                rawTimeMinutes *= multiplier;
+                rawTimeMinutes *= -1;
+                isAfternoon = false;
             }
+            else
+                isAfternoon = true;
 
             hours = (int) (rawTimeMinutes / 60);
-
-            if (multiplier == 1)
-                calendar.set(Calendar.AM_PM, Calendar.PM);
-            else
-                calendar.set(Calendar.AM_PM, Calendar.AM);
-
             minutes = (int) (rawTimeMinutes % 60);
         }
 
         // Time of collection
-        calendar.set(Calendar.HOUR_OF_DAY, hours);
+        calendar.set(Calendar.HOUR, hours);
         calendar.set(Calendar.MINUTE, minutes);
         calendar.set(Calendar.SECOND, 0);
         calendar.set(Calendar.MILLISECOND, 0);
+        if (isAfternoon)
+            calendar.set(Calendar.AM_PM, Calendar.PM);
+        else
+            calendar.set(Calendar.AM_PM, Calendar.AM);
 
 
         // calculate initial delay
@@ -108,7 +110,7 @@ public class ScheduledConfigurationLoader
         {
             // the current time is after the requested collection time so we need to increment the calendar by one day and wait
             if (manager.getConfiguration().getCollectionMethod() == Configuration.CollectionMethod.Interval)
-                calendar.add(Calendar.HOUR_OF_DAY, (int)rawValue);
+                calendar.add(Calendar.HOUR_OF_DAY, (int) rawValue);
             else
                 calendar.add(Calendar.DAY_OF_MONTH, 1);
         }

@@ -50,8 +50,6 @@ public class SettingsPageServlet extends HttpServlet
                 {
                     // test alarm if there is one
                     ConfigManager testManager = createConfigManagerFromRequest(req);
-//                    if (!testManager.getConfiguration().getAlarmControlProgramPath().isEmpty())
-//                        this.testAlarmProgram(testManager.getConfiguration().getAlarmControlProgramPath(), responseObject);
 
                     saveConfiguration(testManager);
                     responseObject.put("result", "Settings Saved");
@@ -185,7 +183,7 @@ public class SettingsPageServlet extends HttpServlet
         }
         else
         {
-            time = Long.parseLong(value);
+//            time = Long.parseLong(value);
 //            if (time < 1 || time > 1440)
 //                throw new IllegalArgumentException("Time must be within 1 and 1440 hours");
         }
@@ -198,9 +196,9 @@ public class SettingsPageServlet extends HttpServlet
 
         Configuration configuration;
         if (!alarmPath.isEmpty())
-            configuration = new Configuration(time, collectionMethod, alarmPath);
+            configuration = new Configuration(value, collectionMethod, alarmPath);
         else
-            configuration = new Configuration(time, collectionMethod);
+            configuration = new Configuration(value, collectionMethod);
 
         return new ConfigManager(host, port, user, pass, databaseType, instance, configuration);
     }
@@ -229,7 +227,7 @@ public class SettingsPageServlet extends HttpServlet
         responseObject.put("pass", manager.getCurrentConnectionInfo().getPasswd());
 
         responseObject.put("collectionType", manager.getConfiguration().getCollectionMethod());
-        responseObject.put("collectionValue", manager.getConfiguration().getCollectionValue());
+        responseObject.put("collectionValue", manager.getConfiguration().getCollectionValue() / (60*60*1000));
 
         String alarmPath = manager.getConfiguration().getAlarmControlProgramPath();
         responseObject.put("alarmPath", alarmPath);
