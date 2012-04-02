@@ -119,9 +119,9 @@ function getActiveNodeKey()
 
 function updateUI(dtnode, typeOfRequest)
 {
-    $('#source_tableName_input').prop('disabled', dtnode.data.isFolder === true);
+    $('#source_tableName_input').prop('disabled', dtnode.data.isSource === false);
 
-    if (dtnode.data.isFolder === true)
+    if (dtnode.data.isSource === false)
     {
         $('#source_tableName_input').val("N/A");
 

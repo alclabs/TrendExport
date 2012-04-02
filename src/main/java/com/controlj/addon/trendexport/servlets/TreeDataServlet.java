@@ -85,12 +85,12 @@ public class TreeDataServlet extends HttpServlet
 
                         if (key == null)
                         {
-                            Collection<Location> treeChildren = getTreeFromNodeKey(geoTree, key, access);
+                            Collection<Location> treeChildren = getTreeFromNodeKey(geoTree, key);
                             jsonArray = toJSON(treeChildren, synchronizer);
                         }
                         else if (req.getParameter("mode").contains("lazyTree") || req.getParameter("mode").contains("data"))
                         {
-                            Collection<Location> treeChildren = getTreeFromNodeKey(geoTree, key, access);
+                            Collection<Location> treeChildren = getTreeFromNodeKey(geoTree, key);
                             jsonArray = toJSON(treeChildren, synchronizer);
                         }
                     }
@@ -130,7 +130,7 @@ public class TreeDataServlet extends HttpServlet
         }
         catch (SystemException e)
         {
-            // An error occured. This may be temporary. Please refresh the page
+            // An error occurred. This may be temporary. Please refresh the page
             resp.sendError(500, "A System error occurred. Ensure that the system is running before continuing.");
             ErrorHandler.handleError("TreeData System Error - ", e);
         }
@@ -146,14 +146,14 @@ public class TreeDataServlet extends HttpServlet
         }
     }
 
-    private Collection<Location> getTreeFromNodeKey(Tree tree, String lookupString, SystemAccess access)
+    private Collection<Location> getTreeFromNodeKey(Tree tree, String lookupString)
     {
         if (lookupString == null)
             return getRoot(tree);
 
         try
         {
-            return getChildren(tree.resolve(lookupString), access);
+            return getChildren(tree.resolve(lookupString));
         }
         catch (UnresolvableException e)
         {
@@ -166,13 +166,13 @@ public class TreeDataServlet extends HttpServlet
         return Collections.singleton(tree.getRoot());
     }
 
-    private Collection<Location> getChildren(Location location, SystemAccess access)
+    private Collection<Location> getChildren(Location location)
     {
         List<Location> treeChildren = new ArrayList<Location>();
         Collection<Location> locChildren = location.getChildren(LocationSort.PRESENTATION);
         for (Location child : locChildren)
         {
-            if (quickFind(child, access))
+            if (quickFind(child))
                 treeChildren.add(child);
 
 //            API 1.2.x (WebCTRL 5.5+) optimization - not supported in API v1.1.+ or WebCTRL 5.2
@@ -183,11 +183,11 @@ public class TreeDataServlet extends HttpServlet
         return treeChildren;
     }
 
-    private boolean quickFind(Location location, SystemAccess access)
+    private boolean quickFind(Location location)
     {
         try
         {
-            access.find(location, TrendSource.class, new AspectAcceptor<TrendSource>()
+            location.find(TrendSource.class, new AspectAcceptor<TrendSource>()
             {
                 @Override
                 public boolean accept(@NotNull TrendSource aspect)
@@ -204,6 +204,29 @@ public class TreeDataServlet extends HttpServlet
         {
             return true;
         }
+    }
+
+    private boolean hasEnabledTrendSource(Location location)
+    {
+        try
+        {
+            TrendSource aspect = location.getAspect(TrendSource.class);
+            return aspect.isEnabled() && aspect.isHistorianEnabled();
+        }
+        catch (NoSuchAspectException e)
+        {
+            return false;
+        }
+    }
+
+    private boolean childHasEnabledTrendSource(Location location)
+    {
+        for (Location child : location.getChildren())
+        {
+            if (quickFind(child))
+                return true;
+        }
+        return false;
     }
 
     private String getIconForType(LocationType type)
@@ -229,18 +252,19 @@ public class TreeDataServlet extends HttpServlet
                 next.put("title", displayName);
                 next.put("key", lookup);
 
-                if (location.getChildren().size() > 0)
+                if (hasEnabledTrendSource(location))
                 {
-                    next.put("hideCheckbox", true);
-                    next.put("isLazy", true);
-                    next.put("isFolder", true);
-                    next.put("url", "N/A");
+                    boolean childTrendChildren = childHasEnabledTrendSource(location);
+                    next.put("isLazy", childTrendChildren);
+                    next.put("isFolder", childTrendChildren);
+                    next.put("isSource", true);
+                    next.put("url", getTableName(location, displayName, synchronizer));
                 }
                 else
                 {
-                    next.put("hideCheckbox", false);
-                    next.put("isFolder", false);
-                    next.put("url", getTableName(location, displayName, synchronizer));
+                    next.put("isLazy", true);
+                    next.put("isFolder", true);
+                    next.put("isSource", false);
                 }
 
                 // Convert persistent lookup to reference name here because the synchronizer only maintains a list of
@@ -260,7 +284,7 @@ public class TreeDataServlet extends HttpServlet
                 next.put("icon", getIconForType(location.getType()));
                 arrayData.put(next);
             }
-            catch (SourceMappingNotFoundException e)
+            catch (SourceMappingNotFoundException ignored)
             {
                 // ignored because we're loading lazy data
             }
