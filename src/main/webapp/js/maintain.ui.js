@@ -68,12 +68,13 @@ $(function()
                 "sRowSelect": "multiple",
                 "fnServerData": function(sSource, aoData, fnCallback)
                 {
-                    $.getJSON(sSource, aoData, function (json)
-                    {
-                        removeSelectedClassFromRows(tableOfAllSources);
-                        updateButtonsBasedOnRowsState(getSelectedRows(tableOfAllSources));
-                        fnCallback(json)
-                    }).error(function(e, jqxhr, settings, exception)
+                    $.getJSON(sSource, aoData,
+                            function (json)
+                            {
+                                removeSelectedClassFromRows(tableOfAllSources);
+                                updateButtonsBasedOnRowsState(getSelectedRows(tableOfAllSources));
+                                fnCallback(json)
+                            }).error(function(e, jqxhr, settings, exception)
                             {
                                 alert("Something went wrong on loading the list of sources: " + settings);
                             });
@@ -164,23 +165,9 @@ function reloadTable()
     $('#maintenanceTable').dataTable().fnReloadAjax();
 }
 
-function getNumberOfSelectedRows(oTableLocal)
-{
-//    "use strict";
-    var aTrs = oTableLocal.fnGetNodes();
-    var count = 0;
-    for (var i = 0; i < aTrs.length; i++)
-    {
-        if ($(aTrs[i]).hasClass('row_selected'))
-            count++;
-    }
-
-    return count;
-}
-
 function removeSelectedClassFromRows(oTableLocal)
 {
-    var aTrs = oTableLocal.fnGetNodes();
+    var aTrs = oTableLocal.fnGetFilteredNodes(oTableLocal.oSettings);
 
     for (var i = 0; i < aTrs.length; i++)
     {
@@ -194,13 +181,16 @@ function removeSelectedClassFromRows(oTableLocal)
 function getSelectedRows(oTableLocal)
 {
     var aReturn = new Array();
-    var aTrs = oTableLocal.fnGetNodes();
+
+    var aDatas = oTableLocal.fnGetFilteredData(oTableLocal.oSettings);
+    var aTrs = oTableLocal.fnGetFilteredNodes(oTableLocal.oSettings);
 
     for (var i = 0; i < aTrs.length; i++)
     {
         if ($(aTrs[i]).hasClass('row_selected'))
-            aReturn.push(oTableLocal.fnGetData(i));
+            aReturn.push(aDatas[i]);
     }
+
     return aReturn;
 }
 

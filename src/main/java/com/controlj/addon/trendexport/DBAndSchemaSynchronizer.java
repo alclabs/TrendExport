@@ -133,7 +133,7 @@ public class DBAndSchemaSynchronizer
             throw new DatabaseException("Reference path exceeds 2000 characters");
 
         if (sourceMappings.containsSource(referencePath) && sourceMappings.getTableNames().contains(tableName))
-            return; // todo: check that tableName matches
+            return;
 
         if (displayName.length() > 100)
             displayName = displayName.substring(0, 100);
@@ -144,6 +144,7 @@ public class DBAndSchemaSynchronizer
         sourceMappings.addSourceAndName(new TrendPathAndDBTableName(referencePath, displayName, displayPath, tableName, type, true));
         DynamicDatabase newDatabase = database.upgradeSchema(sourceMappings, true);
         database.close();
+
         try
         {
             newDatabase.connect(connectionInfo);

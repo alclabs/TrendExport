@@ -40,6 +40,8 @@
     <script type="text/javascript" src="js/jquery.hyjack.select.min.js"></script>
     <script type="text/javascript" src="js/jquery.dataTables.js"></script>
     <script type="text/javascript" src="js/jquery.dataTables.fnReloadAjax.js"></script>
+    <script type="text/javascript" src="js/jquery.dataTables.fnGetFilteredData.js"></script>
+    <script type="text/javascript" src="js/jquery.dataTables.fnGetFilteredNodes.js"></script>
 
     <script type="text/javascript" src="js/addRemove.ui.js"></script>
     <script type="text/javascript" src="js/settings.ui.js"></script>
