@@ -54,7 +54,7 @@ public class DataCollector
             isBusy.set(true);
 
             synchronizer.connect();
-            Collection<TrendPathAndDBTableName> sources = synchronizer.getSourceMappings().getSourcesAndTableNames();
+            Collection<TrendPathAndDBTableName> sources = synchronizer.getEnabledSources().getSourcesAndTableNames();
 
             for (TrendPathAndDBTableName source : sources)
             {

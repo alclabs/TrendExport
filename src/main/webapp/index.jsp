@@ -93,7 +93,7 @@
                     </tbody>
                 </table>
                 <br/> <br/>
-                <button id="addSource">Add Source</button>
+                <button id="addSource">Add Source</button> &nbsp
                 <button id="addRemove_removeSource">Remove Source...</button>
             </div>
         </div>

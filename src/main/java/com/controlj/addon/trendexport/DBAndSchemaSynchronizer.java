@@ -30,7 +30,6 @@ import com.controlj.addon.trendexport.exceptions.SourceMappingNotFoundException;
 import com.controlj.addon.trendexport.exceptions.TableNotInDatabaseException;
 import com.controlj.addon.trendexport.helper.TrendPathAndDBTableName;
 import com.controlj.addon.trendexport.helper.TrendSourceTypeAndPathResolver;
-import com.controlj.addon.trendexport.helper.TrendTableNameGenerator;
 import com.controlj.green.addonsupport.access.*;
 import com.controlj.green.addonsupport.access.aspect.TrendSource;
 import com.controlj.green.addonsupport.access.trend.TrendData;
@@ -81,28 +80,6 @@ public class DBAndSchemaSynchronizer
                 info1.getPort() == info2.getPort() &&
                 (user == null ? info2.getUser() == null : user.equals(info2.getUser())) &&
                 (passwd == null ? info2.getPasswd() == null : passwd.equals(info2.getPasswd()));
-    }
-
-    // auto-generated name - only used in Test -> use addSourceAndTableName below
-    public void addSource(final String referencePath) throws Exception
-    {
-        // get trend source via persistent lookup string and get type within read action
-        SystemConnection connection = DirectAccess.getDirectAccess().getRootSystemConnection();
-        connection.runReadAction(FieldAccessFactory.newDisabledFieldAccess(), new ReadAction()
-        {
-            @Override
-            public void execute(@NotNull SystemAccess systemAccess) throws Exception
-            {
-                Location loc = systemAccess.getTree(SystemTree.Geographic).resolve(referencePath);
-                TrendSource trendSource = loc.getAspect(TrendSource.class);
-
-                String tableName = TrendTableNameGenerator.generateUniqueTableName(loc.getDisplayName(), sourceMappings.getTableNames());
-//                if (tableName != null)
-//                    addSourceAndTableName(referencePath, loc.getDisplayName(), loc.getDisplayPath(), tableName, trendSource.getType());
-            }
-        });
-
-
     }
 
     public DataStoreRetriever getRetrieverForTrendSource(String nodeLookupString) throws SourceMappingNotFoundException, TableNotInDatabaseException
@@ -295,6 +272,20 @@ public class DBAndSchemaSynchronizer
         {
 //            if (table.getIsEnabled()) // we only want enabled source mappings
             mappings.addSourceAndName(table);
+        }
+
+        return mappings;
+    }
+
+    public SourceMappings getEnabledSources() throws DatabaseException
+    {
+        Collection<TrendPathAndDBTableName> listOfAll = this.getAllTrends();
+        SourceMappings mappings = new SourceMappings();
+
+        for (TrendPathAndDBTableName table : listOfAll)
+        {
+            if (table.getIsEnabled()) // we only want enabled source mappings
+                mappings.addSourceAndName(table);
         }
 
         return mappings;
