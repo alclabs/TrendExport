@@ -197,8 +197,8 @@
         </div>
 
         <div class="groupContent">
-            Path to TrendExport Alarm Program:<br/>
-            <input type="text" id="alarmPath" value="" size="30"/>
+            Path to TrendExport Alarm Program: <br/>
+            <input type="text" id="alarmPath" value="" size="30"/> &nbsp&nbsp&nbsp&nbsp
             <button id="testAlarm" class="largeButton">Test Alarm</button>
         </div>
     </div>
