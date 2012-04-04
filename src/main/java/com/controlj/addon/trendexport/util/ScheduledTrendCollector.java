@@ -45,7 +45,8 @@ public class ScheduledTrendCollector implements ServletContextListener
     private static final AtomicReference<ScheduledTrendCollector> collectorRef = new AtomicReference<ScheduledTrendCollector>();
 
     private final ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
-    @Nullable private ScheduledFuture<?> collectionHandler;
+    @Nullable
+    private ScheduledFuture<?> collectionHandler;
     private static Calendar nextCollectionDate;
 
     @Override

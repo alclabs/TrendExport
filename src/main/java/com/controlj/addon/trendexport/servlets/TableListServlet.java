@@ -49,6 +49,7 @@ public class TableListServlet extends HttpServlet
         {
             ErrorHandler.handleError("Unable to load configuration.", e);
             resp.sendError(500, "Unable to load configuration.");
+
         }
         catch (Exception e)
         {

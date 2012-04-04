@@ -111,7 +111,8 @@ function makeRequestToCollector(objectToSend)
                     alert("Table Name is not valid. Please refer to the help section about valid table names.");
                 else
                 {
-                    reloadTable(); // method defined in maintain.ui.js
+                    if (objectToSend['action'] != "collectData")
+                        reloadTable(); // method defined in maintain.ui.js
 
                     // split the nodes back and get each lookup for the tree to update...need to improve the servlets
                     // lesson learned: servlets need to be designed better...

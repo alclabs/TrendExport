@@ -139,7 +139,7 @@ public class SettingsPageServlet extends HttpServlet
     {
         try
         {
-            manager.getCurrentConnectionInfo().tryConnection(5000);
+            manager.getCurrentConnectionInfo().tryConnection(1);
             return "Connection Successful!";
         }
         catch (DatabaseConnectionException e)
@@ -168,18 +168,18 @@ public class SettingsPageServlet extends HttpServlet
         String value = req.getParameter("collValue");
         String alarmPath = req.getParameter("alarmPath");
 
-        long time;
+//        long time;
         if (value.contains(":"))
         {
-            int start = value.indexOf(':');
-            int end = value.lastIndexOf(':');
-            int hours = Integer.parseInt(value.substring(0, start));
-            int minutes = Integer.parseInt(value.substring(start + 1, end));
+//            int start = value.indexOf(':');
+//            int end = value.lastIndexOf(':');
+//            int hours = Integer.parseInt(value.substring(0, start));
+//            int minutes = Integer.parseInt(value.substring(start + 1, end));
 
             // hours -> ms = 60 * 60 * 1000
-            time = hours * 3600000 + (minutes * 60000);
-            if (value.contains("AM"))
-                time *= -1;
+//            time = hours * 3600000 + (minutes * 60000);
+//            if (value.contains("AM"))
+//                time *= -1;
         }
         else
         {

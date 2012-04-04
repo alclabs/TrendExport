@@ -258,11 +258,18 @@ function checkInputs()
 
 function checkCollectionInputs()
 {
-    var intervalHours = parseInt($('#intervalValue').val());
+
 
     if ($("input[@name='collectionSettings']:checked").val() === 'interval')
     {
-        if ($('#intervalValue').val() === "" || intervalHours <= 0)
+        var intervalHours = parseInt($('#intervalValue').val());
+
+        if (isNaN(Number($('#intervalValue').val())))
+        {
+            alert("Interval is not a valid number");
+            return null;
+        }
+        else if ($('#intervalValue').val() === "" || intervalHours <= 0)
         {
             alert("Collection Interval is not valid. Enter a number greater than 0 in the field.");
             $('#intervalValue').val(12);
@@ -302,7 +309,6 @@ function checkCollectionInputs()
             alert("A number is not valid. Please enter integers.");
             return null;
         }
-
     }
 }
 

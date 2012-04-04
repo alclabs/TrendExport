@@ -26,7 +26,9 @@ public class ErrorHandler
 {
     private static AlarmHandler alarmHandler;
 
-    public ErrorHandler() { }
+    public ErrorHandler()
+    {
+    }
 
     public ErrorHandler(String path)
     {
@@ -35,7 +37,14 @@ public class ErrorHandler
 
     public static boolean isAlarmHandlerConfigured()
     {
-        return alarmHandler.isConfigured();
+        try
+        {
+            return alarmHandler.isConfigured();
+        }
+        catch (NullPointerException e)
+        {
+            return false;
+        }
     }
 
     public static void handleError(String message, Throwable throwable)
@@ -43,7 +52,7 @@ public class ErrorHandler
         Logger.println(message, throwable);
     }
 
-    public static void handleError( String message, Throwable throwable, AlarmHandler.TrendExportAlarm alarmType)
+    public static void handleError(String message, Throwable throwable, AlarmHandler.TrendExportAlarm alarmType)
     {
         handleError(message, throwable);
 

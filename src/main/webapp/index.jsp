@@ -102,11 +102,10 @@
     <!--Maintain Tab (place to display everything)-->
     <div id="maintain">
         <div class="groupTitle">
+            <span id="maintainStatusText" class="maintainStatusLabel">Status: Idle</span>
             <button id="collectDataNow">Collect Data Now</button>
             <button id="enableOrDisable_btn">Enable Collection</button>
             <button id="maintain_RemoveSource">Remove Source...</button>
-
-            <span id="maintainStatusText" style="float: right;padding-right: 5%;padding-top: 5px;">Status: Idle</span>
         </div>
 
 

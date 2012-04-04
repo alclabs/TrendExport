@@ -210,7 +210,7 @@ public class DBAndSchemaSynchronizer
                 database.connect(connectionInfo);
                 sourceMappings = readMappingsFromDatabase();
             }
-            catch (DatabaseVersionMismatchException e)
+            catch (DatabaseException e)
             {
                 // either doesn't exist or need to be upgraded
                 create();

@@ -32,6 +32,8 @@ import com.controlj.addon.trendexport.helper.TrendTableNameGenerator;
 import com.controlj.addon.trendexport.util.ErrorHandler;
 import com.controlj.green.addonsupport.InvalidConnectionRequestException;
 import com.controlj.green.addonsupport.access.*;
+import com.controlj.green.addonsupport.access.aspect.AnalogTrendSource;
+import com.controlj.green.addonsupport.access.aspect.DigitalTrendSource;
 import com.controlj.green.addonsupport.access.aspect.TrendSource;
 import com.controlj.green.addonsupport.access.util.LocationSort;
 import com.controlj.green.addonsupport.xdatabase.DatabaseException;
@@ -57,6 +59,16 @@ import static com.controlj.green.addonsupport.access.LocationType.System;
 
 public class TreeDataServlet extends HttpServlet
 {
+    private static final AspectAcceptor<TrendSource> standardAcceptor = new AspectAcceptor<TrendSource>()
+    {
+        @Override
+        public boolean accept(@NotNull TrendSource aspect)
+        {
+            return (aspect.isEnabled() && aspect.isHistorianEnabled() &&
+                    (aspect instanceof AnalogTrendSource || aspect instanceof DigitalTrendSource));
+        }
+    };
+
     @Override
     protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException
     {
@@ -172,7 +184,7 @@ public class TreeDataServlet extends HttpServlet
         Collection<Location> locChildren = location.getChildren(LocationSort.PRESENTATION);
         for (Location child : locChildren)
         {
-            if (quickFind(child))
+            if (quickFind(child, standardAcceptor))
                 treeChildren.add(child);
 
 //            API 1.2.x (WebCTRL 5.5+) optimization - not supported in API v1.1.+ or WebCTRL 5.2
@@ -183,7 +195,7 @@ public class TreeDataServlet extends HttpServlet
         return treeChildren;
     }
 
-    private boolean quickFind(Location location)
+    private boolean quickFind(Location location, final AspectAcceptor<TrendSource> acceptor)
     {
         try
         {
@@ -192,7 +204,7 @@ public class TreeDataServlet extends HttpServlet
                 @Override
                 public boolean accept(@NotNull TrendSource aspect)
                 {
-                   if (aspect.isEnabled() && aspect.isHistorianEnabled())
+                   if (acceptor.accept(aspect))
                       throw new RuntimeException();
                    return false;
                 }
@@ -211,7 +223,7 @@ public class TreeDataServlet extends HttpServlet
         try
         {
             TrendSource aspect = location.getAspect(TrendSource.class);
-            return aspect.isEnabled() && aspect.isHistorianEnabled();
+            return standardAcceptor.accept(aspect);
         }
         catch (NoSuchAspectException e)
         {
@@ -223,7 +235,7 @@ public class TreeDataServlet extends HttpServlet
     {
         for (Location child : location.getChildren())
         {
-            if (quickFind(child))
+            if (quickFind(child, standardAcceptor))
                 return true;
         }
         return false;

@@ -55,6 +55,11 @@ div.addremovebuttons {
 }
 
 /*<!--Maintenance Page-->*/
+span.maintainStatusLabel {
+    float: right;
+    padding-right: 5%;
+    padding-top: 5px;
+}
 input.smallInput {
     width: 30px;
 }
