@@ -24,6 +24,7 @@
 ~ THE SOFTWARE.
 -->
 <head>
+    <meta http-equiv="x-ua-compatible" content="IE=9">
     <title>Trend Export</title>
 
     <link rel="stylesheet" type="text/css" href="css/smoothness/jquery-ui-1.8.9.custom.css"/>
