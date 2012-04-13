@@ -26,6 +26,8 @@ import com.controlj.addon.trendexport.DBAndSchemaSynchronizer;
 import com.controlj.addon.trendexport.DataCollector;
 import com.controlj.addon.trendexport.config.ConfigManager;
 import com.controlj.addon.trendexport.config.ConfigManagerLoader;
+import com.controlj.addon.trendexport.helper.TrendPathAndDBTableName;
+import com.controlj.green.addonsupport.xdatabase.DatabaseException;
 import org.jetbrains.annotations.Nullable;
 
 import javax.servlet.ServletContextEvent;
@@ -33,6 +35,7 @@ import javax.servlet.ServletContextListener;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.GregorianCalendar;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -113,8 +116,16 @@ public class ScheduledTrendCollector implements ServletContextListener
                     @Override
                     public void run()
                     {
-                        DataCollector.collectData(synchronizer);
-                        nextCollectionDate = loader.getScheduledCalendarDate();
+                        try
+                        {
+                            Collection<TrendPathAndDBTableName> trendPathAndDBTableNames = synchronizer.getEnabledSources().getSourcesAndTableNames();
+                            DataCollector.collectData(synchronizer, synchronizer.getReferencePaths(trendPathAndDBTableNames));
+                            nextCollectionDate = loader.getScheduledCalendarDate();
+                        }
+                        catch (DatabaseException e)
+                        {
+                            ErrorHandler.handleError("Initilization of DataCollector Failed", e, AlarmHandler.TrendExportAlarm.CollectionFailure);
+                        }
                     }
                 }, initialDelay, interval, TimeUnit.MILLISECONDS);
     }

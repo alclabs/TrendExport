@@ -187,6 +187,10 @@ public class DBAndSchemaSynchronizer
                 database.connect(connectionInfo);
                 sourceMappings = readMappingsFromDatabase();
             }
+            catch (DatabaseSchemaNotFoundException e)
+            {
+                create();
+            }
             catch (DatabaseException e)
             {
                 // either doesn't exist or need to be upgraded
@@ -265,7 +269,7 @@ public class DBAndSchemaSynchronizer
 
     private SourceMappings readMappingsFromDatabase() throws DatabaseException
     {
-        Collection<TrendPathAndDBTableName> listOfAll = this.getAllTrends();
+        Collection<TrendPathAndDBTableName> listOfAll = this.getAllSources();
         SourceMappings mappings = new SourceMappings();
 
         for (TrendPathAndDBTableName table : listOfAll)
@@ -279,12 +283,12 @@ public class DBAndSchemaSynchronizer
 
     public SourceMappings getEnabledSources() throws DatabaseException
     {
-        Collection<TrendPathAndDBTableName> listOfAll = this.getAllTrends();
+        Collection<TrendPathAndDBTableName> listOfAll = this.getAllSources();
         SourceMappings mappings = new SourceMappings();
 
         for (TrendPathAndDBTableName table : listOfAll)
         {
-            if (table.getIsEnabled()) // we only want enabled source mappings
+            if (table.getIsEnabled())
                 mappings.addSourceAndName(table);
         }
 
@@ -303,8 +307,17 @@ public class DBAndSchemaSynchronizer
         return sourceMappings.containsSource(referencePath);
     }
 
-    public Collection<TrendPathAndDBTableName> getAllTrends() throws DatabaseException
+    public Collection<TrendPathAndDBTableName> getAllSources() throws DatabaseException
     {
         return this.getMetaDataTableInfo();
+    }
+
+    public Collection<String> getReferencePaths(Collection<TrendPathAndDBTableName> trendPathAndDBTableNames)
+    {
+        Collection<String> referencePaths = new ArrayList<String>();
+        for (TrendPathAndDBTableName tableName : trendPathAndDBTableNames)
+            referencePaths.add(tableName.getTrendSourceReferencePath());
+
+        return referencePaths;
     }
 }

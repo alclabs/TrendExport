@@ -125,7 +125,7 @@ public class SettingsPageServlet extends HttpServlet
 
         if (dbType.contains("mysql"))
             return DatabaseType.MySQL;
-        else if (dbType.contains("postgresql "))
+        else if (dbType.contains("postgresql"))
             return DatabaseType.PostgreSQL;
         else if (dbType.contains("oracle"))
             return DatabaseType.Oracle;

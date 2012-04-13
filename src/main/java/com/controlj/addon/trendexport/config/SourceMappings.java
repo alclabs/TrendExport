@@ -40,6 +40,11 @@ public class SourceMappings
         return sourcesAndTableNames;
     }
 
+    public boolean isEmpty()
+    {
+        return sourcesAndTableNames.isEmpty();
+    }
+
     public void addSourceAndName(TrendPathAndDBTableName t)
     {
         sourcesAndTableNames.add(t);

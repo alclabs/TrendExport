@@ -47,20 +47,23 @@ public class DataCollector
     private static final AtomicReference<String> tableName = new AtomicReference<String>("");
     private static final AtomicBoolean isBusy = new AtomicBoolean();
 
-    public static void collectData(DBAndSchemaSynchronizer synchronizer)
+    public static void collectData(DBAndSchemaSynchronizer synchronizer, Collection<String> referencePaths)
     {
         try
         {
             isBusy.set(true);
 
             synchronizer.connect();
-            Collection<TrendPathAndDBTableName> sources = synchronizer.getEnabledSources().getSourcesAndTableNames();
+            Collection<TrendPathAndDBTableName> sourcess = synchronizer.getEnabledSources().getSourcesAndTableNames();
 
-            for (TrendPathAndDBTableName source : sources)
+
+
+
+            for (String source : referencePaths)
             {
                 try
                 {
-                    collectDataForSource(source.getTrendSourceReferencePath(), synchronizer);
+                    collectDataForSource(source, synchronizer);
                 }
                 catch (SourceMappingNotFoundException e)
                 {
@@ -145,6 +148,8 @@ public class DataCollector
         }
         catch (ActionExecutionException e)
         {
+            isBusy.set(false);
+
             if (e.getCause() instanceof DatabaseException)
                 throw new DatabaseException("Database Error", e);
             else if (e.getCause() instanceof NoSuchAspectException)

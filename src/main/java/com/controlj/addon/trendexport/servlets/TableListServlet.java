@@ -66,7 +66,7 @@ public class TableListServlet extends HttpServlet
             throws JSONException, DatabaseException, SystemException, com.controlj.green.addonsupport.access.UnresolvableException
     {
         JSONArray jsonArray = new JSONArray();
-        Collection<TrendPathAndDBTableName> stuffs = synchronizer.getAllTrends();
+        Collection<TrendPathAndDBTableName> stuffs = synchronizer.getAllSources();
 
         // catch an empty list and make a dummy object - prevents a crash in datatables
         if (stuffs.isEmpty())

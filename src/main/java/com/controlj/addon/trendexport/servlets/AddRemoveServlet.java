@@ -5,7 +5,6 @@ import com.controlj.addon.trendexport.DataCollector;
 import com.controlj.addon.trendexport.config.ConfigManager;
 import com.controlj.addon.trendexport.config.ConfigManagerLoader;
 import com.controlj.addon.trendexport.exceptions.SourceMappingNotFoundException;
-import com.controlj.addon.trendexport.exceptions.TableNotInDatabaseException;
 import com.controlj.addon.trendexport.helper.TrendSourceTypeAndPathResolver;
 import com.controlj.addon.trendexport.helper.TrendTableNameGenerator;
 import com.controlj.addon.trendexport.util.AlarmHandler;
@@ -75,7 +74,8 @@ public class AddRemoveServlet extends HttpServlet
             }
             else if (actionToAttempt.contains("collectData"))
             {
-                collectData(nodeLookupStrings, synchronizer);
+                DataCollector.collectData(synchronizer, nodeLookupStrings);
+//                collectData(nodeLookupStrings, synchronizer);
             }
             else if (actionToAttempt.contains("enableSource") || actionToAttempt.contains("disableSource"))
             {
@@ -158,6 +158,8 @@ public class AddRemoveServlet extends HttpServlet
 
     private void collectData(List<String> sources, DBAndSchemaSynchronizer synchronizer)
     {
+                            /*
+
         for (String source : sources)
         {
             try
@@ -184,7 +186,7 @@ public class AddRemoveServlet extends HttpServlet
             {
                 ErrorHandler.handleError("Database communication error", e, AlarmHandler.TrendExportAlarm.DatabaseWriteFailure);
             }
-        }
+        }      */
     }
 
     private void addSource(final List<String> nodeLookups, final DBAndSchemaSynchronizer synchronizer, final String tableName)
