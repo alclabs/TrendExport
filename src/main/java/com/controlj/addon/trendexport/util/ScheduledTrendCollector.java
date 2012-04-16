@@ -118,14 +118,15 @@ public class ScheduledTrendCollector implements ServletContextListener
                     {
                         try
                         {
-                            Collection<TrendPathAndDBTableName> trendPathAndDBTableNames = synchronizer.getEnabledSources().getSourcesAndTableNames();
-                            DataCollector.collectData(synchronizer, synchronizer.getReferencePaths(trendPathAndDBTableNames));
-                            nextCollectionDate = loader.getScheduledCalendarDate();
+                            synchronizer.connect();
                         }
                         catch (DatabaseException e)
                         {
-                            ErrorHandler.handleError("Initilization of DataCollector Failed", e, AlarmHandler.TrendExportAlarm.CollectionFailure);
+                            ErrorHandler.handleError("What?", e);
                         }
+                        Collection<TrendPathAndDBTableName> trendPathAndDBTableNames = synchronizer.getSourceMappings().getSourcesAndTableNames();
+                            DataCollector.collectData(synchronizer, synchronizer.getReferencePaths(trendPathAndDBTableNames));
+                            nextCollectionDate = loader.getScheduledCalendarDate();
                     }
                 }, initialDelay, interval, TimeUnit.MILLISECONDS);
     }

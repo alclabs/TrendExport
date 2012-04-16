@@ -190,13 +190,13 @@ public class DBAndSchemaSynchronizer
             catch (DatabaseException e)
             {
                 // either doesn't exist or need to be upgraded
-                if (e.getLocalizedMessage().contains("No instance named"))
-                    create();
+                create();
+                if (connections > 1)
+                    throw new DatabaseConnectionException("Failed to connect to database. Please check your settings");
             }
             catch (Exception e)
             {
-                if (e.getLocalizedMessage().contains("No instance named"))
-                    create();
+                create();
             }
 
             database.close();
