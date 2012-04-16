@@ -149,6 +149,7 @@ public class DataCollector
         catch (ActionExecutionException e)
         {
             isBusy.set(false);
+            tableName.set("Error Collecting Data!");
 
             if (e.getCause() instanceof DatabaseException)
                 throw new DatabaseException("Database Error", e);

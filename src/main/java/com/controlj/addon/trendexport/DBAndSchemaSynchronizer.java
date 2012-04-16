@@ -187,13 +187,13 @@ public class DBAndSchemaSynchronizer
                 database.connect(connectionInfo);
                 sourceMappings = readMappingsFromDatabase();
             }
-            catch (DatabaseSchemaNotFoundException e)
-            {
-                create();
-            }
             catch (DatabaseException e)
             {
                 // either doesn't exist or need to be upgraded
+                create();
+            }
+            catch (Exception e)
+            {
                 create();
             }
 

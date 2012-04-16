@@ -75,7 +75,6 @@ public class AddRemoveServlet extends HttpServlet
             else if (actionToAttempt.contains("collectData"))
             {
                 DataCollector.collectData(synchronizer, nodeLookupStrings);
-//                collectData(nodeLookupStrings, synchronizer);
             }
             else if (actionToAttempt.contains("enableSource") || actionToAttempt.contains("disableSource"))
             {
@@ -90,21 +89,8 @@ public class AddRemoveServlet extends HttpServlet
 
             resp.getWriter().print(writeResult(result, nodeLookupStrings));
         }
-//        catch (TrendException e)
-//        {
-        // not able to retrieve from WebCTRL
-//            ErrorHandler.handleError("AddOrRemoveSerlvet error", e);
-//            resp.sendError(500, "WebCTRL Database collection error.");
-//        }
-//        catch (DatabaseException e)
-//        {
-//            resp.getWriter().print(writeResult("Action not successful", nodeLookupStrings)); // todo: needed?
-//            ErrorHandler.handleError("AddOrRemoveSerlvet error", e);
-//            resp.sendError(500, "Database communications error.  Make sure the database server is running.");
-//        }
         catch (Exception e)
         {
-            // resp.getWriter().print(writeResult("Action not successful", nodeLookupStrings)); // todo: needed?
             ErrorHandler.handleError("AddOrRemoveSerlvet error", e);
             resp.sendError(500, "Error processing request");
         }
