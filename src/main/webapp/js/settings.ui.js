@@ -93,19 +93,6 @@ $(function()
                     else
                         $('#am').prop('checked', true);
 
-//                    var rawTime = data['collectionValue'] / 60000;
-//                    if (rawTime < 0)
-//                    {
-//                        $('#am').prop('checked', true);
-//                        rawTime *= -1;
-//                    }
-//                    else
-//                        $('#pm').prop('checked', true);
-//
-//                    var hours = rawTime / 60;
-//                    var minutes = rawTime % 60;
-//                    var minute_str = minutes < 10 ? "0" + minutes : minutes;
-
                     $('#collTime_Hours').val(Math.floor(hours));
                     $('#collTime_Minutes').val(minute_str);
                     $('#intervalValue').val("");
@@ -125,6 +112,7 @@ $(function()
                 function(data)
                 {
                     getCollectorStatus();
+                    reloadTable();
                     alert(data["result"]);
                 });
     });

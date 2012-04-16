@@ -190,11 +190,13 @@ public class DBAndSchemaSynchronizer
             catch (DatabaseException e)
             {
                 // either doesn't exist or need to be upgraded
-                create();
+                if (e.getLocalizedMessage().contains("No instance named"))
+                    create();
             }
             catch (Exception e)
             {
-                create();
+                if (e.getLocalizedMessage().contains("No instance named"))
+                    create();
             }
 
             database.close();
@@ -204,7 +206,7 @@ public class DBAndSchemaSynchronizer
             database.upgradeSchema(sourceMappings, true);
             isConnected = true;
         }
-        catch (DatabaseVersionMismatchException e)
+        catch (Exception e)
         {
             throw new DatabaseException("Unable to upgrade the database", e);
         }

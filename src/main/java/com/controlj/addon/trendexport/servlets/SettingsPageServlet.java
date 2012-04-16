@@ -144,7 +144,7 @@ public class SettingsPageServlet extends HttpServlet
         }
         catch (DatabaseConnectionException e)
         {
-            return "Connection Failed!";
+            return "Connection Failed!\n" + e.getLocalizedMessage();
         }
         catch (IOException e)
         {
