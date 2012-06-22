@@ -1,5 +1,6 @@
 package com.controlj.addon.trendexport.helper;
 
+import com.controlj.addon.trendexport.util.Logger;
 import com.controlj.green.addonsupport.access.*;
 import com.controlj.green.addonsupport.access.aspect.TrendSource;
 import org.jetbrains.annotations.NotNull;
@@ -8,7 +9,9 @@ public class TrendSourceTypeAndPathResolver
 {
     public static String getReferencePath(Location location) throws UnresolvableException
     {
-        return resolveReferencePath(location, new StringBuilder()).toString();
+        String path = resolveReferencePath(location, new StringBuilder()).toString();
+        Logger.println("referencePath for "+location+" (tree " + location.getTree().getRoot() + ") is \"" + path + '\"');
+        return path;
     }
 
     private static StringBuilder resolveReferencePath(Location location, StringBuilder builder) throws UnresolvableException
@@ -70,7 +73,6 @@ public class TrendSourceTypeAndPathResolver
                 @Override
                 public String execute(@NotNull SystemAccess access) throws UnresolvableException
                 {
-//                    Location startLoc = access.getTree(SystemTree.Geographic).resolve(nodeLookupString);
                     Location location = access.resolveGQLPath(referencePath);
                     return location.getPersistentLookupString(true);
                 }
@@ -78,7 +80,7 @@ public class TrendSourceTypeAndPathResolver
         }
         catch (ActionExecutionException e)
         {
-            throw new UnresolvableException("Unable to resolve reference to path.");
+            throw new UnresolvableException("Unable to resolve reference to path \"" + referencePath + '\"', e);
         }
     }
 }

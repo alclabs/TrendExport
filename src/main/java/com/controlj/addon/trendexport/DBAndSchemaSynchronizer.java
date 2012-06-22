@@ -30,6 +30,7 @@ import com.controlj.addon.trendexport.exceptions.SourceMappingNotFoundException;
 import com.controlj.addon.trendexport.exceptions.TableNotInDatabaseException;
 import com.controlj.addon.trendexport.helper.TrendPathAndDBTableName;
 import com.controlj.addon.trendexport.helper.TrendSourceTypeAndPathResolver;
+import com.controlj.addon.trendexport.util.Logger;
 import com.controlj.green.addonsupport.access.*;
 import com.controlj.green.addonsupport.access.aspect.TrendSource;
 import com.controlj.green.addonsupport.access.trend.TrendData;
@@ -118,7 +119,9 @@ public class DBAndSchemaSynchronizer
         if (displayPath.length() > 2000)
             displayPath = displayPath.substring(0, 2000);
 
-        sourceMappings.addSourceAndName(new TrendPathAndDBTableName(referencePath, displayName, displayPath, tableName, type, true));
+        TrendPathAndDBTableName newEntry = new TrendPathAndDBTableName(referencePath, displayName, displayPath, tableName, type, true);
+        Logger.println("Adding: "+newEntry);
+        sourceMappings.addSourceAndName(newEntry);
         DynamicDatabase newDatabase = database.upgradeSchema(sourceMappings, true);
         database.close();
 
@@ -247,6 +250,7 @@ public class DBAndSchemaSynchronizer
 
                 Collection<TrendPathAndDBTableName> listOfEverything = new ArrayList<TrendPathAndDBTableName>();
 
+                Logger.println("Reading metadata table");
                 while (result.next())
                 {
                     String sourcePath = result.get(database.metaDataTable.referencePath);
@@ -254,15 +258,18 @@ public class DBAndSchemaSynchronizer
                     String displayPath = result.get(database.metaDataTable.displayPath);
                     String tableName = result.get(database.metaDataTable.tableName);
                     Short type = result.get(database.metaDataTable.sourceType);
-                    boolean isEnabled = result.get(database.metaDataTable.isTrendEnabled);
+                    Boolean isEnabled = result.get(database.metaDataTable.isTrendEnabled);
 
                     if (type == null)
                         throw new RuntimeException("Type not found");
 
                     TrendSource.Type trendSourceType = TrendSourceTypeAndPathResolver.getTrendSourceType(type);
 
-                    listOfEverything.add(new TrendPathAndDBTableName(sourcePath, displayName, displayPath, tableName, trendSourceType, isEnabled));
+                    TrendPathAndDBTableName entry = new TrendPathAndDBTableName(sourcePath, displayName, displayPath, tableName, trendSourceType, isEnabled != null && isEnabled.booleanValue());
+                    Logger.println("   Entry: "+entry);
+                    listOfEverything.add(entry);
                 }
+                Logger.println("Done reading metadata table");
 
                 return listOfEverything;
             }

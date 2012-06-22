@@ -34,4 +34,9 @@ public class Logger
         logWriter.print(message+" -- Exception: ");
         logWriter.println(ex);
     }
+
+    public static void println(String message)
+    {
+        logWriter.println(message);
+    }
 }

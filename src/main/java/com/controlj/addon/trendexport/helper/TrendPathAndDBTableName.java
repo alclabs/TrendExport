@@ -55,4 +55,16 @@ public class TrendPathAndDBTableName
     {
         this.isEnabled = enabled;
     }
+
+    @Override public String toString()
+    {
+        return "TrendPathAndDBTableName{" +
+                "trendSourceDisplayName='" + trendSourceDisplayName + '\'' +
+                ", trendSourceDisplayPath='" + trendSourceDisplayPath + '\'' +
+                ", trendSourceReferencePath='" + trendSourceReferencePath + '\'' +
+                ", dbTableName='" + dbTableName + '\'' +
+                ", trendType=" + trendType +
+                ", isEnabled=" + isEnabled +
+                '}';
+    }
 }
