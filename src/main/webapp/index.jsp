@@ -118,6 +118,10 @@
     <div id="settings">
         <div class="groupTitle">
             <button id="Save" class="smallButton">Save</button>
+            <div class="debug_div">
+                <input type="checkbox" id="debug_check" value="checked"/>Debug Mode
+            </div>
+
         </div>
         <br/>
 

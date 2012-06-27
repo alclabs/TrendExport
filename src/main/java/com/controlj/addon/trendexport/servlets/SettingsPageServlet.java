@@ -5,6 +5,7 @@ import com.controlj.addon.trendexport.config.ConfigManagerLoader;
 import com.controlj.addon.trendexport.config.Configuration;
 import com.controlj.addon.trendexport.util.AlarmHandler;
 import com.controlj.addon.trendexport.util.ErrorHandler;
+import com.controlj.addon.trendexport.util.Logger;
 import com.controlj.addon.trendexport.util.ScheduledTrendCollector;
 import com.controlj.green.addonsupport.AddOnInfo;
 import com.controlj.green.addonsupport.Version;
@@ -154,6 +155,8 @@ public class SettingsPageServlet extends HttpServlet
 
     private ConfigManager createConfigManagerFromRequest(HttpServletRequest req)
     {
+        Logger.setDebugMode(req.getParameter("debugMode"));
+
         String dbType = req.getParameter("dbType");
         DatabaseType databaseType = getDatabaseType(dbType);
         String host = req.getParameter("host");
@@ -219,6 +222,7 @@ public class SettingsPageServlet extends HttpServlet
                 apiVersion.getMinorVersionNumber() + "." +
                 apiVersion.getUpdateVersionNumber());
 
+        responseObject.put("debugMode", Logger.getisDebugEnabled());
         responseObject.put("dbType", manager.getCurrentConnectionInfo().getType().toString().toLowerCase());
         responseObject.put("host", manager.getCurrentConnectionInfo().getHost());
         responseObject.put("port", manager.getCurrentConnectionInfo().getPort());

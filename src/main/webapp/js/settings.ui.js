@@ -56,6 +56,7 @@ $(function()
                             .css('display', "block");
                 }
 
+                $('#debug_check').prop('checked', data['debugMode']);
                 $('#dbTypeCombo').val(data['dbType']);
                 $('#host').val(data['host']);
                 $('#port').val(data['port']);
@@ -163,11 +164,14 @@ $(function()
 
 function getSettingsObj(action)
 {
+    $("input[@name='collectionSettings']:checked").val() === 'checked';
+
     if (checkInputs() === null)
         return null;
     else if ($("input[@name='collectionSettings']:checked").val() === 'interval')
     {
         return {
+            "debugMode"  : $("input[@name='collectionSettings']:checked").val() === 'checked',
             "action"     : action,
             "dbType"     : $('#dbTypeCombo').val(),
             "host"       : $('#host').val(),
@@ -200,6 +204,7 @@ function getSettingsObj(action)
         var timeString = $('#collTime_Hours').val() + ':' + Math.floor($('#collTime_Minutes').val()) + ':' + amOrPm;
 
         return {
+            "debugMode"  : $("input[@name='collectionSettings']:checked").val() === 'checked',
             "action"     : action,
             "dbType"     : $('#dbTypeCombo').val(),
             "host"       : $('#host').val(),

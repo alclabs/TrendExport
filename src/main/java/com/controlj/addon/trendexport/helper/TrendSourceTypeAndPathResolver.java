@@ -10,7 +10,7 @@ public class TrendSourceTypeAndPathResolver
     public static String getReferencePath(Location location) throws UnresolvableException
     {
         String path = resolveReferencePath(location, new StringBuilder()).toString();
-        Logger.println("referencePath for "+location+" (tree " + location.getTree().getRoot() + ") is \"" + path + '\"');
+        Logger.debuggerPrint("referencePath for " + location + " (tree " + location.getTree().getRoot() + ") is \"" + path + '\"');
         return path;
     }
 

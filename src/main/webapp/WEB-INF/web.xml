@@ -61,15 +61,6 @@
         <url-pattern>/servlets/settings</url-pattern>
     </servlet-mapping>
 
-    <servlet>
-        <servlet-name>tester</servlet-name>
-        <servlet-class>com.controlj.addon.trendexport.servlets.TestServlet</servlet-class>
-    </servlet>
-    <servlet-mapping>
-        <servlet-name>tester</servlet-name>
-        <url-pattern>/servlets/tester</url-pattern>
-    </servlet-mapping>
-
     <listener>
         <listener-class>com.controlj.addon.trendexport.util.ScheduledTrendCollector</listener-class>
     </listener>

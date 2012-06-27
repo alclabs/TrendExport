@@ -120,7 +120,7 @@ public class DBAndSchemaSynchronizer
             displayPath = displayPath.substring(0, 2000);
 
         TrendPathAndDBTableName newEntry = new TrendPathAndDBTableName(referencePath, displayName, displayPath, tableName, type, true);
-        Logger.println("Adding: "+newEntry);
+        Logger.debuggerPrint("Adding: " + newEntry);
         sourceMappings.addSourceAndName(newEntry);
         DynamicDatabase newDatabase = database.upgradeSchema(sourceMappings, true);
         database.close();
@@ -250,7 +250,7 @@ public class DBAndSchemaSynchronizer
 
                 Collection<TrendPathAndDBTableName> listOfEverything = new ArrayList<TrendPathAndDBTableName>();
 
-                Logger.println("Reading metadata table");
+                Logger.debuggerPrint("Reading metadata table");
                 while (result.next())
                 {
                     String sourcePath = result.get(database.metaDataTable.referencePath);
@@ -266,10 +266,10 @@ public class DBAndSchemaSynchronizer
                     TrendSource.Type trendSourceType = TrendSourceTypeAndPathResolver.getTrendSourceType(type);
 
                     TrendPathAndDBTableName entry = new TrendPathAndDBTableName(sourcePath, displayName, displayPath, tableName, trendSourceType, isEnabled != null && isEnabled.booleanValue());
-                    Logger.println("   Entry: "+entry);
+                    Logger.debuggerPrint("   Entry: " + entry);
                     listOfEverything.add(entry);
                 }
-                Logger.println("Done reading metadata table");
+                Logger.debuggerPrint("Done reading metadata table");
 
                 return listOfEverything;
             }

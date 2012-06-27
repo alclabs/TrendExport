@@ -28,15 +28,27 @@ import com.controlj.green.addonsupport.FileLogger;
 public class Logger
 {
     private static FileLogger logWriter = AddOnInfo.getAddOnInfo().getDateStampLogger();
+    private static boolean debugMode = false;
 
     public static void println(String message, Throwable ex)
     {
-        logWriter.print(message+" -- Exception: ");
+        logWriter.print(message + " -- Exception: ");
         logWriter.println(ex);
     }
 
-    public static void println(String message)
+    public static void debuggerPrint(String message)
     {
-        logWriter.println(message);
+        if (Logger.debugMode)
+            logWriter.println(message);
+    }
+
+    public static boolean getisDebugEnabled()
+    {
+        return Logger.debugMode;
+    }
+
+    public static void setDebugMode(String debugMode)
+    {
+        Logger.debugMode = debugMode.contains("true");
     }
 }
