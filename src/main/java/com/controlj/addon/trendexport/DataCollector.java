@@ -37,6 +37,8 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.Lock;
@@ -50,9 +52,7 @@ public class DataCollector
 
     public static void collectData(DBAndSchemaSynchronizer synchronizer, Collection<String> referencePaths)
     {
-        Statistics globalStats = StatisticsCollector.getStatisticsCollector().getStatisticsForSource("global");
-        long startTimer = System.currentTimeMillis();
-        Date collDate = new Date();
+        Map<String, Statistics> tempCollectionMap = new HashMap<String, Statistics>(referencePaths.size());
 
         try
         {
@@ -63,7 +63,9 @@ public class DataCollector
             {
                 try
                 {
-                    collectDataForSource(source, synchronizer);
+                    Statistics sourceStats = new Statistics();
+                    collectDataForSource(source, synchronizer, sourceStats);
+                    tempCollectionMap.put(source, sourceStats);
                 }
                 catch (SourceMappingNotFoundException e)
                 {
@@ -94,22 +96,19 @@ public class DataCollector
         finally
         {
             synchronizer.disconnect();
-
-            globalStats.addStatistics(collDate, System.currentTimeMillis() - startTimer);
-            globalStats.addSamples(StatisticsCollector.getStatisticsCollector().getMostRecentTotal());
-            StatisticsCollector.getStatisticsCollector().writeToDataStore();
+            StatisticsCollector.getStatisticsCollector().storeCollectionStatistics(tempCollectionMap);
 
             isBusy.set(false);
         }
     }
 
-    public static void collectDataForSource(String source, DBAndSchemaSynchronizer synchronizer)
+    private static void collectDataForSource(String source, DBAndSchemaSynchronizer synchronizer, Statistics singleSourceStats)
             throws SourceMappingNotFoundException, TableNotInDatabaseException, TrendException, DatabaseException, SystemException
     {
         lock.lock(); isBusy.set(true);
         tableName.set(synchronizer.getSourceMappings().getTableNameFromSource(source));
 
-        copyLatestTrendHistory(source, synchronizer);
+        copyLatestTrendHistory(source, synchronizer, singleSourceStats);
 
         lock.unlock(); isBusy.set(false);
     }
@@ -124,22 +123,22 @@ public class DataCollector
         return isBusy.get();
     }
 
-    private static void copyLatestTrendHistory(final String nodeGQLPath, final DBAndSchemaSynchronizer synchronizer)
+    private static void copyLatestTrendHistory(final String nodeGQLPath, final DBAndSchemaSynchronizer synchronizer, final Statistics singleStat)
             throws DatabaseException, TrendException, TableNotInDatabaseException, SourceMappingNotFoundException, SystemException
     {
         try
         {
             SystemConnection connection = DirectAccess.getDirectAccess().getRootSystemConnection();
-            connection.runReadAction(FieldAccessFactory.newDisabledFieldAccess(), new ReadAction()
+            connection.runReadAction(FieldAccessFactory.newDisabledFieldAccess(), new ReadActionResult<Statistics>()
             {
                 @Override
-                public void execute(@NotNull SystemAccess systemAccess)
+                public Statistics execute(@NotNull SystemAccess systemAccess)
                         throws DatabaseException, NoSuchAspectException, TrendException, TableNotInDatabaseException, UnresolvableException, SourceMappingNotFoundException
                 {
                     Location startLoc = systemAccess.resolveGQLPath(nodeGQLPath);
-                    String lookupString = startLoc.getPersistentLookupString(true);
+//                    String lookupString = startLoc.getPersistentLookupString(true);
 
-                    Statistics tempStats = StatisticsCollector.getStatisticsCollector().getStatisticsForSource(lookupString);
+
                     long startCollection = System.currentTimeMillis();
                     Date collectionTime = new Date();
 
@@ -153,13 +152,14 @@ public class DataCollector
                     int numberOfSamplesToSkip = retriever.getNumberOfSamplesToSkip();
 
                     TrendData trendData = trendSource.getTrendData(TrendRangeFactory.byDateRange(startDate, new Date()));
-                    synchronizer.insertTrendSamples(nodeGQLPath, trendData, numberOfSamplesToSkip, tempStats);
+                    synchronizer.insertTrendSamples(nodeGQLPath, trendData, numberOfSamplesToSkip, singleStat);
 
-                    // end statistics gathering/write to StatisticsCollector
+                    // end statistics gathering and store
                     long elapsedTime = System.currentTimeMillis() - startCollection;
-                    tempStats.addStatistics(collectionTime, elapsedTime);
+                    singleStat.setDate(collectionTime, elapsedTime);
 
-                    StatisticsCollector.getStatisticsCollector().writeStats(lookupString, tempStats);
+//                    StatisticsCollector.getStatisticsCollector().storeStats(lookupString, tempStats);
+                    return singleStat;
                 }
             });
         }

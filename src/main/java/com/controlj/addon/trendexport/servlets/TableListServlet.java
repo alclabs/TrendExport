@@ -130,30 +130,26 @@ public class TableListServlet extends HttpServlet
 
     private String convertStatisticsToHTMLTable(String source)
     {
-        Statistics statistics = StatisticsCollector.getStatisticsCollector().getStatisticsForSource(source);
-        if (statistics.getDates().isEmpty())
+//        get the collection of stats for a source
+        List<Statistics> sourceStatsList = StatisticsCollector.getStatisticsCollector().getStatisticsForSource(source);
+        if (sourceStatsList.isEmpty())
             return "<p style=\"background-color:#d7e1c5;\">No stats found for this source.</p>";
-        return createHTMLForStatistics(statistics);
-    }
 
-    private String createHTMLForStatistics(Statistics statistics)
-    {
         StringBuilder builder = new StringBuilder();
 //        builder.append("<table cellpadding = \"5\" cellspacing=\"0\" border=\"0\" style=\"padding-left:50px;background-color:#d7e1c5;\">");
         builder.append("<table cellpadding = \"10\" cellspacing=\"10\" border=\"0\" style=\"padding-left:50px;\">");
         builder.append("<tr><td>Date of Collection</td>").append("<td>Collection Duration</td>").append("<td>Samples Collected</td></tr>");
 
-        List<Date> dates =     statistics.getDates();
-        List<Long> durations = statistics.getCollectionDurationsList();
-        List<Long> samples =   statistics.getSampleCollection();
+        for (Statistics s : sourceStatsList)
+            builder.append(createHTMLForStatistics(s));
 
-        // most recent collection first
-        for (int i = dates.size()-1; i >= 0; i--)
-            builder.append(createTableRowForList(dates.get(i), durations.get(i), samples.get(i)));
-
-//        builder.append("<tr><td>Total Samples</td>").append("<td>").append(statistics.getTotalSamples()).append("</td></tr>");
         builder.append("</table>");
         return builder.toString();
+    }
+
+    private String createHTMLForStatistics(Statistics statistics)
+    {
+        return createTableRowForList(statistics.getDate(), statistics.getElapsedTime(), statistics.getSamples());
     }
 
     private String createTableRowForList(Date date, Long elapsedTime, Long samples)
@@ -186,8 +182,8 @@ public class TableListServlet extends HttpServlet
         StringBuilder builder = new StringBuilder();
         for (int i = 0; i < iterations; i++)
         {
-            builder.append((int)time).append(':');
-            time -= (int)time;
+            builder.append((int) time).append(':');
+            time -= (int) time;
             time *= 60;
         }
 

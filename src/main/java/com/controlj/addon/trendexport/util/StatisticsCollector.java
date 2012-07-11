@@ -14,7 +14,10 @@ import java.util.concurrent.locks.ReentrantLock;
 
 public class StatisticsCollector
 {
-    private static Map<String, Statistics> statsMap;
+    private static final int STORED_COLLECTION_LIMIT = 5;
+
+    // global map of every collection containing the source that was collected as well as the statistics
+    private static List<Map<String, Statistics>> globalStats;
     private static final StatisticsCollector STATISTICS_COLLECTOR = new StatisticsCollector();
     private static final Lock lock = new ReentrantLock(true);
     private static final String STATS_DATASTORE_NAME = "TrendExportStats";
@@ -26,32 +29,71 @@ public class StatisticsCollector
 
     private StatisticsCollector()
     {
-        statsMap = new HashMap<String, Statistics>();
-        statsMap.put("global", new Statistics());
+        globalStats = new ArrayList<Map<String, Statistics>>();
     }
 
-    public void writeStats(String source, Statistics statistics)
+    public void storeCollectionStatistics(Map<String, Statistics> collectionStats)
     {
-        lock.lock();
-
-        statsMap.put(source, statistics);
-        writeToDataStore();
-
-        lock.unlock();
+        // check and fix length of collection list - keeps size of globalStats of collections to STORED_COLLECTION_LIMIT
+        checkAndCorrectStorageLimit();
+        globalStats.add(collectionStats);
     }
 
-    public Statistics getStatisticsForSource(String source)
+    private void checkAndCorrectStorageLimit()
     {
-        if (!statsMap.containsKey(source))
-            statsMap.put(source, new Statistics());
+        if (globalStats.size() < STORED_COLLECTION_LIMIT)
+            return;
 
-        return statsMap.get(source);
+        globalStats.remove(0);
+    }
+
+    public List<Statistics> getStatisticsForSource(String source)
+    {
+        // search through each collection and search for the source
+        List<Statistics> results = new ArrayList<Statistics>();
+        for (Map<String, Statistics> statsMapping : globalStats)
+        {
+            if (statsMapping.containsKey(source))
+                results.add(statsMapping.get(source));
+        }
+
+        return results;
+    }
+
+    public List<Statistics> getGlobalStatistics()
+    {
+        // returns the earliest found date, duration of entire collection (add all in Map), total number of samples (by adding)
+        // and possibly which sources were collected
+
+        List<Statistics> allStats = new ArrayList<Statistics>(globalStats.size());
+        for (Map<String, Statistics> singleCollection : globalStats)
+        {
+            Date earlyDate = new Date();
+            long sumDuration = 0, sumSamples = 0;
+
+            for (Statistics s : singleCollection.values())
+            {
+                // save only the earliest date
+                if (s.getDate().before(earlyDate))
+                    earlyDate = s.getDate();
+
+                sumDuration += s.getElapsedTime();
+                sumSamples += s.getSamples();
+            }
+
+            allStats.add(new Statistics(earlyDate, sumDuration, sumSamples));
+        }
+
+
+        return allStats;
     }
 
     public void removeStatisticsForSource(String source)
     {
-        statsMap.remove(source);
-        // search datastore and remove individual stats or just rewrite whole thing?
+        // search everything; if found, remove object; write new results
+        for (Map<String, Statistics> statsMapping : globalStats)
+            statsMapping.remove(source);
+
         writeToDataStore();
     }
 
@@ -68,11 +110,13 @@ public class StatisticsCollector
                     DataStore store = access.getSystemDataStore(STATS_DATASTORE_NAME);
                     PrintWriter writer = store.getWriter();
 
-//                    calculateGlobalStatistics();
-
                     // for each key, write the line for the stats map
-                    for (String key : statsMap.keySet())
-                        writer.println(key + ";" + statsMap.get(key).toString());
+                    for (Map<String, Statistics> collectionStats : globalStats)
+                    {
+                        writer.print(collectionStats.size() + ";");
+                        for (String key : collectionStats.keySet())
+                            writer.println(key + ";" + collectionStats.get(key).toString());
+                    }
 
                     writer.flush();
                     writer.close();
@@ -91,21 +135,6 @@ public class StatisticsCollector
         {
             Logger.println("Action Execution exception when writing Statistics DataStore", e);
         }
-    }
-
-    private Statistics calculateGlobalStatistics()
-    {
-        Statistics globalStats = statsMap.get("global");
-        for (String key : statsMap.keySet())
-        {
-            if (key.equals("global"))
-                continue;
-
-            Statistics stats = statsMap.get(key);
-
-        }
-
-        return null;
     }
 
     public void loadFromDataSore()
@@ -128,8 +157,8 @@ public class StatisticsCollector
                         while (line != null)
                         {
                             String[] flatStats = line.split(";");
-                            Statistics stats = parseFlatStatistics(flatStats);
-                            statsMap.put(flatStats[0], stats);
+                            Map<String, Statistics> statsMap = parseFlatStatistics(flatStats);
+                            globalStats.add(statsMap);
 
                             line = reader.readLine();
                         }
@@ -152,79 +181,21 @@ public class StatisticsCollector
         }
     }
 
-    private Statistics parseFlatStatistics(String[] strings) throws Exception
+    private Map<String, Statistics> parseFlatStatistics(String[] strings) throws Exception
     {
-        int start = 2;
-        int sizeOfEachCollection = Integer.parseInt(strings[1]);
+        Map<String, Statistics> singleCollectionMap = new HashMap<String, Statistics>();
+        int sizeOfEachCollection = Integer.parseInt(strings[0]);
 
-        // read in size of date collection
-        List<Date> dates = convertLongsToDates(getListFromFlatStats(strings, sizeOfEachCollection, start));
-
-        // read in size of elapsed times collection
-        start = 2 + sizeOfEachCollection;
-        List<Long> elapsedTimes = getListFromFlatStats(strings, sizeOfEachCollection, start);
-
-        // read in size of samples collection
-        start = 2 + (sizeOfEachCollection * 2);
-        List<Long> samplesCollection = getListFromFlatStats(strings, sizeOfEachCollection, start);
-
-        return new Statistics(dates, elapsedTimes, samplesCollection);
-    }
-
-    private List<Long> getListFromFlatStats(String[] data, int sizeOfEachCollection, int start) throws Exception
-    {
-        int i = 0; // used for debugging mainly :/
-        try
+        for (int i = 1; i < sizeOfEachCollection; i += 4)
         {
-            List<Long> tempList = new ArrayList<Long>(sizeOfEachCollection);
-            for (i = start; i < start + sizeOfEachCollection; i++)
-            {
-                Long l = Long.parseLong(data[i]);
-                tempList.add(l);
-            }
+            String source   = strings[i];
+            long date       = Long.parseLong(strings[i+1]);
+            long duration   = Long.parseLong(strings[i+2]);
+            long samples    = Long.parseLong(strings[i+3]);
 
-            return tempList;
-        }
-        catch (NumberFormatException e)
-        {
-            Logger.println("Error parsing statistics datastore at index: " + i, e);
-            throw new Exception("Error parsing statistics datastore at " + i, e);
-        }
-    }
-
-    private List<Date> convertLongsToDates(List<Long> longs)
-    {
-        List<Date> dates = new ArrayList<Date>(longs.size());
-        for (Long l : longs)
-            dates.add(new Date(l));
-
-        return dates;
-    }
-
-    public long getTotalSamples()
-    {
-        long sum = 0;
-        for (String key : statsMap.keySet())
-        {
-            if (!key.equals("global"))
-                sum += statsMap.get(key).getTotalSamples();
+            singleCollectionMap.put(source, new Statistics(new Date(date), duration, samples));
         }
 
-        return sum;
-    }
-
-    public long getMostRecentTotal()
-    {
-        long sum = 0;
-        for (String key : statsMap.keySet())
-        {
-            if (key.equals("global"))
-                continue;
-
-
-            sum += statsMap.get(key).getLatestSampleCollection();
-        }
-
-        return sum;
+        return singleCollectionMap;
     }
 }
