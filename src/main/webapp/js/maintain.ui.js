@@ -23,9 +23,8 @@
 $(function()
 {
     var tableOfAllSources;
-
     getCollectorStatus();
-    setInterval("getCollectorStatus()", 15000);
+    setInterval("getCollectorStatus()", 10000);
 
 
     var collectDataNowBtn = $('#collectDataNow').button().bind("click", function()
@@ -59,6 +58,22 @@ $(function()
 
     $('#collectorStatusLabel').text("Current Status: ");
 
+
+
+
+    // Global statistics button to go here
+    $('#view_global_stats_btn').button().bind("click", function()
+    {
+        // get global stats
+        displayStatistics(tableOfAllSources, null);
+    }).button('enable');
+
+
+    // initialize table here
+    var nCloneTh = document.createElement('th');
+    var nCloneTd = document.createElement('td');
+    nCloneTd.className = "center";
+
     tableOfAllSources = $('#maintenanceTable').dataTable({
                 bPaginate: true,
                 bAutoWidth: false,
@@ -76,55 +91,89 @@ $(function()
                                 fnCallback(json)
                             }).error(function(e, jqxhr, settings, exception)
                             {
-                                alert("Something went wrong on loading the list of sources: " + settings);
+                                alert("Something went wrong when loading the list of sources: " + settings);
                             });
 
                 },
                 "aoColumns" : [
-                    {"sTitle": "Collection", "sWidth": "2%", "mDataProp": "isEnabled"},
+                    {"sTitle": "Collection",    "sWidth": "2%",  "mDataProp": "isEnabled"},
                     {"sTitle": "Source Path",   "sWidth": "50%", "mDataProp": "displayPath"},
                     {"sTitle": "Source Name",   "sWidth": "25%", "mDataProp": "sourceDisplayName"},
                     {"sTitle": "Table Name",    "sWidth": "25%", "mDataProp": "tableName"},
-                    {"sTitle": "Lookup String", "sWidth": "5%",  "mDataProp": "sourceReferencePath", "bVisible": false}
+                    {"sTitle": "Statistics",       "sWidth": "2%",  "mDataProp": null, "bSortable": false},
+                    {"sTitle": "Lookup String", "sWidth": "5%",  "mDataProp": "sourceReferencePath", "bVisible": false, "bSearchable": false}
 //                    {"sTitle": "Lookup String", "sWidth": "5%",  "mDataProp": "sourceLookupString", "bVisible": false}
-
                 ],
                 "fnCreatedRow": function(nRow)
                 {
-                    $(nRow).live('click', rowClickEvent());
-                    return nRow;
-                },
-                "fnInitComplete": function()
-                {
-                    $('#maintenanceTable tbody tr').live('click', function()
-                    {
-                        // fix for detecting dummy table row in the event that the table is empty
-                        var htmlString = $(this).html();
-                        if (htmlString.indexOf("Add a source from") !== -1)
-                        {
-                            $("#tabs").tabs('select', 1);
-                            return;
-                        }
+                    $(nRow).insertBefore(nCloneTh, nRow);
+                    $(nRow).insertBefore(nCloneTd.cloneNode(true), nRow);
 
+                    $('td:eq(4)', nRow).html('<input type="button" value="Stats""/>');
+                    $('td:eq(4)', nRow).bind('click', function()
+                    {
+                        var tdElement = $(this);
+                        displayStatistics(tableOfAllSources, tdElement);
+                        return false; // kills propagation of any other event handlers
+                    });
+
+                    $(nRow).bind('click', function()
+                    {
                         if ($(this).hasClass('row_selected'))
                             $(this).removeClass('row_selected');
                         else
                             $(this).addClass('row_selected');
 
+                        // fix for detecting dummy table row in the event that the table is empty
+                        var htmlString = $(this).html();
+                        if (htmlString.indexOf("Add a source from") !== -1)
+                            $("#tabs").tabs('select', 1);
+
                         updateButtonsBasedOnRowsState(getSelectedRows(tableOfAllSources));
                     });
+
+                    return nRow;
+                },
+                "fnInitComplete": function()
+                {
+                    /*$('#maintenanceTable tbody tr').live('click', function()
+                    {
+
+                    });*/
                 }
             });
 
-
-    function rowClickEvent()
+    function displayStatistics(tableOfAllSources, td)
     {
-        if ($(this).hasClass('row_selected'))
-            $(this).removeClass('row_selected');
-        else
-            $(this).addClass('row_selected');
+        // create dialog
+        var dialog = $('#stats_dialog').dialog({
+                    autoOpen: false,
+                    closeOnEscape: true,
+                    modal: true,
+                    title: "Statistics",
+                    minWidth: 400,
+                    width: 600
+                });
 
-        updateButtonsBasedOnRowsState(getSelectedRows(tableOfAllSources));
+        var source;
+        if (td !== null)
+        {
+            // get the source
+            var nTr = $(td).parents('tr')[0];
+            source = tableOfAllSources.fnGetData(nTr)["sourceLookupString"];
+        }
+        else
+        {
+            source = "global";
+        }
+
+//        getDetailsAboutSource(tableOfAllSources, nTr, source, dialog);
+        getDetailsAboutSource(null, null, source, dialog);
+
+//        if (tableOfAllSources.fnIsOpen(nTr))
+//            tableOfAllSources.fnClose(nTr);           // close row
+//        else
+//            formatRowDetails(tableOfAllSources, nTr);  // open row
     }
 });
 

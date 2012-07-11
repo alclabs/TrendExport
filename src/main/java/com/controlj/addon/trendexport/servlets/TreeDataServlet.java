@@ -65,7 +65,7 @@ public class TreeDataServlet extends HttpServlet
         public boolean accept(@NotNull TrendSource aspect)
         {
             return (aspect.isEnabled() && aspect.isHistorianEnabled() &&
-                    (aspect instanceof AnalogTrendSource || aspect instanceof DigitalTrendSource));
+                   (aspect instanceof AnalogTrendSource || aspect instanceof DigitalTrendSource));
         }
     };
 

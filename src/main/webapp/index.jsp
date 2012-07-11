@@ -34,7 +34,7 @@
     <link rel="stylesheet" type="text/css" href="skin/ui.maintainPage.css"/>
     <link rel="stylesheet" type='text/css' href='skin/ui.helpPage.css'/>
 
-    <script type="text/javascript" src="js/jquery-1.6.4.min.js"></script>
+    <script type="text/javascript" src="js/jquery-1.7.2.min.js"></script>
     <script type="text/javascript" src="js/jquery-ui-1.8.18.custom.min.js"></script>
 
     <script type="text/javascript" src="js/jquery.dynatree.min.js"></script>
@@ -71,6 +71,8 @@
         </p>
     </div>
 
+    <%--Define more dialog content--%>
+    <div id="stats_dialog" title="Source Stats"></div>
 
     <!--Add/Remove Tab-->
     <div id="addOrRemove">
@@ -103,6 +105,7 @@
     <!--Maintain Tab (place to display everything)-->
     <div id="maintain">
         <div class="groupTitle">
+            <button id="view_global_stats_btn" class="global_stats_btn">View Global Stats</button>
             <span id="maintainStatusText" class="maintainStatusLabel">Status: Idle</span>
             <button id="collectDataNow">Collect Data Now</button>
             <button id="enableOrDisable_btn">Enable Collection</button>

@@ -61,6 +61,7 @@ public class ScheduledTrendCollector implements ServletContextListener
         {
             ConfigManager configManager = new ConfigManagerLoader().loadConnectionInfoFromDataStore();
             initializeAndScheduleCollector(configManager);
+            StatisticsCollector.getStatisticsCollector().loadFromDataSore();
         }
         catch (Exception e)
         {

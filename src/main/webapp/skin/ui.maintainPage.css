@@ -10,7 +10,11 @@
  * Footer content:           #d7e1c5
  */
 
-div.collectorStatus {
+button.global_stats_btn {
+    float: right;
+    margin-right: 10px;
+}
+span.collectorStatus {
     float: right;
     font: 90%/1.45em Arial, Verdana, Helvetica, sans-serif;
 }

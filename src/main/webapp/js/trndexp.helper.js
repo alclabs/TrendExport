@@ -20,6 +20,27 @@
  * THE SOFTWARE.
  */
 
+function getDetailsAboutSource(oTable, rowClicked, lookup, dialog)
+{
+    var objectToSend = { "source": lookup };
+    $.ajax({
+                url: "servlets/currentTrends",
+                data: objectToSend,
+                success: function(data)
+                {
+//                    used to open a row...looks ugly and no easy way to update real-time
+//                    oTable.fnOpen(rowClicked, data, 'details');
+
+                    $(dialog).html(data).dialog('open');
+                },
+                error: function(e, jqxhr, settings, exception)
+                {
+                    alert('Error: ' + settings);
+                }
+            }
+    );
+}
+
 function collectData(lookups)
 {
     var objToSend = {
@@ -137,4 +158,6 @@ function makeRequestToCollector(objectToSend)
             {
                 alert('Error: ' + settings);
             });
+
+    getCollectorStatus();
 }

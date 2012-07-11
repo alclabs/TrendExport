@@ -26,6 +26,8 @@ import com.controlj.addon.trendexport.exceptions.SourceMappingNotFoundException;
 import com.controlj.addon.trendexport.exceptions.TableNotInDatabaseException;
 import com.controlj.addon.trendexport.util.AlarmHandler;
 import com.controlj.addon.trendexport.util.ErrorHandler;
+import com.controlj.addon.trendexport.util.Statistics;
+import com.controlj.addon.trendexport.util.StatisticsCollector;
 import com.controlj.green.addonsupport.access.*;
 import com.controlj.green.addonsupport.access.aspect.TrendSource;
 import com.controlj.green.addonsupport.access.trend.TrendData;
@@ -48,10 +50,13 @@ public class DataCollector
 
     public static void collectData(DBAndSchemaSynchronizer synchronizer, Collection<String> referencePaths)
     {
+        Statistics globalStats = StatisticsCollector.getStatisticsCollector().getStatisticsForSource("global");
+        long startTimer = System.currentTimeMillis();
+        Date collDate = new Date();
+
         try
         {
             isBusy.set(true);
-
             synchronizer.connect();
 
             for (String source : referencePaths)
@@ -89,6 +94,11 @@ public class DataCollector
         finally
         {
             synchronizer.disconnect();
+
+            globalStats.addStatistics(collDate, System.currentTimeMillis() - startTimer);
+            globalStats.addSamples(StatisticsCollector.getStatisticsCollector().getMostRecentTotal());
+            StatisticsCollector.getStatisticsCollector().writeToDataStore();
+
             isBusy.set(false);
         }
     }
@@ -114,7 +124,7 @@ public class DataCollector
         return isBusy.get();
     }
 
-    private static void copyLatestTrendHistory(final String nodeLookupString, final DBAndSchemaSynchronizer synchronizer)
+    private static void copyLatestTrendHistory(final String nodeGQLPath, final DBAndSchemaSynchronizer synchronizer)
             throws DatabaseException, TrendException, TableNotInDatabaseException, SourceMappingNotFoundException, SystemException
     {
         try
@@ -126,18 +136,30 @@ public class DataCollector
                 public void execute(@NotNull SystemAccess systemAccess)
                         throws DatabaseException, NoSuchAspectException, TrendException, TableNotInDatabaseException, UnresolvableException, SourceMappingNotFoundException
                 {
-                    Location startLoc = systemAccess.resolveGQLPath(nodeLookupString);
+                    Location startLoc = systemAccess.resolveGQLPath(nodeGQLPath);
+                    String lookupString = startLoc.getPersistentLookupString(true);
+
+                    Statistics tempStats = StatisticsCollector.getStatisticsCollector().getStatisticsForSource(lookupString);
+                    long startCollection = System.currentTimeMillis();
+                    Date collectionTime = new Date();
+
                     TrendSource trendSource = startLoc.getAspect(TrendSource.class);
                     if (! trendSource.isHistorianEnabled())
                         ErrorHandler.handleError("Trend Historian Disabled", new Exception(), AlarmHandler.TrendExportAlarm.HistorianDisabled);
 
                     // start using the retriever
-                    DataStoreRetriever retriever = synchronizer.getRetrieverForTrendSource(nodeLookupString);
+                    CollectionOptimizer retriever = synchronizer.getRetrieverForTrendSource(nodeGQLPath);
                     Date startDate = retriever.getLastRecordedDate();
                     int numberOfSamplesToSkip = retriever.getNumberOfSamplesToSkip();
-                    TrendData trendData = trendSource.getTrendData(TrendRangeFactory.byDateRange(startDate, new Date()));
 
-                    synchronizer.insertTrendSamples(nodeLookupString, trendData, numberOfSamplesToSkip);
+                    TrendData trendData = trendSource.getTrendData(TrendRangeFactory.byDateRange(startDate, new Date()));
+                    synchronizer.insertTrendSamples(nodeGQLPath, trendData, numberOfSamplesToSkip, tempStats);
+
+                    // end statistics gathering/write to StatisticsCollector
+                    long elapsedTime = System.currentTimeMillis() - startCollection;
+                    tempStats.addStatistics(collectionTime, elapsedTime);
+
+                    StatisticsCollector.getStatisticsCollector().writeStats(lookupString, tempStats);
                 }
             });
         }

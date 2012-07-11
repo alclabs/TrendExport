@@ -31,6 +31,8 @@ import com.controlj.addon.trendexport.exceptions.TableNotInDatabaseException;
 import com.controlj.addon.trendexport.helper.TrendPathAndDBTableName;
 import com.controlj.addon.trendexport.helper.TrendSourceTypeAndPathResolver;
 import com.controlj.addon.trendexport.util.Logger;
+import com.controlj.addon.trendexport.util.Statistics;
+import com.controlj.addon.trendexport.util.StatisticsCollector;
 import com.controlj.green.addonsupport.access.*;
 import com.controlj.green.addonsupport.access.aspect.TrendSource;
 import com.controlj.green.addonsupport.access.trend.TrendData;
@@ -83,9 +85,9 @@ public class DBAndSchemaSynchronizer
                 (passwd == null ? info2.getPasswd() == null : passwd.equals(info2.getPasswd()));
     }
 
-    public DataStoreRetriever getRetrieverForTrendSource(String nodeLookupString) throws SourceMappingNotFoundException, TableNotInDatabaseException
+    public CollectionOptimizer getRetrieverForTrendSource(String nodeLookupString) throws SourceMappingNotFoundException, TableNotInDatabaseException
     {
-        return new DataStoreRetriever(sourceMappings.getTableNameFromSource(nodeLookupString), database);
+        return new CollectionOptimizer(sourceMappings.getTableNameFromSource(nodeLookupString), database);
     }
 
     public SourceMappings getSourceMappings()
@@ -137,10 +139,14 @@ public class DBAndSchemaSynchronizer
     }
 
     public void removeSource(String gqlReferencePath, boolean keepData)
-            throws DatabaseException
+            throws DatabaseException, SystemException, UnresolvableException
     {
         sourceMappings.removeSource(gqlReferencePath);
         database.upgradeSchema(sourceMappings, keepData);
+
+        // remove statistics
+        String lookup = TrendSourceTypeAndPathResolver.getPersistentLookupString(gqlReferencePath);
+        StatisticsCollector.getStatisticsCollector().removeStatisticsForSource(lookup);
     }
 
     public void enableOrDisableSource(final String lookupString, final boolean enable) throws DatabaseException, SystemException, ActionExecutionException
@@ -304,11 +310,11 @@ public class DBAndSchemaSynchronizer
         return mappings;
     }
 
-    public void insertTrendSamples(String source, TrendData trendData, int numberOfSamplesToSkip)
+    public void insertTrendSamples(String source, TrendData trendData, int numberOfSamplesToSkip, Statistics statistics)
             throws SourceMappingNotFoundException, TableNotInDatabaseException, TrendException
     {
         String tableName = sourceMappings.getTableNameFromSource(source);
-        database.insertDataIntoTrendTable(tableName, trendData, numberOfSamplesToSkip);
+        database.insertDataIntoTrendTable(tableName, trendData, numberOfSamplesToSkip, statistics);
     }
 
     public boolean containsSource(String referencePath)

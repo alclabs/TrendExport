@@ -28,6 +28,7 @@ import com.controlj.addon.trendexport.exceptions.TableNotInDatabaseException;
 import com.controlj.addon.trendexport.helper.TrendDataProcessor;
 import com.controlj.addon.trendexport.tables.MetaDataTable;
 import com.controlj.addon.trendexport.tables.TrendDataTable;
+import com.controlj.addon.trendexport.util.Statistics;
 import com.controlj.green.addonsupport.access.TrendException;
 import com.controlj.green.addonsupport.access.trend.TrendData;
 import com.controlj.green.addonsupport.xdatabase.*;
@@ -143,11 +144,11 @@ public class DynamicDatabase extends Database
         metaDataTable.setEnabledByReferenceName(this, referencePath, enabled);
     }
 
-    public void insertDataIntoTrendTable(String tableName, TrendData<?> data, int numberOfSamplesToSkip)
+    public void insertDataIntoTrendTable(String tableName, TrendData<?> data, int numberOfSamplesToSkip, Statistics statistics)
             throws TableNotInDatabaseException, TrendException
     {
         TrendDataTable table = getDataTableByTableName(tableName);
-        data.process(new TrendDataProcessor(this, table, numberOfSamplesToSkip));
+        data.process(new TrendDataProcessor(this, table, numberOfSamplesToSkip, statistics));
     }
 
     public TrendDataTable getDataTableByTableName(String name) throws TableNotInDatabaseException

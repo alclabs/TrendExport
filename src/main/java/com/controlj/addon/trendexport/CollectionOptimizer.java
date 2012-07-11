@@ -32,14 +32,16 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Date;
 
-public class DataStoreRetriever
+// Class is to look at that
+
+public class CollectionOptimizer
 {
     private Date lastRecordedDate;
     private String tableName;
     private DynamicDatabase database;
     private TrendDataTable trendDataTable;
 
-    public DataStoreRetriever(String nameFromSource, DynamicDatabase database) throws TableNotInDatabaseException
+    public CollectionOptimizer(String nameFromSource, DynamicDatabase database) throws TableNotInDatabaseException
     {
         this.tableName = nameFromSource;
         this.database = database;
@@ -54,7 +56,6 @@ public class DataStoreRetriever
 
     private Date getLastRecordedDateFromDB() throws DatabaseException
     {
-//        ErrorHandler.handleError("Entering GET DATE", new Throwable());
         return database.runQuery(new QueryTask<Date>()
         {
             @Override
@@ -62,8 +63,6 @@ public class DataStoreRetriever
             {
                 TrendDataTable table = trendDataTable;
                 Result result = databaseReadAccess.execute(database.buildSelect(table.dateColumn).orderBy(table.dateColumn.desc()));
-
-//                ErrorHandler.handleError("Leaving GET DATE", new Throwable());
 
                 if (result.next())
                     return result.get(table.dateColumn);

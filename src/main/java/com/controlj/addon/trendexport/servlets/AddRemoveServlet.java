@@ -217,7 +217,7 @@ public class AddRemoveServlet extends HttpServlet
     }
 
     private void removeSource(final List<String> nodeLookups, final DBAndSchemaSynchronizer synchronizer)
-            throws DatabaseException, UnresolvableException
+            throws DatabaseException, UnresolvableException, SystemException
     {
         // resolve any DBIDS to GQL reference paths as well
         for (String referencePath : nodeLookups)

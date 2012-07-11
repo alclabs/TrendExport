@@ -14,7 +14,8 @@ public class ConfigManagerLoader
 
     public static boolean isConfigured()
     {
-        try {
+        try
+        {
             return XDatabase.getXDatabase().canReadDatabaseConnectionInfo("connection");
         }
         catch (NullPointerException n)

@@ -1,7 +1,9 @@
 package com.controlj.addon.trendexport.helper;
 
 import com.controlj.addon.trendexport.tables.TrendDataTable;
-import com.controlj.green.addonsupport.access.trend.*;
+import com.controlj.addon.trendexport.util.Statistics;
+import com.controlj.green.addonsupport.access.trend.TrendProcessor;
+import com.controlj.green.addonsupport.access.trend.TrendSample;
 import com.controlj.green.addonsupport.xdatabase.Database;
 import com.controlj.green.addonsupport.xdatabase.DatabaseException;
 import com.controlj.green.addonsupport.xdatabase.Insert;
@@ -21,13 +23,16 @@ public class TrendDataProcessor implements TrendProcessor
     private int samplesToSkip;
     private Insert holeStartInsert;
     private Insert holeEndInsert;
+    private long samplesWritten;
+    private Statistics statistics;
 
-
-    public TrendDataProcessor(Database database, TrendDataTable trendDataTable, int numberOfSamplesToSkip)
+    public TrendDataProcessor(Database database, TrendDataTable trendDataTable, int numberOfSamplesToSkip, Statistics statistics)
     {
         db = database;
         table = trendDataTable;
         samplesToSkip = numberOfSamplesToSkip;
+        samplesWritten = 0;
+        this.statistics = statistics;
     }
 
     @Override
@@ -59,7 +64,7 @@ public class TrendDataProcessor implements TrendProcessor
                 holeEndInsert = null;
             }
 
-            Insert insert = table.buildInsertForData(sample);
+            Insert insert = table.buildInsertForData(sample); samplesWritten++;
             db.execute(insert);
         }
         catch (DatabaseException e)
@@ -71,6 +76,7 @@ public class TrendDataProcessor implements TrendProcessor
     @Override
     public void processEnd(@NotNull Date date, @Nullable TrendSample sample)
     {
+        statistics.addSamples(samplesWritten);
     }
 
     @Override

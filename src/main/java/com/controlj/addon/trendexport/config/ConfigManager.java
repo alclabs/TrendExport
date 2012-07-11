@@ -62,6 +62,9 @@ public class ConfigManager
                     String timeInterval = reader.readLine();
                     String collMethod = reader.readLine();
 
+                    if (collMethod == null || timeInterval == null)
+                        throw new IOException();
+
                     Configuration.CollectionMethod method;
                     if (collMethod.contains("Interval"))
                         method = Configuration.CollectionMethod.Interval;
