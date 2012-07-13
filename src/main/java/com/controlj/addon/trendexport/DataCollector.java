@@ -24,6 +24,7 @@ package com.controlj.addon.trendexport;
 
 import com.controlj.addon.trendexport.exceptions.SourceMappingNotFoundException;
 import com.controlj.addon.trendexport.exceptions.TableNotInDatabaseException;
+import com.controlj.addon.trendexport.helper.TrendSourceTypeAndPathResolver;
 import com.controlj.addon.trendexport.util.AlarmHandler;
 import com.controlj.addon.trendexport.util.ErrorHandler;
 import com.controlj.addon.trendexport.util.Statistics;
@@ -37,8 +38,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.Lock;
@@ -52,7 +51,9 @@ public class DataCollector
 
     public static void collectData(DBAndSchemaSynchronizer synchronizer, Collection<String> referencePaths)
     {
-        Map<String, Statistics> tempCollectionMap = new HashMap<String, Statistics>(referencePaths.size());
+        // store here so it's always stored after or only store if successful?
+        Statistics globalStats = new Statistics();
+        globalStats.setDate(new Date());
 
         try
         {
@@ -64,8 +65,11 @@ public class DataCollector
                 try
                 {
                     Statistics sourceStats = new Statistics();
-                    collectDataForSource(source, synchronizer, sourceStats);
-                    tempCollectionMap.put(source, sourceStats);
+                    collectDataForSource(source, synchronizer, sourceStats, globalStats);
+
+                    String lookup = TrendSourceTypeAndPathResolver.getPersistentLookupString(source);
+                    StatisticsCollector.getStatisticsCollector().storeCollectionStatistics(lookup, sourceStats);
+                    StatisticsCollector.getStatisticsCollector().writeToDataStore();
                 }
                 catch (SourceMappingNotFoundException e)
                 {
@@ -87,6 +91,10 @@ public class DataCollector
                 {
                     ErrorHandler.handleError("Database error exception", e, AlarmHandler.TrendExportAlarm.DatabaseWriteFailure);
                 }
+                catch (UnresolvableException e)
+                {
+                    ErrorHandler.handleError("Unable to resolve trend: " + source, e, AlarmHandler.TrendExportAlarm.CollectionFailure);
+                }
             }
         }
         catch (DatabaseException e)
@@ -95,20 +103,20 @@ public class DataCollector
         }
         finally
         {
+            StatisticsCollector.getStatisticsCollector().storeCollectionStatistics("global", globalStats);
+            StatisticsCollector.getStatisticsCollector().writeToDataStore();
             synchronizer.disconnect();
-            StatisticsCollector.getStatisticsCollector().storeCollectionStatistics(tempCollectionMap);
-
             isBusy.set(false);
         }
     }
 
-    private static void collectDataForSource(String source, DBAndSchemaSynchronizer synchronizer, Statistics singleSourceStats)
+    private static void collectDataForSource(String source, DBAndSchemaSynchronizer synchronizer, Statistics singleSourceStats, Statistics globalStats)
             throws SourceMappingNotFoundException, TableNotInDatabaseException, TrendException, DatabaseException, SystemException
     {
         lock.lock(); isBusy.set(true);
         tableName.set(synchronizer.getSourceMappings().getTableNameFromSource(source));
 
-        copyLatestTrendHistory(source, synchronizer, singleSourceStats);
+        copyLatestTrendHistory(source, synchronizer, singleSourceStats, globalStats);
 
         lock.unlock(); isBusy.set(false);
     }
@@ -123,7 +131,7 @@ public class DataCollector
         return isBusy.get();
     }
 
-    private static void copyLatestTrendHistory(final String nodeGQLPath, final DBAndSchemaSynchronizer synchronizer, final Statistics singleStat)
+    private static void copyLatestTrendHistory(final String nodeGQLPath, final DBAndSchemaSynchronizer synchronizer, final Statistics singleStat, final Statistics globalStats)
             throws DatabaseException, TrendException, TableNotInDatabaseException, SourceMappingNotFoundException, SystemException
     {
         try
@@ -136,8 +144,6 @@ public class DataCollector
                         throws DatabaseException, NoSuchAspectException, TrendException, TableNotInDatabaseException, UnresolvableException, SourceMappingNotFoundException
                 {
                     Location startLoc = systemAccess.resolveGQLPath(nodeGQLPath);
-//                    String lookupString = startLoc.getPersistentLookupString(true);
-
 
                     long startCollection = System.currentTimeMillis();
                     Date collectionTime = new Date();
@@ -152,13 +158,16 @@ public class DataCollector
                     int numberOfSamplesToSkip = retriever.getNumberOfSamplesToSkip();
 
                     TrendData trendData = trendSource.getTrendData(TrendRangeFactory.byDateRange(startDate, new Date()));
-                    synchronizer.insertTrendSamples(nodeGQLPath, trendData, numberOfSamplesToSkip, singleStat);
+                    synchronizer.insertTrendSamples(nodeGQLPath, trendData, numberOfSamplesToSkip, singleStat, globalStats);
 
                     // end statistics gathering and store
                     long elapsedTime = System.currentTimeMillis() - startCollection;
-                    singleStat.setDate(collectionTime, elapsedTime);
+                    singleStat.setDate(collectionTime);
+                    singleStat.setElapsedTime(elapsedTime);
 
-//                    StatisticsCollector.getStatisticsCollector().storeStats(lookupString, tempStats);
+                    // set up global stats
+                    globalStats.setElapsedTime(elapsedTime + globalStats.getElapsedTime());
+
                     return singleStat;
                 }
             });

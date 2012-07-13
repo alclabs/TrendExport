@@ -144,11 +144,11 @@ public class DynamicDatabase extends Database
         metaDataTable.setEnabledByReferenceName(this, referencePath, enabled);
     }
 
-    public void insertDataIntoTrendTable(String tableName, TrendData<?> data, int numberOfSamplesToSkip, Statistics statistics)
+    public void insertDataIntoTrendTable(String tableName, TrendData<?> data, int numberOfSamplesToSkip, Statistics statistics, Statistics globalStats)
             throws TableNotInDatabaseException, TrendException
     {
         TrendDataTable table = getDataTableByTableName(tableName);
-        data.process(new TrendDataProcessor(this, table, numberOfSamplesToSkip, statistics));
+        data.process(new TrendDataProcessor(this, table, numberOfSamplesToSkip, statistics, globalStats));
     }
 
     public TrendDataTable getDataTableByTableName(String name) throws TableNotInDatabaseException

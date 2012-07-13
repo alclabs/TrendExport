@@ -24,15 +24,16 @@ public class TrendDataProcessor implements TrendProcessor
     private Insert holeStartInsert;
     private Insert holeEndInsert;
     private long samplesWritten;
-    private Statistics statistics;
+    private Statistics statistics, globalStatistics;
 
-    public TrendDataProcessor(Database database, TrendDataTable trendDataTable, int numberOfSamplesToSkip, Statistics statistics)
+    public TrendDataProcessor(Database database, TrendDataTable trendDataTable, int numberOfSamplesToSkip, Statistics statistics, Statistics globalStats)
     {
         db = database;
         table = trendDataTable;
         samplesToSkip = numberOfSamplesToSkip;
         samplesWritten = 0;
         this.statistics = statistics;
+        globalStatistics = globalStats;
     }
 
     @Override
@@ -77,6 +78,7 @@ public class TrendDataProcessor implements TrendProcessor
     public void processEnd(@NotNull Date date, @Nullable TrendSample sample)
     {
         statistics.addSamples(samplesWritten);
+        globalStatistics.addSamples(samplesWritten);
     }
 
     @Override

@@ -282,7 +282,7 @@ public class DBAndSchemaSynchronizer
         });
     }
 
-    private SourceMappings readMappingsFromDatabase() throws DatabaseException
+    private SourceMappings readMappingsFromDatabase() throws DatabaseException, DatabaseVersionMismatchException
     {
         Collection<TrendPathAndDBTableName> listOfAll = this.getAllSources();
         SourceMappings mappings = new SourceMappings();
@@ -296,7 +296,7 @@ public class DBAndSchemaSynchronizer
         return mappings;
     }
 
-    public SourceMappings getEnabledSources() throws DatabaseException
+    public SourceMappings getEnabledSources() throws DatabaseException, DatabaseVersionMismatchException
     {
         Collection<TrendPathAndDBTableName> listOfAll = this.getAllSources();
         SourceMappings mappings = new SourceMappings();
@@ -310,11 +310,11 @@ public class DBAndSchemaSynchronizer
         return mappings;
     }
 
-    public void insertTrendSamples(String source, TrendData trendData, int numberOfSamplesToSkip, Statistics statistics)
+    public void insertTrendSamples(String source, TrendData trendData, int numberOfSamplesToSkip, Statistics statistics, Statistics globalStats)
             throws SourceMappingNotFoundException, TableNotInDatabaseException, TrendException
     {
         String tableName = sourceMappings.getTableNameFromSource(source);
-        database.insertDataIntoTrendTable(tableName, trendData, numberOfSamplesToSkip, statistics);
+        database.insertDataIntoTrendTable(tableName, trendData, numberOfSamplesToSkip, statistics, globalStats);
     }
 
     public boolean containsSource(String referencePath)
@@ -322,9 +322,20 @@ public class DBAndSchemaSynchronizer
         return sourceMappings.containsSource(referencePath);
     }
 
-    public Collection<TrendPathAndDBTableName> getAllSources() throws DatabaseException
+    public Collection<TrendPathAndDBTableName> getAllSources() throws DatabaseException, DatabaseVersionMismatchException
     {
+        // attempt to rebuild meta data table?
+        try
+        {
+            return this.getMetaDataTableInfo();
+        }
+        catch (DatabaseException e)
+        {
+            create();
+        }
+
         return this.getMetaDataTableInfo();
+
     }
 
     public Collection<String> getReferencePaths(Collection<TrendPathAndDBTableName> trendPathAndDBTableNames)

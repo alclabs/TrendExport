@@ -5,12 +5,14 @@ import java.util.Date;
 public class Statistics
 {
     private Date date;
-    private Long elapsedTime;
-    private Long samples;
+    private long elapsedTime;
+    private long samples;
 
     public Statistics()
     {
-
+        date = new Date();
+        elapsedTime = 0;
+        samples = 0;
     }
 
     public Statistics(Date singleDate, long time, long numSamples)
@@ -20,10 +22,14 @@ public class Statistics
         samples = numSamples;
     }
 
-    public void setDate(Date date, long collectionDuration)
+    public void setDate(Date date)
     {
         this.date = date;
-        this.elapsedTime = collectionDuration;
+    }
+
+    public void setElapsedTime(long time)
+    {
+        elapsedTime = time;
     }
 
     public void addSamples(long samples)
@@ -44,6 +50,12 @@ public class Statistics
     public Long getSamples()
     {
         return samples;
+    }
+
+    @Override
+    public String toString()
+    {
+        return date.getTime() + ";" + elapsedTime + ";" + samples;
     }
 }
 

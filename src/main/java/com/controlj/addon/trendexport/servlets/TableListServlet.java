@@ -10,6 +10,7 @@ import com.controlj.addon.trendexport.util.Statistics;
 import com.controlj.addon.trendexport.util.StatisticsCollector;
 import com.controlj.green.addonsupport.access.SystemException;
 import com.controlj.green.addonsupport.xdatabase.DatabaseException;
+import com.controlj.green.addonsupport.xdatabase.DatabaseVersionMismatchException;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -21,9 +22,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.NumberFormat;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 public class TableListServlet extends HttpServlet
 {
@@ -64,6 +63,10 @@ public class TableListServlet extends HttpServlet
             resp.sendError(500, "Unable to load configuration.");
 
         }
+        catch (DatabaseException e)
+        {
+            resp.sendError(500, "Database Corrupted. This is usually related to the MetaData Table");
+        }
         catch (Exception e)
         {
             resp.sendError(500, "Unable to load list of sources.");
@@ -76,7 +79,7 @@ public class TableListServlet extends HttpServlet
     }
 
     private JSONObject getCurrentList(DBAndSchemaSynchronizer synchronizer)
-            throws JSONException, DatabaseException, SystemException, com.controlj.green.addonsupport.access.UnresolvableException
+            throws JSONException, DatabaseException, SystemException, com.controlj.green.addonsupport.access.UnresolvableException, DatabaseVersionMismatchException
     {
         JSONArray jsonArray = new JSONArray();
         Collection<TrendPathAndDBTableName> stuffs = synchronizer.getAllSources();
@@ -182,11 +185,24 @@ public class TableListServlet extends HttpServlet
         StringBuilder builder = new StringBuilder();
         for (int i = 0; i < iterations; i++)
         {
-            builder.append((int) time).append(':');
+            builder.append((int) time).append(' ').append(getTimeUnit(i)).append(':');
             time -= (int) time;
             time *= 60;
         }
 
         return builder.toString();
+    }
+
+    private String getTimeUnit(int iteration)
+    {
+        if (iteration == 0)
+            return "sec";
+
+        if (iteration == 1)
+            return "mins";
+        else
+            return "hrs";
+
+
     }
 }

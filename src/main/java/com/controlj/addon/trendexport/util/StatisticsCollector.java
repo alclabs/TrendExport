@@ -8,19 +8,18 @@ import org.jetbrains.annotations.NotNull;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.*;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class StatisticsCollector
 {
-    private static final int STORED_COLLECTION_LIMIT = 5;
+    private static final StatisticsCollector STATISTICS_COLLECTOR = new StatisticsCollector();
+    private static final String STATS_DATASTORE_NAME = "TrendExportStats";
 
     // global map of every collection containing the source that was collected as well as the statistics
-    private static List<Map<String, Statistics>> globalStats;
-    private static final StatisticsCollector STATISTICS_COLLECTOR = new StatisticsCollector();
-    private static final Lock lock = new ReentrantLock(true);
-    private static final String STATS_DATASTORE_NAME = "TrendExportStats";
+    private final Map<String, StatisticsHolder> globalStats;
 
     public static StatisticsCollector getStatisticsCollector()
     {
@@ -29,71 +28,34 @@ public class StatisticsCollector
 
     private StatisticsCollector()
     {
-        globalStats = new ArrayList<Map<String, Statistics>>();
+        globalStats = new HashMap<String, StatisticsHolder>();
+        globalStats.put("global", new StatisticsHolder());
     }
 
-    public void storeCollectionStatistics(Map<String, Statistics> collectionStats)
+    public void storeCollectionStatistics(String source, Statistics statistics)
     {
-        // check and fix length of collection list - keeps size of globalStats of collections to STORED_COLLECTION_LIMIT
-        checkAndCorrectStorageLimit();
-        globalStats.add(collectionStats);
+        sourceExists(source);
+
+        StatisticsHolder holder = globalStats.get(source);
+        holder.addStatistics(statistics);
+        globalStats.put(source, holder);
     }
 
-    private void checkAndCorrectStorageLimit()
+    private void sourceExists(String source)
     {
-        if (globalStats.size() < STORED_COLLECTION_LIMIT)
-            return;
-
-        globalStats.remove(0);
+        if (!globalStats.containsKey(source))
+            globalStats.put(source, new StatisticsHolder());
     }
 
     public List<Statistics> getStatisticsForSource(String source)
     {
-        // search through each collection and search for the source
-        List<Statistics> results = new ArrayList<Statistics>();
-        for (Map<String, Statistics> statsMapping : globalStats)
-        {
-            if (statsMapping.containsKey(source))
-                results.add(statsMapping.get(source));
-        }
-
-        return results;
-    }
-
-    public List<Statistics> getGlobalStatistics()
-    {
-        // returns the earliest found date, duration of entire collection (add all in Map), total number of samples (by adding)
-        // and possibly which sources were collected
-
-        List<Statistics> allStats = new ArrayList<Statistics>(globalStats.size());
-        for (Map<String, Statistics> singleCollection : globalStats)
-        {
-            Date earlyDate = new Date();
-            long sumDuration = 0, sumSamples = 0;
-
-            for (Statistics s : singleCollection.values())
-            {
-                // save only the earliest date
-                if (s.getDate().before(earlyDate))
-                    earlyDate = s.getDate();
-
-                sumDuration += s.getElapsedTime();
-                sumSamples += s.getSamples();
-            }
-
-            allStats.add(new Statistics(earlyDate, sumDuration, sumSamples));
-        }
-
-
-        return allStats;
+        sourceExists(source);
+        return globalStats.get(source).getStatisticsList();
     }
 
     public void removeStatisticsForSource(String source)
     {
-        // search everything; if found, remove object; write new results
-        for (Map<String, Statistics> statsMapping : globalStats)
-            statsMapping.remove(source);
-
+        globalStats.remove(source);
         writeToDataStore();
     }
 
@@ -111,12 +73,10 @@ public class StatisticsCollector
                     PrintWriter writer = store.getWriter();
 
                     // for each key, write the line for the stats map
-                    for (Map<String, Statistics> collectionStats : globalStats)
-                    {
-                        writer.print(collectionStats.size() + ";");
-                        for (String key : collectionStats.keySet())
-                            writer.println(key + ";" + collectionStats.get(key).toString());
-                    }
+                    for (String key : globalStats.keySet())
+                        writer.println(key + ";" +
+                                globalStats.get(key).getStatisticsList().size() + ";" +
+                                globalStats.get(key).toString());
 
                     writer.flush();
                     writer.close();
@@ -157,8 +117,8 @@ public class StatisticsCollector
                         while (line != null)
                         {
                             String[] flatStats = line.split(";");
-                            Map<String, Statistics> statsMap = parseFlatStatistics(flatStats);
-                            globalStats.add(statsMap);
+                            StatisticsHolder holder = parseFlatStatistics(flatStats);
+                            globalStats.put(flatStats[0], holder);
 
                             line = reader.readLine();
                         }
@@ -181,21 +141,20 @@ public class StatisticsCollector
         }
     }
 
-    private Map<String, Statistics> parseFlatStatistics(String[] strings) throws Exception
+    private StatisticsHolder parseFlatStatistics(String[] strings) throws Exception
     {
-        Map<String, Statistics> singleCollectionMap = new HashMap<String, Statistics>();
-        int sizeOfEachCollection = Integer.parseInt(strings[0]);
+        StatisticsHolder holder = new StatisticsHolder();
+        int lengthForEach = (int) Long.parseLong(strings[1]);
 
-        for (int i = 1; i < sizeOfEachCollection; i += 4)
+        for (int i = 2; i < lengthForEach; i++)
         {
-            String source   = strings[i];
-            long date       = Long.parseLong(strings[i+1]);
-            long duration   = Long.parseLong(strings[i+2]);
-            long samples    = Long.parseLong(strings[i+3]);
+            Date date = new Date(Long.parseLong(strings[i]));
+            long duration = Long.parseLong(strings[1 + i + lengthForEach]);
+            long samples = Long.parseLong(strings[2 + i + lengthForEach]);
 
-            singleCollectionMap.put(source, new Statistics(new Date(date), duration, samples));
+            holder.addStatistics(new Statistics(date, duration, samples));
         }
 
-        return singleCollectionMap;
+        return holder;
     }
 }
