@@ -110,7 +110,6 @@ public class StatisticsCollector
                     DataStore store = access.getSystemDataStore(STATS_DATASTORE_NAME);
                     try
                     {
-
                         BufferedReader reader = store.getReader();
                         String line = reader.readLine();
 

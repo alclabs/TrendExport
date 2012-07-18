@@ -61,7 +61,6 @@ public class TableListServlet extends HttpServlet
         {
             ErrorHandler.handleError("Unable to load configuration.", e);
             resp.sendError(500, "Unable to load configuration.");
-
         }
         catch (DatabaseException e)
         {
@@ -183,9 +182,9 @@ public class TableListServlet extends HttpServlet
         }
 
         StringBuilder builder = new StringBuilder();
-        for (int i = 0; i < iterations; i++)
+        for (int i = 0; i <= iterations; i++)
         {
-            builder.append((int) time).append(' ').append(getTimeUnit(i)).append(':');
+            builder.append((int) time).append(' ').append(getTimeUnit(i)).append(' ');
             time -= (int) time;
             time *= 60;
         }
