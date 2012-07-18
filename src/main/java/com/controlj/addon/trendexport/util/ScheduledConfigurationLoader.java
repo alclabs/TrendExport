@@ -115,6 +115,9 @@ public class ScheduledConfigurationLoader
                 calendar.add(Calendar.DAY_OF_MONTH, 1);
         }
 
+        if (calendar.get(Calendar.YEAR) > 2030)
+            ErrorHandler.handleError("Calendar problem", new Exception("Scheduled Collection date error!"));
+
         return calendar;
     }
 
