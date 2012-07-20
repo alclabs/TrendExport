@@ -145,33 +145,40 @@ table.pretty tfoot td {
 	font-weight: bold;
 }
 
-/*
- * Pagination
- */
-span.paginate_button,
-span.paginate_active {
-	display: inline-block;
-	/*background-color: #608995;*/
-	background-color: #A2B5CD;
-    padding: 2px 6px;
-	margin-left: 2px;
+
+.paging_full_numbers a.paginate_button,
+ .paging_full_numbers a.paginate_active {
+	border: 1px solid #aaa;
+	-webkit-border-radius: 5px;
+	-moz-border-radius: 5px;
+	padding: 2px 5px;
+	margin: 0 3px;
 	cursor: pointer;
 	*cursor: hand;
+	color: #333 !important;
 }
 
-span.paginate_active {
-	background-color: transparent;
-	border: 1px solid black;
+/* Pagination */
+
+.paging_full_numbers a:active {
+	outline: none
 }
 
-span.paginate_button_disabled {
-	/*color: #3d6672;*/
-    color: #E0E0E0;
+.paging_full_numbers a:hover {
+	text-decoration: none;
 }
 
-div.dataTables_paginate span>span {
-	width: 15px;
-	text-align: center;
+.paging_full_numbers a.paginate_button {
+	background-color: #ddd;
+}
+
+.paging_full_numbers a.paginate_button:hover {
+	background-color: #ccc;
+	text-decoration: none !important;
+}
+
+.paging_full_numbers a.paginate_active {
+	background-color: #99B3FF;
 }
 
 /* Selected Colors */
