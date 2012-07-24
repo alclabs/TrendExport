@@ -142,39 +142,6 @@ public class AddRemoveServlet extends HttpServlet
         return collection;
     }
 
-    private void collectData(List<String> sources, DBAndSchemaSynchronizer synchronizer)
-    {
-                            /*
-
-        for (String source : sources)
-        {
-            try
-            {
-                DataCollector.collectDataForSource(source, synchronizer);
-            }
-            catch (SourceMappingNotFoundException e)
-            {
-                ErrorHandler.handleError("SourceMapping not found", e);
-            }
-            catch (SystemException e)
-            {
-                ErrorHandler.handleError("", e, AlarmHandler.TrendExportAlarm.CollectionFailure);
-            }
-            catch (TrendException e)
-            {
-                ErrorHandler.handleError("Unable to retrieve TrendSource data from WebCTRL database", e, AlarmHandler.TrendExportAlarm.CollectionFailure);
-            }
-            catch (TableNotInDatabaseException e)
-            {
-                ErrorHandler.handleError("Table not present in database", e, AlarmHandler.TrendExportAlarm.DatabaseWriteFailure);
-            }
-            catch (DatabaseException e)
-            {
-                ErrorHandler.handleError("Database communication error", e, AlarmHandler.TrendExportAlarm.DatabaseWriteFailure);
-            }
-        }      */
-    }
-
     private void addSource(final List<String> nodeLookups, final DBAndSchemaSynchronizer synchronizer, final String tableName)
             throws DatabaseException, UnresolvableException, NoSuchAspectException
     {

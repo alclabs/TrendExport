@@ -142,11 +142,21 @@ public class DBAndSchemaSynchronizer
             throws DatabaseException, SystemException, UnresolvableException
     {
         sourceMappings.removeSource(gqlReferencePath);
-        database.upgradeSchema(sourceMappings, keepData);
-
+        DynamicDatabase newDatabase = database.upgradeSchema(sourceMappings, keepData);
+        database.close();
         // remove statistics
         String lookup = TrendSourceTypeAndPathResolver.getPersistentLookupString(gqlReferencePath);
         StatisticsCollector.getStatisticsCollector().removeStatisticsForSource(lookup);
+
+        try
+        {
+            newDatabase.connect(connectionInfo);
+        }
+        catch (DatabaseVersionMismatchException e)
+        {
+            throw new DatabaseException("After adding table, database is wrong version!", e);
+        }
+        database = newDatabase;
     }
 
     public void enableOrDisableSource(final String lookupString, final boolean enable) throws DatabaseException, SystemException, ActionExecutionException
