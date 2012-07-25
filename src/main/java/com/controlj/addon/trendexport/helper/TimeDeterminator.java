@@ -76,7 +76,7 @@ public class TimeDeterminator
         //
 
         // add the interval to the current scheduledCollection until the time is valid
-        while (!isCurrentCollectionDateValid(this.scheduledCollection))
+        while (!isCurrentCollectionDateValid())
         {
             this.scheduledCollection.add(Calendar.HOUR_OF_DAY, (int) getIntervalInHours());
         }
@@ -85,9 +85,9 @@ public class TimeDeterminator
     }
 
     // valid means that the scheduled collection is scheduled for the future (after now)
-    private boolean isCurrentCollectionDateValid(Calendar scheduledCollection)
+    private boolean isCurrentCollectionDateValid()
     {
-        return scheduledCollection.after(GregorianCalendar.getInstance());
+        return this.scheduledCollection.getTimeInMillis() > System.currentTimeMillis();
     }
 
     public long calculateInitialDelay()
@@ -97,7 +97,20 @@ public class TimeDeterminator
         * 1) Specified time - determine next scheduled date.  return the difference the time between the next scheduled date and now.
         * 2) Interval       - if the current scheduled date is before now (i.e. the collection date is not valid)
         * */
-        return this.collectionMethod == Configuration.CollectionMethod.Interval ? convertMsToHours(getIntervalInMillis()) : calculateNextScheduledCollection().getTimeInMillis();
+
+         if (this.collectionMethod == Configuration.CollectionMethod.Interval)
+            return getIntervalInMillis();
+        else
+        {
+            // get current time...if scheduled time is invalid, get new time.
+            if (!isCurrentCollectionDateValid())
+                calculateNextScheduledCollection();
+
+            return this.scheduledCollection.getTimeInMillis() - System.currentTimeMillis();
+        }
+
+
+//         return this.collectionMethod == Configuration.CollectionMethod.Interval ? convertMsToHours(getIntervalInMillis()) : getIntervalInMillis();
     }
 
     public long calculateInterval()
@@ -107,7 +120,6 @@ public class TimeDeterminator
         * 1) Specified time - determine next scheduled date. Calculate the time between then and now.
         * 2) Interval       - Fixed given that the interval is the value given...
         * */
-
         return this.collectionMethod == Configuration.CollectionMethod.Interval ? getIntervalInMillis() : convertHoursToMs(24);
     }
 

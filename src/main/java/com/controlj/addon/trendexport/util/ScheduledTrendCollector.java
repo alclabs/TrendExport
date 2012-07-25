@@ -34,7 +34,6 @@ import org.jetbrains.annotations.Nullable;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import java.io.IOException;
-import java.util.Calendar;
 import java.util.Collection;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -48,10 +47,9 @@ public class ScheduledTrendCollector implements ServletContextListener
     private static final AtomicReference<TimeDeterminator> TIME_DETERMINATOR = new AtomicReference<TimeDeterminator>();
 
     private final ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
-//    private static final StatisticsLibrarian statisticsCollector = new StatisticsLibrarian();
+    //    private static final StatisticsLibrarian statisticsCollector = new StatisticsLibrarian();
     @Nullable
     private ScheduledFuture<?> collectionHandler;
-    private static Calendar nextCollectionDate;
 
     @Override
     public void contextInitialized(ServletContextEvent sce)
@@ -112,7 +110,7 @@ public class ScheduledTrendCollector implements ServletContextListener
         final ScheduledConfigurationLoader loader = new ScheduledConfigurationLoader(manager);
         TIME_DETERMINATOR.set(TimeDeterminator.getTimeDeterminator(manager.getConfiguration().getCollectionString()));
         final TimeDeterminator timeDeterminator = TIME_DETERMINATOR.get();
-        nextCollectionDate = timeDeterminator.calculateNextScheduledCollection();
+        timeDeterminator.calculateNextScheduledCollection();
         final long initialDelay = timeDeterminator.calculateInitialDelay();
         final long interval = timeDeterminator.calculateInterval();
 
@@ -133,7 +131,7 @@ public class ScheduledTrendCollector implements ServletContextListener
 
                         Collection<TrendPathAndDBTableName> trendPathAndDBTableNames = synchronizer.getSourceMappings().getSourcesAndTableNames();
                         DataCollector.collectData(synchronizer, synchronizer.getReferencePaths(trendPathAndDBTableNames));
-                        nextCollectionDate = timeDeterminator.calculateNextScheduledCollection();
+                        timeDeterminator.calculateNextScheduledCollection();
                     }
                 }, initialDelay, interval, TimeUnit.MILLISECONDS);
     }
