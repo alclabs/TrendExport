@@ -40,7 +40,8 @@ public class Configuration
         return this.collectionMethod;
     }
 
-    public long getCollectionValue()
+    // convert time into a value for Date but this is ineffective...
+    /*public long getCollectionValue()
     {
         if (!this.collectionString.contains(":"))
             return Long.parseLong(this.collectionString) * 60 * 60 * 1000;
@@ -59,7 +60,7 @@ public class Configuration
 
             return time;
         }
-    }
+    }*/
 
     @NotNull
     public String getAlarmControlProgramPath()

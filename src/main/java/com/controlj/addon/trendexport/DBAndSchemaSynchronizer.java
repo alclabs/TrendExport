@@ -30,9 +30,9 @@ import com.controlj.addon.trendexport.exceptions.SourceMappingNotFoundException;
 import com.controlj.addon.trendexport.exceptions.TableNotInDatabaseException;
 import com.controlj.addon.trendexport.helper.TrendPathAndDBTableName;
 import com.controlj.addon.trendexport.helper.TrendSourceTypeAndPathResolver;
+import com.controlj.addon.trendexport.statistics.StatisticsAccumulator;
+import com.controlj.addon.trendexport.statistics.StatisticsLibrarian;
 import com.controlj.addon.trendexport.util.Logger;
-import com.controlj.addon.trendexport.util.Statistics;
-import com.controlj.addon.trendexport.util.StatisticsCollector;
 import com.controlj.green.addonsupport.access.*;
 import com.controlj.green.addonsupport.access.aspect.TrendSource;
 import com.controlj.green.addonsupport.access.trend.TrendData;
@@ -144,9 +144,10 @@ public class DBAndSchemaSynchronizer
         sourceMappings.removeSource(gqlReferencePath);
         DynamicDatabase newDatabase = database.upgradeSchema(sourceMappings, keepData);
         database.close();
+
         // remove statistics
         String lookup = TrendSourceTypeAndPathResolver.getPersistentLookupString(gqlReferencePath);
-        StatisticsCollector.getStatisticsCollector().removeStatisticsForSource(lookup);
+        new StatisticsLibrarian().removeStatisticsForSource(lookup);
 
         try
         {
@@ -320,11 +321,11 @@ public class DBAndSchemaSynchronizer
         return mappings;
     }
 
-    public void insertTrendSamples(String source, TrendData trendData, int numberOfSamplesToSkip, Statistics statistics, Statistics globalStats)
+    public void insertTrendSamples(String source, TrendData trendData, int numberOfSamplesToSkip, StatisticsAccumulator statistics)
             throws SourceMappingNotFoundException, TableNotInDatabaseException, TrendException
     {
         String tableName = sourceMappings.getTableNameFromSource(source);
-        database.insertDataIntoTrendTable(tableName, trendData, numberOfSamplesToSkip, statistics, globalStats);
+        database.insertDataIntoTrendTable(tableName, trendData, numberOfSamplesToSkip, statistics);
     }
 
     public boolean containsSource(String referencePath)

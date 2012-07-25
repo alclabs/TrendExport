@@ -1,14 +1,14 @@
-package com.controlj.addon.trendexport.util;
+package com.controlj.addon.trendexport.statistics;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class StatisticsHolder
+public class SourceStatsHolder
 {
     private List<Statistics> statisticsList;
     private static final int STORED_COLLECTION_LIMIT = 5;
 
-    public StatisticsHolder()
+    public SourceStatsHolder()
     {
         statisticsList = new ArrayList<Statistics>();
     }
@@ -36,6 +36,7 @@ public class StatisticsHolder
         StringBuilder builder = new StringBuilder();
         builder.append(statisticsList.size());
 
+        StatisticsSerializer statisticsSerializer = new StatisticsSerializer();
         for (Statistics s : statisticsList)
             builder.append(s.toString()).append(";");
 

@@ -26,6 +26,7 @@ import com.controlj.addon.trendexport.DBAndSchemaSynchronizer;
 import com.controlj.addon.trendexport.DataCollector;
 import com.controlj.addon.trendexport.config.ConfigManager;
 import com.controlj.addon.trendexport.config.ConfigManagerLoader;
+import com.controlj.addon.trendexport.helper.TimeDeterminator;
 import com.controlj.addon.trendexport.helper.TrendPathAndDBTableName;
 import com.controlj.green.addonsupport.xdatabase.DatabaseException;
 import org.jetbrains.annotations.Nullable;
@@ -33,10 +34,8 @@ import org.jetbrains.annotations.Nullable;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Collection;
-import java.util.GregorianCalendar;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -46,8 +45,10 @@ import java.util.concurrent.atomic.AtomicReference;
 public class ScheduledTrendCollector implements ServletContextListener
 {
     private static final AtomicReference<ScheduledTrendCollector> collectorRef = new AtomicReference<ScheduledTrendCollector>();
+    private static final AtomicReference<TimeDeterminator> TIME_DETERMINATOR = new AtomicReference<TimeDeterminator>();
 
     private final ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
+//    private static final StatisticsLibrarian statisticsCollector = new StatisticsLibrarian();
     @Nullable
     private ScheduledFuture<?> collectionHandler;
     private static Calendar nextCollectionDate;
@@ -61,7 +62,7 @@ public class ScheduledTrendCollector implements ServletContextListener
         {
             ConfigManager configManager = new ConfigManagerLoader().loadConnectionInfoFromDataStore();
             initializeAndScheduleCollector(configManager);
-            StatisticsCollector.getStatisticsCollector().loadFromDataSore();
+//            statisticsCollector.loadFromDataSore();
         }
         catch (Exception e)
         {
@@ -95,6 +96,7 @@ public class ScheduledTrendCollector implements ServletContextListener
         if (collectionHandler != null && !collectionHandler.isCancelled())
             collectionHandler.cancel(false);
 
+        // set up synchronizer
         final DBAndSchemaSynchronizer synchronizer;
         try
         {
@@ -106,11 +108,14 @@ public class ScheduledTrendCollector implements ServletContextListener
             return;
         }
 
+        // where injection of changing the configuration happens
         final ScheduledConfigurationLoader loader = new ScheduledConfigurationLoader(manager);
-        long initialDelay = loader.calculateDelay();
-        final long interval = loader.calculateInterval();
+        TIME_DETERMINATOR.set(TimeDeterminator.getTimeDeterminator(manager.getConfiguration().getCollectionString()));
+        final TimeDeterminator timeDeterminator = TIME_DETERMINATOR.get();
+        nextCollectionDate = timeDeterminator.calculateNextScheduledCollection();
+        final long initialDelay = timeDeterminator.calculateInitialDelay();
+        final long interval = timeDeterminator.calculateInterval();
 
-        nextCollectionDate = loader.getScheduledCalendarDate();
 
         collectionHandler = executor.scheduleAtFixedRate(new Runnable()
                 {
@@ -123,34 +128,26 @@ public class ScheduledTrendCollector implements ServletContextListener
                         }
                         catch (DatabaseException e)
                         {
-                            ErrorHandler.handleError("What?", e);
+                            ErrorHandler.handleError("Database Failure?", e);
                         }
+
                         Collection<TrendPathAndDBTableName> trendPathAndDBTableNames = synchronizer.getSourceMappings().getSourcesAndTableNames();
-                            DataCollector.collectData(synchronizer, synchronizer.getReferencePaths(trendPathAndDBTableNames));
-                            nextCollectionDate = loader.getScheduledCalendarDate();
+                        DataCollector.collectData(synchronizer, synchronizer.getReferencePaths(trendPathAndDBTableNames));
+                        nextCollectionDate = timeDeterminator.calculateNextScheduledCollection();
                     }
                 }, initialDelay, interval, TimeUnit.MILLISECONDS);
     }
 
-    public static String getNextCollectionDate()
+    // Used to get the next collection date
+    public static String getCollectionDateForStatus()
     {
-        // format here
-        String formatPattern = getFormatPattern(nextCollectionDate);
-        return new SimpleDateFormat(formatPattern).format(nextCollectionDate.getTime());
+        return TIME_DETERMINATOR.get().getNextCollectionTimeForStatus();
     }
 
+    // Used to get what table the collector is placing data into
     public static String getTableName()
     {
         return DataCollector.getTableName();
-    }
-
-    private static String getFormatPattern(Calendar nextCollectionDate)
-    {
-        Calendar now = new GregorianCalendar();
-        if (nextCollectionDate.get(Calendar.DAY_OF_MONTH) == now.get(Calendar.DAY_OF_MONTH))
-            return "'Today at' h:mm a"; // format: "Today at " + Time of day + "AM/PM"
-        else
-            return "MM/dd/yy 'at' hh:mm a"; // format "day/month/year at Time + AM/PM
     }
 }
 

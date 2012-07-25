@@ -5,9 +5,9 @@ import com.controlj.addon.trendexport.config.ConfigManager;
 import com.controlj.addon.trendexport.config.ConfigManagerLoader;
 import com.controlj.addon.trendexport.helper.TrendPathAndDBTableName;
 import com.controlj.addon.trendexport.helper.TrendSourceTypeAndPathResolver;
+import com.controlj.addon.trendexport.statistics.StatisticsLibrarian;
+import com.controlj.addon.trendexport.statistics.Statistics;
 import com.controlj.addon.trendexport.util.ErrorHandler;
-import com.controlj.addon.trendexport.util.Statistics;
-import com.controlj.addon.trendexport.util.StatisticsCollector;
 import com.controlj.green.addonsupport.access.SystemException;
 import com.controlj.green.addonsupport.xdatabase.DatabaseException;
 import com.controlj.green.addonsupport.xdatabase.DatabaseVersionMismatchException;
@@ -22,7 +22,9 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.NumberFormat;
-import java.util.*;
+import java.util.Collection;
+import java.util.Date;
+import java.util.List;
 
 public class TableListServlet extends HttpServlet
 {
@@ -133,7 +135,7 @@ public class TableListServlet extends HttpServlet
     private String convertStatisticsToHTMLTable(String source)
     {
 //        get the collection of stats for a source
-        List<Statistics> sourceStatsList = StatisticsCollector.getStatisticsCollector().getStatisticsForSource(source);
+        List<Statistics> sourceStatsList = new StatisticsLibrarian().getStatisticsForSource(source);
         if (sourceStatsList.isEmpty())
             return "<p style=\"background-color:#d7e1c5;\">No stats found for this source.</p>";
 

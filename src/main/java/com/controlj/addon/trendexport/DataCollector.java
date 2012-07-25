@@ -25,10 +25,9 @@ package com.controlj.addon.trendexport;
 import com.controlj.addon.trendexport.exceptions.SourceMappingNotFoundException;
 import com.controlj.addon.trendexport.exceptions.TableNotInDatabaseException;
 import com.controlj.addon.trendexport.helper.TrendSourceTypeAndPathResolver;
+import com.controlj.addon.trendexport.statistics.*;
 import com.controlj.addon.trendexport.util.AlarmHandler;
 import com.controlj.addon.trendexport.util.ErrorHandler;
-import com.controlj.addon.trendexport.util.Statistics;
-import com.controlj.addon.trendexport.util.StatisticsCollector;
 import com.controlj.green.addonsupport.access.*;
 import com.controlj.green.addonsupport.access.aspect.TrendSource;
 import com.controlj.green.addonsupport.access.trend.TrendData;
@@ -51,8 +50,8 @@ public class DataCollector
 
     public static void collectData(DBAndSchemaSynchronizer synchronizer, Collection<String> referencePaths)
     {
-        // store here so it's always stored after or only store if successful?
-        Statistics globalStats = new Statistics();
+        final StatisticsLibrarian statisticsLibrarian = new StatisticsLibrarian();
+        final StatisticsAccumulator globalStats = new StatisticsAccumulator();
         globalStats.setDate(new Date());
 
         try
@@ -64,12 +63,15 @@ public class DataCollector
             {
                 try
                 {
-                    Statistics sourceStats = new Statistics();
-                    collectDataForSource(source, synchronizer, sourceStats, globalStats);
+                    StatisticsAccumulator accumulator = new StatisticsAccumulator();
+                    collectDataForSource(source, synchronizer, accumulator);
 
                     String lookup = TrendSourceTypeAndPathResolver.getPersistentLookupString(source);
-                    StatisticsCollector.getStatisticsCollector().storeCollectionStatistics(lookup, sourceStats);
-                    StatisticsCollector.getStatisticsCollector().writeToDataStore();
+                    globalStats.addElapsedTime(accumulator.getElapsedTime());
+                    globalStats.addSamples(accumulator.getSamples());
+
+                    statisticsLibrarian.storeCollectionStatistics(lookup, new Statistics(accumulator.getDate(), accumulator.getElapsedTime(), accumulator.getSamples()));
+
                 }
                 catch (SourceMappingNotFoundException e)
                 {
@@ -103,20 +105,22 @@ public class DataCollector
         }
         finally
         {
-            StatisticsCollector.getStatisticsCollector().storeCollectionStatistics("global", globalStats);
-            StatisticsCollector.getStatisticsCollector().writeToDataStore();
+            Statistics holder = new Statistics(globalStats.getDate(), globalStats.getElapsedTime(), globalStats.getSamples());
+            statisticsLibrarian.storeCollectionStatistics("global", holder);
+            statisticsLibrarian.writeToDataStore();
+
             synchronizer.disconnect();
             isBusy.set(false);
         }
     }
 
-    private static void collectDataForSource(String source, DBAndSchemaSynchronizer synchronizer, Statistics singleSourceStats, Statistics globalStats)
+    private static void collectDataForSource(String source, DBAndSchemaSynchronizer synchronizer, StatisticsAccumulator singleSourceStats)
             throws SourceMappingNotFoundException, TableNotInDatabaseException, TrendException, DatabaseException, SystemException
     {
         lock.lock(); isBusy.set(true);
         tableName.set(synchronizer.getSourceMappings().getTableNameFromSource(source));
 
-        copyLatestTrendHistory(source, synchronizer, singleSourceStats, globalStats);
+        copyLatestTrendHistory(source, synchronizer, singleSourceStats);
 
         lock.unlock(); isBusy.set(false);
     }
@@ -131,16 +135,16 @@ public class DataCollector
         return isBusy.get();
     }
 
-    private static void copyLatestTrendHistory(final String nodeGQLPath, final DBAndSchemaSynchronizer synchronizer, final Statistics singleStat, final Statistics globalStats)
+    private static StatisticsAccumulator copyLatestTrendHistory(final String nodeGQLPath, final DBAndSchemaSynchronizer synchronizer, final StatisticsAccumulator singleStat)
             throws DatabaseException, TrendException, TableNotInDatabaseException, SourceMappingNotFoundException, SystemException
     {
         try
         {
             SystemConnection connection = DirectAccess.getDirectAccess().getRootSystemConnection();
-            connection.runReadAction(FieldAccessFactory.newDisabledFieldAccess(), new ReadActionResult<Statistics>()
+            return connection.runReadAction(FieldAccessFactory.newDisabledFieldAccess(), new ReadActionResult<StatisticsAccumulator>()
             {
                 @Override
-                public Statistics execute(@NotNull SystemAccess systemAccess)
+                public StatisticsAccumulator execute(@NotNull SystemAccess systemAccess)
                         throws DatabaseException, NoSuchAspectException, TrendException, TableNotInDatabaseException, UnresolvableException, SourceMappingNotFoundException
                 {
                     Location startLoc = systemAccess.resolveGQLPath(nodeGQLPath);
@@ -158,15 +162,12 @@ public class DataCollector
                     int numberOfSamplesToSkip = retriever.getNumberOfSamplesToSkip();
 
                     TrendData trendData = trendSource.getTrendData(TrendRangeFactory.byDateRange(startDate, new Date()));
-                    synchronizer.insertTrendSamples(nodeGQLPath, trendData, numberOfSamplesToSkip, singleStat, globalStats);
+                    synchronizer.insertTrendSamples(nodeGQLPath, trendData, numberOfSamplesToSkip, singleStat);
 
                     // end statistics gathering and store
                     long elapsedTime = System.currentTimeMillis() - startCollection;
                     singleStat.setDate(collectionTime);
-                    singleStat.setElapsedTime(elapsedTime);
-
-                    // set up global stats
-                    globalStats.setElapsedTime(elapsedTime + globalStats.getElapsedTime());
+                    singleStat.addElapsedTime(elapsedTime);
 
                     return singleStat;
                 }
@@ -188,5 +189,7 @@ public class DataCollector
             else if (e.getCause() instanceof SourceMappingNotFoundException)
                 throw new SourceMappingNotFoundException("Source Mapping not found");
         }
+
+        throw new RuntimeException("Uncaught runtime exception!");
     }
 }

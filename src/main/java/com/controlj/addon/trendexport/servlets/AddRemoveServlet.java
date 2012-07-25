@@ -82,7 +82,7 @@ public class AddRemoveServlet extends HttpServlet
             }
             else if (actionToAttempt.contains("getCollectorStatus"))
             {
-                result = "Next automatic collection time:    " + ScheduledTrendCollector.getNextCollectionDate();
+                result = "Next automatic collection time:    " + ScheduledTrendCollector.getCollectionDateForStatus();
                 if (DataCollector.isCollectorBusy())
                     result = "Running Collection for table:    " + ScheduledTrendCollector.getTableName();
             }
