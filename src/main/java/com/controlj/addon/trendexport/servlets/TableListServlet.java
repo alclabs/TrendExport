@@ -167,10 +167,10 @@ public class TableListServlet extends HttpServlet
     {
         StringBuilder builder = new StringBuilder();
         builder.append("<tr class=\"").append(isOdd ? "odd" : "even").append("\">").
-                append("<td>").append(DateFormat.getDateTimeInstance().format(date)).
-                append("</td><td>").append(formatTime(elapsedTime)).
-                append("</td><td>").append(NumberFormat.getInstance().format(samples)).
-                append("</td></tr>");
+                append("<td>").append(DateFormat.getDateTimeInstance().format(date)).append("</td>").
+                append("<td>").append(formatTime(elapsedTime)).append("</td>").
+                append("<td>").append(NumberFormat.getInstance().format(samples)).append("</td>").
+                append("</tr>");
 
         return builder.toString();
     }
@@ -193,7 +193,7 @@ public class TableListServlet extends HttpServlet
         StringBuilder builder = new StringBuilder();
         for (int i = iterations; i >= 0; i--)
         {
-            builder.append((int) time).append(' ').append(getTimeUnit(i)).append(' ');
+            builder.append((int) time).append(' ').append(getTimeUnit(i, (int) time)).append(' ');
             time -= (int) time;
             time *= 60;
         }
@@ -201,15 +201,20 @@ public class TableListServlet extends HttpServlet
         return builder.toString();
     }
 
-    private String getTimeUnit(int iteration)
+    private String getTimeUnit(int iteration, int value)
     {
-        if (iteration > 1)
-            return "hour(s)";
+        StringBuilder builder = new StringBuilder();
+
+        if (iteration == 0)
+            builder.append("second");
         else if (iteration == 1)
-            return "minute(s)";
+            builder.append("minute");
         else
-            return "seconds";
+            builder.append("hour");
 
+        if (value > 1)
+            builder.append("s");
 
+        return builder.toString();
     }
 }
