@@ -27,7 +27,8 @@ public class StatisticsLibrarian
     private boolean checkSourceExists(String source)
     {
         // look to see if datastore exists
-        return false;
+
+        return true;
     }
 
     public List<Statistics> getStatisticsForSource(String source)
@@ -126,7 +127,7 @@ public class StatisticsLibrarian
 
     public SourceStatsHolder loadFromDataStore(String source)
     {
-       /* try
+        try
         {
             final String sourceName = source.replace(":", "_");
             SystemConnection connection = DirectAccess.getDirectAccess().getRootSystemConnection();
@@ -147,7 +148,7 @@ public class StatisticsLibrarian
         catch (ActionExecutionException e)
         {
             e.printStackTrace();
-        }   */
+        }
 
         return new SourceStatsHolder();
     }

@@ -16,27 +16,23 @@ public class TimeDeterminator
     private final long intervalInMillis;
 
     // factory method for itself? O_o
-    public static TimeDeterminator getTimeDeterminator(String timeStringToParse)
+    public static TimeDeterminator createTimeDeterminator(String timeStringToParse)
     {
         // time based or not?
 
         String[] parts = timeStringToParse.split(":");
-        if (timeStringToParse.contains(":"))
-        {
-            // parse time
-            int hours = Integer.parseInt(parts[0]);
-            int minutes = Integer.parseInt(parts[1]);
-            boolean isAmOrPm = parts[2].equals("AM");
-
-            return new TimeDeterminator(hours, minutes, isAmOrPm);
-        }
-        else
-        {
+        if (!timeStringToParse.contains(":"))
             return new TimeDeterminator(Integer.parseInt(parts[0]));
-        }
+
+        // otherwise, the string is based on a time so parse it!
+        int hours        = Integer.parseInt(parts[0]);
+        int minutes      = Integer.parseInt(parts[1]);
+        boolean isAmOrPm = parts[2].equals("AM");
+
+        return new TimeDeterminator(hours, minutes, isAmOrPm);
     }
 
-    TimeDeterminator(int intervalInHours)
+    private TimeDeterminator(int intervalInHours)
     {
         this.collectionMethod = Configuration.CollectionMethod.Interval;
         this.intervalInMillis = convertHoursToMs(intervalInHours);
@@ -44,7 +40,7 @@ public class TimeDeterminator
     }
 
     // for specified time (based on 12 hour clock)
-    TimeDeterminator(int hourOfCollection, int minuteOfCollection, boolean isAM)
+    private TimeDeterminator(int hourOfCollection, int minuteOfCollection, boolean isAM)
     {
         this.collectionMethod = Configuration.CollectionMethod.SpecifiedTime;
         this.intervalInMillis = convertHoursToMs(24);  // interval is fixed for 24 hours (once a day)
@@ -63,23 +59,12 @@ public class TimeDeterminator
         return intervalInMillis;
     }
 
-    public long getIntervalInHours()
-    {
-        return convertMsToHours(getIntervalInMillis());
-    }
-
     // needs to calculate the calendar date based on info given
     public Calendar calculateNextScheduledCollection()
     {
-        //
-        // hopefully this adds dates as well and rolls everything needed
-        //
-
-        // add the interval to the current scheduledCollection until the time is valid
+        // Add the interval to the current scheduledCollection until the time is valid
         while (!isCurrentCollectionDateValid())
-        {
-            this.scheduledCollection.add(Calendar.HOUR_OF_DAY, (int) getIntervalInHours());
-        }
+            this.scheduledCollection.add(Calendar.HOUR_OF_DAY, (int) convertMsToHours(getIntervalInMillis()));
 
         return this.scheduledCollection; // present time in milliseconds
     }
@@ -105,9 +90,6 @@ public class TimeDeterminator
 
             return this.scheduledCollection.getTimeInMillis() - System.currentTimeMillis();
         }
-
-
-//         return this.collectionMethod == Configuration.CollectionMethod.Interval ? convertMsToHours(getIntervalInMillis()) : getIntervalInMillis();
     }
 
     /* Notes:
@@ -129,8 +111,8 @@ public class TimeDeterminator
     {
         if (date.get(Calendar.DAY_OF_MONTH) == GregorianCalendar.getInstance().get(Calendar.DAY_OF_MONTH))
             return "'Today at' h:mm a";      // format: "Today at " + Time of day + "AM/PM"
-        else
-            return "MM/dd/yy 'at' hh:mm a"; // format "day/month/year at Time + AM/PM
+
+        return "MM/dd/yy 'at' hh:mm a"; // format "day/month/year at Time + AM/PM
     }
 
     private long convertMsToHours(long ms)

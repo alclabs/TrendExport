@@ -91,9 +91,9 @@ public class SettingsPageServlet extends HttpServlet
                     try
                     {
                         return alarmLocation.hasChild(AlarmHandler.TrendExportAlarm.Test.getParameterRefName()) &&
-                                alarmLocation.hasChild(AlarmHandler.TrendExportAlarm.CollectionFailure.getParameterRefName()) &&
-                                alarmLocation.hasChild(AlarmHandler.TrendExportAlarm.HistorianDisabled.getParameterRefName()) &&
-                                alarmLocation.hasChild(AlarmHandler.TrendExportAlarm.DatabaseWriteFailure.getParameterRefName());
+                               alarmLocation.hasChild(AlarmHandler.TrendExportAlarm.CollectionFailure.getParameterRefName()) &&
+                               alarmLocation.hasChild(AlarmHandler.TrendExportAlarm.HistorianDisabled.getParameterRefName()) &&
+                               alarmLocation.hasChild(AlarmHandler.TrendExportAlarm.DatabaseWriteFailure.getParameterRefName());
                     }
                     catch (Exception e)
                     {
@@ -170,26 +170,6 @@ public class SettingsPageServlet extends HttpServlet
         String method = req.getParameter("collMethod");
         String value = req.getParameter("collValue");
         String alarmPath = req.getParameter("alarmPath");
-
-//        long time;
-        if (value.contains(":"))
-        {
-//            int start = value.indexOf(':');
-//            int end = value.lastIndexOf(':');
-//            int hours = Integer.parseInt(value.substring(0, start));
-//            int minutes = Integer.parseInt(value.substring(start + 1, end));
-
-            // hours -> ms = 60 * 60 * 1000
-//            time = hours * 3600000 + (minutes * 60000);
-//            if (value.contains("AM"))
-//                time *= -1;
-        }
-        else
-        {
-//            time = Long.parseLong(value);
-//            if (time < 1 || time > 1440)
-//                throw new IllegalArgumentException("Time must be within 1 and 1440 hours");
-        }
 
         Configuration.CollectionMethod collectionMethod;
         if (method.contains("interval"))

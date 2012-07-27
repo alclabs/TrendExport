@@ -70,7 +70,7 @@ public class TableListServlet extends HttpServlet
         }
         catch (Exception e)
         {
-            resp.sendError(500, "Unable to load list of sources.");
+            resp.sendError(500, "Unable to load list due to an unspecified error.");
         }
         finally
         {
@@ -184,7 +184,7 @@ public class TableListServlet extends HttpServlet
         }
 
         StringBuilder builder = new StringBuilder();
-        for (int i = 0; i <= iterations; i++)
+        for (int i = iterations; i >= 0; i--)
         {
             builder.append((int) time).append(' ').append(getTimeUnit(i)).append(' ');
             time -= (int) time;
@@ -196,13 +196,12 @@ public class TableListServlet extends HttpServlet
 
     private String getTimeUnit(int iteration)
     {
-        if (iteration == 0)
-            return "sec";
-
-        if (iteration == 1)
-            return "mins";
+        if (iteration > 1)
+            return "hour(s)";
+        else if (iteration == 1)
+            return "minute(s)";
         else
-            return "hrs";
+            return "seconds";
 
 
     }

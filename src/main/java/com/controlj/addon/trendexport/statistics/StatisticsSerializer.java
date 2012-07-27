@@ -15,13 +15,13 @@ public class StatisticsSerializer
     private SourceStatsHolder parseFlatStatistics(String[] strings)
     {
         SourceStatsHolder holder = new SourceStatsHolder();
-        int lengthForEach = (int) Long.parseLong(strings[1]);
+//        int lengthForEach = (int) Long.parseLong(strings[0]);
 
-        for (int i = 2; i < lengthForEach; i++)
+        for (int i = 0; i <= strings.length-1; i+=3)
         {
             Date date = new Date(Long.parseLong(strings[i]));
-            long duration = Long.parseLong(strings[1 + i + lengthForEach]);
-            long samples = Long.parseLong(strings[2 + i + lengthForEach]);
+            long duration = Long.parseLong(strings[i+1]);
+            long samples = Long.parseLong(strings[i+2]);
 
             holder.addStatistics(new Statistics(date, duration, samples));
         }
@@ -38,8 +38,6 @@ public class StatisticsSerializer
     public String serialize(List<Statistics> holderList)
     {
         StringBuilder builder = new StringBuilder();
-        builder.append(holderList.size()).append(";");
-
         for (Statistics s : holderList)
             builder.append(serialize(s)).append(";");
 
