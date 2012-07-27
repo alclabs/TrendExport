@@ -47,7 +47,6 @@ public class ScheduledTrendCollector implements ServletContextListener
     private static final AtomicReference<TimeDeterminator> TIME_DETERMINATOR = new AtomicReference<TimeDeterminator>();
 
     private final ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
-    //    private static final StatisticsLibrarian statisticsCollector = new StatisticsLibrarian();
     @Nullable
     private ScheduledFuture<?> collectionHandler;
 

@@ -60,13 +60,13 @@ public class TimeDeterminator
     }
 
     // needs to calculate the calendar date based on info given
-    public Calendar calculateNextScheduledCollection()
+    public synchronized Calendar calculateNextScheduledCollection()
     {
         // Add the interval to the current scheduledCollection until the time is valid
         while (!isCurrentCollectionDateValid())
             this.scheduledCollection.add(Calendar.HOUR_OF_DAY, (int) convertMsToHours(getIntervalInMillis()));
 
-        return this.scheduledCollection; // present time in milliseconds
+        return this.scheduledCollection; // next scheduled collection
     }
 
     // valid means that the scheduled collection is scheduled for the future (after now)
@@ -78,7 +78,7 @@ public class TimeDeterminator
     /* Notes:
         * 1) Specified time - determine next scheduled date.  return the difference the time between the next scheduled date and now.
         * 2) Interval       - if the current scheduled date is before now (i.e. the collection date is not valid)*/
-    public long calculateInitialDelay()
+    public synchronized long calculateInitialDelay()
     {
         if (this.collectionMethod == Configuration.CollectionMethod.Interval)
             return getIntervalInMillis();
@@ -95,13 +95,13 @@ public class TimeDeterminator
     /* Notes:
         * 1) Specified time - determine next scheduled date. Calculate the time between then and now.
         * 2) Interval       - Fixed given that the interval is the value given...*/
-    public long calculateInterval()
+    public synchronized long calculateInterval()
     {
         return this.collectionMethod == Configuration.CollectionMethod.Interval ? getIntervalInMillis() : convertHoursToMs(24);
     }
 
     // get formatted string for calculated time here
-    public String getNextCollectionTimeForStatus()
+    public synchronized String getNextCollectionTimeForStatus()
     {
         String formatPattern = getFormatPattern(this.scheduledCollection);
         return new SimpleDateFormat(formatPattern).format(this.scheduledCollection.getTime());

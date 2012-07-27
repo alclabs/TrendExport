@@ -134,13 +134,7 @@ $(function()
 
                     return nRow;
                 },
-                "fnInitComplete": function()
-                {
-                    /*$('#maintenanceTable tbody tr').live('click', function()
-                    {
-
-                    });*/
-                }
+                "fnInitComplete": function() { }
             });
 
     function displayStatistics(tableOfAllSources, td)
@@ -149,9 +143,11 @@ $(function()
         var dialog = $('#stats_dialog').dialog({
                     autoOpen: false,
                     closeOnEscape: true,
+                    draggable: false,
                     modal: true,
-                    title: "Statistics",
                     minWidth: 400,
+                    resizable: false,
+                    title: "Statistics",
                     width: 600
                 });
 

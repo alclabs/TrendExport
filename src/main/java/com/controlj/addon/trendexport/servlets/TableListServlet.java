@@ -141,26 +141,33 @@ public class TableListServlet extends HttpServlet
 
         StringBuilder builder = new StringBuilder();
 //        builder.append("<table cellpadding = \"5\" cellspacing=\"0\" border=\"0\" style=\"padding-left:50px;background-color:#d7e1c5;\">");
-        builder.append("<table cellpadding = \"10\" cellspacing=\"10\" border=\"0\" style=\"padding-left:50px;\">");
-        builder.append("<tr><td>Date of Collection</td>").append("<td>Collection Duration</td>").append("<td>Samples Collected</td></tr>");
+        builder.append("<table class=\"pretty\" >");
+        builder.append("<thead><tr>")
+               .append("<th>Date of Collection</th>")
+               .append("<th>Collection Duration</th>")
+               .append("<th>Samples Collected</th></tr></thead>")
+                .append("<tbody>");
 
+        int i = 0;
         for (Statistics s : sourceStatsList)
-            builder.append(createHTMLForStatistics(s));
+        {
+            builder.append(createHTMLForStatistics(s, i++));
+        }
 
-        builder.append("</table>");
+        builder.append("</tbody></table>");
         return builder.toString();
     }
 
-    private String createHTMLForStatistics(Statistics statistics)
+    private String createHTMLForStatistics(Statistics statistics, int index)
     {
-        return createTableRowForList(statistics.getDate(), statistics.getElapsedTime(), statistics.getSamples());
+        return createTableRowForList(statistics.getDate(), statistics.getElapsedTime(), statistics.getSamples(), index % 2 == 0);
     }
 
-    private String createTableRowForList(Date date, Long elapsedTime, Long samples)
+    private String createTableRowForList(Date date, Long elapsedTime, Long samples, boolean isOdd)
     {
         StringBuilder builder = new StringBuilder();
-
-        builder.append("<tr><td>").append(DateFormat.getDateTimeInstance().format(date)).
+        builder.append("<tr class=\"").append(isOdd ? "odd" : "even").append("\">").
+                append("<td>").append(DateFormat.getDateTimeInstance().format(date)).
                 append("</td><td>").append(formatTime(elapsedTime)).
                 append("</td><td>").append(NumberFormat.getInstance().format(samples)).
                 append("</td></tr>");
