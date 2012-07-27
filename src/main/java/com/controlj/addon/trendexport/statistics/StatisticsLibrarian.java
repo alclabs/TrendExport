@@ -13,27 +13,15 @@ import java.util.List;
 
 public class StatisticsLibrarian
 {
-    private static final String STATS_DATASTORE_NAME = "TrendExportStats";
-
-    public StatisticsLibrarian()
-    {
-    }
+    public StatisticsLibrarian() { }
 
     public void storeCollectionStatistics(String source, Statistics statistics)
     {
         writeSourceToDataStore(source, statistics);
     }
 
-    private boolean checkSourceExists(String source)
-    {
-        // look to see if datastore exists
-
-        return true;
-    }
-
     public List<Statistics> getStatisticsForSource(String source)
     {
-        checkSourceExists(source);
         return loadFromDataStore(source).getStatisticsList();
     }
 
@@ -43,7 +31,7 @@ public class StatisticsLibrarian
 //        writeToDataStore();
     }
 
-    private void writeSourceToDataStore(String source, final Statistics statistics)
+    private synchronized void writeSourceToDataStore(String source, final Statistics statistics)
     {
         final String datastore = source.replace(":", "_");
         try
@@ -87,45 +75,7 @@ public class StatisticsLibrarian
         }
     }
 
-    public void writeToDataStore()
-    {
-        /*try
-        {
-            SystemConnection connection = DirectAccess.getDirectAccess().getRootSystemConnection();
-            connection.runWriteAction(STATS_DATASTORE_NAME, new WriteAction()
-            {
-                @Override
-                public void execute(@NotNull WritableSystemAccess access) throws IOException
-                {
-                    DataStore store = access.getSystemDataStore(STATS_DATASTORE_NAME);
-                    PrintWriter writer = store.getWriter();
-
-                    // for each key, write the line for the stats map
-                    for (String key : statsMap.keySet())
-                        writer.println(key + ";" +
-                                statsMap.get(key).getStatisticsList().size() + ";" +
-                                statsMap.get(key).toString());
-
-                    writer.flush();
-                    writer.close();
-                }
-            });
-        }
-        catch (SystemException e)
-        {
-            Logger.println("Error in System when writing Statistics DataStore", e);
-        }
-        catch (WriteAbortedException e)
-        {
-            Logger.println("Write Aborted when writing Statistics DataStore", e);
-        }
-        catch (ActionExecutionException e)
-        {
-            Logger.println("Action Execution exception when writing Statistics DataStore", e);
-        }*/
-    }
-
-    public SourceStatsHolder loadFromDataStore(String source)
+    public synchronized SourceStatsHolder loadFromDataStore(String source)
     {
         try
         {
@@ -161,64 +111,4 @@ public class StatisticsLibrarian
 
         return new StatisticsSerializer().deserialize(line);
     }
-
-    /*public void loadFromDataSore()
-    {
-        try
-        {
-            SystemConnection connection = DirectAccess.getDirectAccess().getRootSystemConnection();
-            connection.runReadAction(new ReadAction()
-            {
-                @Override
-                public void execute(@NotNull SystemAccess access) throws Exception
-                {
-                    DataStore store = access.getSystemDataStore(STATS_DATASTORE_NAME);
-                    try
-                    {
-                        BufferedReader reader = store.getReader();
-                        String line = reader.readLine();
-
-                        while (line != null)
-                        {
-                            String[] flatStats = line.split(";");
-                            SourceStatsHolder holder = parseFlatStatistics(flatStats);
-                            statsMap.put(flatStats[0], holder);
-
-                            line = reader.readLine();
-                        }
-                    }
-                    catch (IOException e)
-                    {
-                        Logger.println("Error reading stats file", e);
-                        throw new IOException(e);
-                    }
-                }
-            });
-        }
-        catch (ActionExecutionException e)
-        {
-            Logger.println("Error Loading stats file!", e);
-        }
-        catch (SystemException e)
-        {
-            Logger.println("Error Loading stats file!", e);
-        }
-    }*/
-
-    /*private SourceStatsHolder parseFlatStatistics(String[] strings)
-    {
-        SourceStatsHolder holder = new SourceStatsHolder();
-        int lengthForEach = (int) Long.parseLong(strings[1]);
-
-        for (int i = 2; i < lengthForEach; i++)
-        {
-            Date date = new Date(Long.parseLong(strings[i]));
-            long duration = Long.parseLong(strings[1 + i + lengthForEach]);
-            long samples = Long.parseLong(strings[2 + i + lengthForEach]);
-
-            holder.addStatistics(new Statistics(date, duration, samples));
-        }
-
-        return holder;
-    }*/
 }

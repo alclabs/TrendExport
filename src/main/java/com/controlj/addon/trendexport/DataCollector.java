@@ -107,7 +107,6 @@ public class DataCollector
         {
             Statistics holder = new Statistics(globalStats.getDate(), globalStats.getElapsedTime(), globalStats.getSamples());
             statisticsLibrarian.storeCollectionStatistics("global", holder);
-            statisticsLibrarian.writeToDataStore();
 
             synchronizer.disconnect();
             isBusy.set(false);
