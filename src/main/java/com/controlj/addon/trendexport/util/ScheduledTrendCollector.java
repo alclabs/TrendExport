@@ -107,7 +107,6 @@ public class ScheduledTrendCollector implements ServletContextListener
         }
 
         // where injection of changing the configuration happens
-        final ScheduledConfigurationLoader loader = new ScheduledConfigurationLoader(manager);
         TIME_DETERMINATOR.set(TimeDeterminator.getTimeDeterminator(manager.getConfiguration().getCollectionString()));
         final TimeDeterminator timeDeterminator = TIME_DETERMINATOR.get();
         timeDeterminator.calculateNextScheduledCollection();

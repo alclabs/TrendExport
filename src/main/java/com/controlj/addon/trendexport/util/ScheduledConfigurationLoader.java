@@ -20,6 +20,9 @@
 * THE SOFTWARE.
 */
 
+
+// Deprecated class - remove when positive new time works
+
 package com.controlj.addon.trendexport.util;
 
 import com.controlj.addon.trendexport.config.ConfigManager;
@@ -116,6 +119,4 @@ public class ScheduledConfigurationLoader
 
         return calendar;
     }*/
-
-
 }

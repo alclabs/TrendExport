@@ -36,7 +36,7 @@ public class TimeDeterminator
         }
     }
 
-    public TimeDeterminator(int intervalInHours)
+    TimeDeterminator(int intervalInHours)
     {
         this.collectionMethod = Configuration.CollectionMethod.Interval;
         this.intervalInMillis = convertHoursToMs(intervalInHours);
@@ -44,7 +44,7 @@ public class TimeDeterminator
     }
 
     // for specified time (based on 12 hour clock)
-    public TimeDeterminator(int hourOfCollection, int minuteOfCollection, boolean isAM)
+    TimeDeterminator(int hourOfCollection, int minuteOfCollection, boolean isAM)
     {
         this.collectionMethod = Configuration.CollectionMethod.SpecifiedTime;
         this.intervalInMillis = convertHoursToMs(24);  // interval is fixed for 24 hours (once a day)
@@ -90,15 +90,12 @@ public class TimeDeterminator
         return this.scheduledCollection.getTimeInMillis() > System.currentTimeMillis();
     }
 
+    /* Notes:
+        * 1) Specified time - determine next scheduled date.  return the difference the time between the next scheduled date and now.
+        * 2) Interval       - if the current scheduled date is before now (i.e. the collection date is not valid)*/
     public long calculateInitialDelay()
     {
-        /*
-        * Notes:
-        * 1) Specified time - determine next scheduled date.  return the difference the time between the next scheduled date and now.
-        * 2) Interval       - if the current scheduled date is before now (i.e. the collection date is not valid)
-        * */
-
-         if (this.collectionMethod == Configuration.CollectionMethod.Interval)
+        if (this.collectionMethod == Configuration.CollectionMethod.Interval)
             return getIntervalInMillis();
         else
         {
@@ -113,19 +110,17 @@ public class TimeDeterminator
 //         return this.collectionMethod == Configuration.CollectionMethod.Interval ? convertMsToHours(getIntervalInMillis()) : getIntervalInMillis();
     }
 
+    /* Notes:
+        * 1) Specified time - determine next scheduled date. Calculate the time between then and now.
+        * 2) Interval       - Fixed given that the interval is the value given...*/
     public long calculateInterval()
     {
-        /*
-        * Notes:
-        * 1) Specified time - determine next scheduled date. Calculate the time between then and now.
-        * 2) Interval       - Fixed given that the interval is the value given...
-        * */
         return this.collectionMethod == Configuration.CollectionMethod.Interval ? getIntervalInMillis() : convertHoursToMs(24);
     }
 
+    // get formatted string for calculated time here
     public String getNextCollectionTimeForStatus()
     {
-        // get formatted string for calculated time here
         String formatPattern = getFormatPattern(this.scheduledCollection);
         return new SimpleDateFormat(formatPattern).format(this.scheduledCollection.getTime());
     }
@@ -133,7 +128,7 @@ public class TimeDeterminator
     private String getFormatPattern(Calendar date)
     {
         if (date.get(Calendar.DAY_OF_MONTH) == GregorianCalendar.getInstance().get(Calendar.DAY_OF_MONTH))
-            return "'Today at' h:mm a"; // format: "Today at " + Time of day + "AM/PM"
+            return "'Today at' h:mm a";      // format: "Today at " + Time of day + "AM/PM"
         else
             return "MM/dd/yy 'at' hh:mm a"; // format "day/month/year at Time + AM/PM
     }
