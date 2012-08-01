@@ -3,6 +3,7 @@ package com.controlj.addon.trendexport.servlets;
 import com.controlj.addon.trendexport.DBAndSchemaSynchronizer;
 import com.controlj.addon.trendexport.config.ConfigManager;
 import com.controlj.addon.trendexport.config.ConfigManagerLoader;
+import com.controlj.addon.trendexport.exceptions.NoStatisticsException;
 import com.controlj.addon.trendexport.helper.TrendPathAndDBTableName;
 import com.controlj.addon.trendexport.helper.TrendSourceTypeAndPathResolver;
 import com.controlj.addon.trendexport.statistics.StatisticsLibrarian;
@@ -68,6 +69,10 @@ public class TableListServlet extends HttpServlet
         {
             resp.sendError(500, "Database Corrupted. This is usually related to the MetaData Table");
         }
+        catch (NoStatisticsException e)
+        {
+            resp.sendError(500, "No statistics associated with this source.");
+        }
         catch (Exception e)
         {
             resp.sendError(500, "Unable to load list due to an unspecified error.");
@@ -132,15 +137,13 @@ public class TableListServlet extends HttpServlet
         return responseObject;
     }
 
-    private String convertStatisticsToHTMLTable(String source)
+    private String convertStatisticsToHTMLTable(String source) throws NoStatisticsException
     {
-//        get the collection of stats for a source
         List<Statistics> sourceStatsList = new StatisticsLibrarian().getStatisticsForSource(source);
         if (sourceStatsList.isEmpty())
             return "<p style=\"background-color:#d7e1c5;\">No stats found for this source.</p>";
 
         StringBuilder builder = new StringBuilder();
-//        builder.append("<table cellpadding = \"5\" cellspacing=\"0\" border=\"0\" style=\"padding-left:50px;background-color:#d7e1c5;\">");
         builder.append("<table class=\"pretty\" >");
         builder.append("<thead><tr>")
                .append("<th>Date of Collection</th>")
@@ -150,9 +153,7 @@ public class TableListServlet extends HttpServlet
 
         int i = 0;
         for (Statistics s : sourceStatsList)
-        {
             builder.append(createHTMLForStatistics(s, i++));
-        }
 
         builder.append("</tbody></table>");
         return builder.toString();
@@ -190,6 +191,7 @@ public class TableListServlet extends HttpServlet
             iterations++;
         }
 
+        // look at the iterations in reverse in order to format the time in human readable time to get hours, minutes, seconds.
         StringBuilder builder = new StringBuilder();
         for (int i = iterations; i >= 0; i--)
         {

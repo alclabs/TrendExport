@@ -2,6 +2,7 @@ package com.controlj.addon.trendexport.statistics;
 
 // class is here to maintain a list of stats
 
+import com.controlj.addon.trendexport.exceptions.NoStatisticsException;
 import com.controlj.addon.trendexport.util.Logger;
 import com.controlj.green.addonsupport.access.*;
 import org.jetbrains.annotations.NotNull;
@@ -20,9 +21,13 @@ public class StatisticsLibrarian
         writeSourceToDataStore(source, statistics);
     }
 
-    public List<Statistics> getStatisticsForSource(String source)
+    public List<Statistics> getStatisticsForSource(String source) throws NoStatisticsException
     {
-        return loadFromDataStore(source).getStatisticsList();
+        SourceStatsHolder holder = loadFromDataStore(source);
+        if (holder == null)
+            throw new NoStatisticsException("No statistics found for: " + source);
+
+        return holder.getStatisticsList();
     }
 
     public void removeStatisticsForSource(String source)
