@@ -48,43 +48,42 @@ public class ConfigManager
         try
         {
             currentConnectionInfo = XDatabase.getXDatabase().readDatabaseConnectionInfo("connection");
-
-            SystemConnection connection = DirectAccess.getDirectAccess().getRootSystemConnection();
-            configuration = connection.runReadAction(new ReadActionResult<Configuration>()
-            {
-                @Override
-                public Configuration execute(@NotNull SystemAccess systemAccess) throws IOException
-                {
-                    DataStore store = systemAccess.getSystemDataStore("TrendExportConfig");
-                    BufferedReader reader = store.getReader();
-
-//                    long timeInterval = Long.valueOf(reader.readLine());
-                    String timeInterval = reader.readLine();
-                    String collMethod = reader.readLine();
-
-                    if (collMethod == null || timeInterval == null)
-                        throw new IOException();
-
-                    Configuration.CollectionMethod method;
-                    if (collMethod.contains("Interval"))
-                        method = Configuration.CollectionMethod.Interval;
-                    else
-                        method = Configuration.CollectionMethod.SpecifiedTime;
-
-
-                    String alarmPath = reader.readLine();
-                    if (alarmPath == null || alarmPath.isEmpty())
-                        return new Configuration(timeInterval, method);
-                    else
-                        return new Configuration(timeInterval, method, alarmPath);
-                }
-            });
-
         }
         catch (IOException e)
         {
             configuration = new Configuration("12", Configuration.CollectionMethod.Interval);
         }
+
+        SystemConnection connection = DirectAccess.getDirectAccess().getRootSystemConnection();
+        configuration = connection.runReadAction(new ReadActionResult<Configuration>()
+        {
+            @Override
+            public Configuration execute(@NotNull SystemAccess systemAccess) throws IOException
+            {
+                DataStore store = systemAccess.getSystemDataStore("TrendExportConfig");
+                BufferedReader reader = store.getReader();
+
+//                    long timeInterval = Long.valueOf(reader.readLine());
+                String timeInterval = reader.readLine();
+                String collMethod = reader.readLine();
+
+                if (collMethod == null || timeInterval == null)
+                    throw new IOException();
+
+                Configuration.CollectionMethod method;
+                if (collMethod.contains("Interval"))
+                    method = Configuration.CollectionMethod.Interval;
+                else
+                    method = Configuration.CollectionMethod.SpecifiedTime;
+
+
+                String alarmPath = reader.readLine();
+                if (alarmPath == null || alarmPath.isEmpty())
+                    return new Configuration(timeInterval, method);
+                else
+                    return new Configuration(timeInterval, method, alarmPath);
+            }
+        });
     }
 
     public void save() throws IOException

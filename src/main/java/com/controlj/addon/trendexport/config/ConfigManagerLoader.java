@@ -20,10 +20,8 @@ public class ConfigManagerLoader
         {
             ErrorHandler.handleError("Error loading config file: Default configuration being used", e);
         }
-        finally
-        {
-            return manager;
-        }
+
+        return manager;
     }
 
     public static boolean isConfigured()
