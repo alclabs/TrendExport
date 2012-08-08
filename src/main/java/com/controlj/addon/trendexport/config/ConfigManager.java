@@ -51,39 +51,50 @@ public class ConfigManager
         }
         catch (IOException e)
         {
-            configuration = new Configuration("12", Configuration.CollectionMethod.Interval);
+            XDatabase.getXDatabase().saveDatabaseConnectionInfo("connection", getCurrentConnectionInfo());
         }
 
-        SystemConnection connection = DirectAccess.getDirectAccess().getRootSystemConnection();
-        configuration = connection.runReadAction(new ReadActionResult<Configuration>()
+        try
         {
-            @Override
-            public Configuration execute(@NotNull SystemAccess systemAccess) throws IOException
+            SystemConnection connection = DirectAccess.getDirectAccess().getRootSystemConnection();
+            configuration = connection.runReadAction(new ReadActionResult<Configuration>()
             {
-                DataStore store = systemAccess.getSystemDataStore("TrendExportConfig");
-                BufferedReader reader = store.getReader();
+                @Override
+                public Configuration execute(@NotNull SystemAccess systemAccess) throws IOException
+                {
+                    DataStore store = systemAccess.getSystemDataStore("TrendExportConfig");
+                    BufferedReader reader = store.getReader();
 
 //                    long timeInterval = Long.valueOf(reader.readLine());
-                String timeInterval = reader.readLine();
-                String collMethod = reader.readLine();
+                    String timeInterval = reader.readLine();
+                    String collMethod = reader.readLine();
 
-                if (collMethod == null || timeInterval == null)
-                    throw new IOException();
+                    if (collMethod == null || timeInterval == null)
+                        throw new IOException();
 
-                Configuration.CollectionMethod method;
-                if (collMethod.contains("Interval"))
-                    method = Configuration.CollectionMethod.Interval;
-                else
-                    method = Configuration.CollectionMethod.SpecifiedTime;
+                    Configuration.CollectionMethod method;
+                    if (collMethod.contains("Interval"))
+                        method = Configuration.CollectionMethod.Interval;
+                    else
+                        method = Configuration.CollectionMethod.SpecifiedTime;
 
 
-                String alarmPath = reader.readLine();
-                if (alarmPath == null || alarmPath.isEmpty())
-                    return new Configuration(timeInterval, method);
-                else
-                    return new Configuration(timeInterval, method, alarmPath);
-            }
-        });
+                    String alarmPath = reader.readLine();
+                    if (alarmPath == null || alarmPath.isEmpty())
+                        return new Configuration(timeInterval, method);
+                    else
+                        return new Configuration(timeInterval, method, alarmPath);
+                }
+            });
+        }
+        catch (Exception e)
+        {
+            configuration = new Configuration("12", Configuration.CollectionMethod.Interval);
+
+            // configuration not found or there was an error - no way to know if it exists or not - needs an API update
+            // therefore we must copy out a new configuration
+            save();
+        }
     }
 
     public void save() throws IOException

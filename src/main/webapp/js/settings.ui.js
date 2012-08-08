@@ -133,7 +133,7 @@ $(function()
 
     $("input[type='radio']").change(function()
     {
-        enableTimeSettings($("input[name=collectionSettings]:checked").val() === "time");
+        enableTimeSettings($("input[name='collectionSettings']:checked").val() === "time");
     });
 
     function updateComboSettings(thing)
@@ -164,14 +164,14 @@ $(function()
 
 function getSettingsObj(action)
 {
-    $("input[@name='collectionSettings']:checked").val() === 'checked';
+    $("input[name='collectionSettings']:checked").val() === 'interval';
 
     if (checkInputs() === null)
         return null;
-    else if ($("input[@name='collectionSettings']:checked").val() === 'interval')
+    else if ($("input[name='collectionSettings']:checked").val() === 'interval')
     {
         return {
-            "debugMode"  : $("input[@name='collectionSettings']:checked").val() === 'checked',
+            "debugMode"  : $("input[name='collectionSettings']:checked").val() === 'checked',
             "action"     : action,
             "dbType"     : $('#dbTypeCombo').val(),
             "host"       : $('#host').val(),
@@ -179,7 +179,7 @@ function getSettingsObj(action)
             "instance"   : $('#instance').val(),
             "user"       : $('#user').val(),
             "pass"       : $('#pass').val(),
-            "collMethod" : $("input[@name='collectionSettings']:checked").val(),
+            "collMethod" : $("input[name='collectionSettings']:checked").val(),
             "collValue"  : $('#intervalValue').val(),
             "alarmPath"  : $('#alarmPath').val()
         };
