@@ -28,7 +28,7 @@ public class SourceStatsHolder
 
     private void maintainListLength()
     {
-        while (statisticsList.size() > STORED_COLLECTION_LIMIT)
+        while (statisticsList.size() >= STORED_COLLECTION_LIMIT)
             statisticsList.remove(0);
     }
 }

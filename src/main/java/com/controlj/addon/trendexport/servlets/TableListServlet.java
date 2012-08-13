@@ -6,10 +6,11 @@ import com.controlj.addon.trendexport.config.ConfigManagerLoader;
 import com.controlj.addon.trendexport.exceptions.NoStatisticsException;
 import com.controlj.addon.trendexport.helper.TrendPathAndDBTableName;
 import com.controlj.addon.trendexport.helper.TrendSourceTypeAndPathResolver;
-import com.controlj.addon.trendexport.statistics.StatisticsLibrarian;
 import com.controlj.addon.trendexport.statistics.Statistics;
+import com.controlj.addon.trendexport.statistics.StatisticsLibrarian;
 import com.controlj.addon.trendexport.util.ErrorHandler;
 import com.controlj.green.addonsupport.access.SystemException;
+import com.controlj.green.addonsupport.access.UnresolvableException;
 import com.controlj.green.addonsupport.xdatabase.DatabaseException;
 import com.controlj.green.addonsupport.xdatabase.DatabaseVersionMismatchException;
 import org.json.JSONArray;
@@ -71,7 +72,7 @@ public class TableListServlet extends HttpServlet
         }
         catch (NoStatisticsException e)
         {
-            resp.sendError(500, "No statistics associated with this source.");
+            resp.sendError(500, "No statistics associated with this source. Statistics will be generated when a collection has run.");
         }
         catch (Exception e)
         {
@@ -85,7 +86,7 @@ public class TableListServlet extends HttpServlet
     }
 
     private JSONObject getCurrentList(DBAndSchemaSynchronizer synchronizer)
-            throws JSONException, DatabaseException, SystemException, com.controlj.green.addonsupport.access.UnresolvableException, DatabaseVersionMismatchException
+            throws JSONException, DatabaseException, SystemException, DatabaseVersionMismatchException
     {
         JSONArray jsonArray = new JSONArray();
         Collection<TrendPathAndDBTableName> stuffs = synchronizer.getAllSources();
@@ -107,29 +108,25 @@ public class TableListServlet extends HttpServlet
 
         for (TrendPathAndDBTableName trendPathAndDBTableName : stuffs)
         {
+            JSONObject object = new JSONObject();
+
+            String referencePath = trendPathAndDBTableName.getTrendSourceReferencePath();
+            object.put("sourceReferencePath", referencePath);
+            object.put("sourceDisplayName", trendPathAndDBTableName.getDisplayName());
+            object.put("displayPath", trendPathAndDBTableName.getTrendSourceDisplayPath());
+            object.put("tableName", trendPathAndDBTableName.getDbTableName());
+
             try
             {
-                JSONObject object = new JSONObject();
-
-                String referencePath = trendPathAndDBTableName.getTrendSourceReferencePath();
                 object.put("sourceLookupString", TrendSourceTypeAndPathResolver.getPersistentLookupString(referencePath));
-                object.put("sourceReferencePath", referencePath);
-                object.put("sourceDisplayName", trendPathAndDBTableName.getDisplayName());
-                object.put("displayPath", trendPathAndDBTableName.getTrendSourceDisplayPath());
-                object.put("tableName", trendPathAndDBTableName.getDbTableName());
-//            object.put("tableEntries", trendPathAndDBTableName.)
-
-                if (trendPathAndDBTableName.getIsEnabled())
-                    object.put("isEnabled", "Enabled");
-                else
-                    object.put("isEnabled", "Disabled");
-
-                jsonArray.put(object);
+                object.put("isEnabled", trendPathAndDBTableName.getIsEnabled() ? "Enabled" : "Disabled");
             }
-            catch (com.controlj.green.addonsupport.access.UnresolvableException e)
+            catch (UnresolvableException e)
             {
-                ErrorHandler.handleError(e.getMessage(), e);
+                object.put("isEnabled", "Disabled"); // disable it and hope for the best
             }
+
+            jsonArray.put(object);
         }
 
         JSONObject responseObject = new JSONObject();
@@ -146,9 +143,9 @@ public class TableListServlet extends HttpServlet
         StringBuilder builder = new StringBuilder();
         builder.append("<table class=\"pretty\" >");
         builder.append("<thead><tr>")
-               .append("<th>Date of Collection</th>")
-               .append("<th>Collection Duration</th>")
-               .append("<th>Samples Collected</th></tr></thead>")
+                .append("<th>Date of Collection</th>")
+                .append("<th>Collection Duration</th>")
+                .append("<th>Samples Collected</th></tr></thead>")
                 .append("<tbody>");
 
         int i = 0;
