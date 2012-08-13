@@ -11,6 +11,9 @@ public class TrendSourceTypeAndPathResolver
     {
         String path = resolveReferencePath(location, new StringBuilder()).toString();
         Logger.debuggerPrint("referencePath for " + location + " (tree " + location.getTree().getRoot() + ") is \"" + path + '\"');
+        if (!path.contains("#"))
+            path = "/trees/geographic/" + path;
+
         return path;
     }
 
