@@ -102,7 +102,7 @@ public class DBAndSchemaSynchronizer
 
     public boolean isSourceEnabled(String referenceName) throws SourceMappingNotFoundException
     {
-        return sourceMappings.getTableNameObjectFromRefPath(referenceName).getIsEnabled();
+        return sourceMappings.getTableNameObjectFromRefPath(referenceName).isEnabled();
     }
 
     // human-generated name - or passed name from another method
@@ -300,7 +300,7 @@ public class DBAndSchemaSynchronizer
 
         for (TrendPathAndDBTableName table : listOfAll)
         {
-//            if (table.getIsEnabled()) // we only want enabled source mappings
+//            if (table.isEnabled()) // we only want enabled source mappings
             mappings.addSourceAndName(table);
         }
 
@@ -314,7 +314,7 @@ public class DBAndSchemaSynchronizer
 
         for (TrendPathAndDBTableName table : listOfAll)
         {
-            if (table.getIsEnabled())
+            if (table.isEnabled())
                 mappings.addSourceAndName(table);
         }
 

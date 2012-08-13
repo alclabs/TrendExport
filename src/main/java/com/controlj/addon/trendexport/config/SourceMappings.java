@@ -129,7 +129,7 @@ public class SourceMappings
         for (TrendPathAndDBTableName t : sourcesAndTableNames)
         {
             if (t.getDbTableName().equals(tableName))
-                return t.getIsEnabled();
+                return t.isEnabled();
         }
 
         return false;

@@ -108,25 +108,25 @@ public class TableListServlet extends HttpServlet
 
         for (TrendPathAndDBTableName trendPathAndDBTableName : stuffs)
         {
-            JSONObject object = new JSONObject();
-
-            String referencePath = trendPathAndDBTableName.getTrendSourceReferencePath();
-            object.put("sourceReferencePath", referencePath);
-            object.put("sourceDisplayName", trendPathAndDBTableName.getDisplayName());
-            object.put("displayPath", trendPathAndDBTableName.getTrendSourceDisplayPath());
-            object.put("tableName", trendPathAndDBTableName.getDbTableName());
-
             try
             {
+                JSONObject object = new JSONObject();
+
+                String referencePath = trendPathAndDBTableName.getTrendSourceReferencePath();
+                object.put("sourceReferencePath", referencePath);
+                object.put("sourceDisplayName", trendPathAndDBTableName.getDisplayName());
+                object.put("displayPath", trendPathAndDBTableName.getTrendSourceDisplayPath());
+                object.put("tableName", trendPathAndDBTableName.getDbTableName());
                 object.put("sourceLookupString", TrendSourceTypeAndPathResolver.getPersistentLookupString(referencePath));
-                object.put("isEnabled", trendPathAndDBTableName.getIsEnabled() ? "Enabled" : "Disabled");
+                object.put("isEnabled", trendPathAndDBTableName.isEnabled() ? "Enabled" : "Disabled");
+
+                jsonArray.put(object);
             }
             catch (UnresolvableException e)
             {
-                object.put("isEnabled", "Disabled"); // disable it and hope for the best
+                ErrorHandler.handleError(e.getMessage(), e);
+                trendPathAndDBTableName.setIsEnabled(false); // disable the broken source?
             }
-
-            jsonArray.put(object);
         }
 
         JSONObject responseObject = new JSONObject();

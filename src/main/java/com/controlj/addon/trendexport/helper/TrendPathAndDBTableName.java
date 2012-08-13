@@ -46,7 +46,7 @@ public class TrendPathAndDBTableName
         return trendSourceDisplayPath;
     }
 
-    public boolean getIsEnabled()
+    public boolean isEnabled()
     {
         return isEnabled;
     }

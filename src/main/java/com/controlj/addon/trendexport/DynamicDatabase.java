@@ -29,12 +29,14 @@ import com.controlj.addon.trendexport.helper.TrendDataProcessor;
 import com.controlj.addon.trendexport.statistics.StatisticsAccumulator;
 import com.controlj.addon.trendexport.tables.MetaDataTable;
 import com.controlj.addon.trendexport.tables.TrendDataTable;
+import com.controlj.addon.trendexport.util.Logger;
 import com.controlj.green.addonsupport.access.TrendException;
 import com.controlj.green.addonsupport.access.trend.TrendData;
 import com.controlj.green.addonsupport.xdatabase.*;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class DynamicDatabase extends Database
@@ -66,6 +68,7 @@ public class DynamicDatabase extends Database
             throws DatabaseException
     {
         final DynamicDatabase newDatabase = new DynamicDatabase(newConfig);
+        Logger.debuggerPrint("Starting upgrade task at " + new Date(System.currentTimeMillis()));
 
         try
         {
@@ -79,11 +82,13 @@ public class DynamicDatabase extends Database
                     {
                         String tableName = newDataTable.getTableSchema().getName();
                         // set enabled
-    //                    if (keepData != newConfig.getIsEnabled(tableName))
+    //                    if (keepData != newConfig.isEnabled(tableName))
     //                        metaDataTable.setEnabled(DynamicDatabase.this, tableName, keepData);
 
                         if (!dataTables.contains(newDataTable))
                         {
+                            Logger.debuggerPrint("Attempting to add table " + tableName);
+
                             String displayName = newConfig.getDisplayNameFromTableName(tableName);
                             String displayPath = newConfig.getDisplayPathFromTableName(tableName);
                             String source = newConfig.getSourceFromTableName(tableName);
@@ -91,23 +96,32 @@ public class DynamicDatabase extends Database
                             boolean enabled = newConfig.getIsEnabled(tableName);
 
                             if (source == null)
+                            {
+                                Logger.debuggerPrint("Source (" + source + " ) does not exists for table " + tableName +
+                                                     " at " + displayPath);
                                 throw new DatabaseException("Source does not exist for table: " + tableName);
+                            }
 
                             dbAccess.addTable(new TrendDataTable(schema, tableName, type).getTableSchema());
                             metaDataTable.insertRow(DynamicDatabase.this, source, displayName, displayPath, tableName, type, enabled);
+
+                            Logger.debuggerPrint("Table added successfully");
                         }
                     }
 
                     // drop old tables no longer needed
                     for (TrendDataTable oldDataTable : dataTables)
                     {
-
                         if (!newDatabase.dataTables.contains(oldDataTable))
                         {
                             // get the source to delete the row in the metadata table
                             String tableName = oldDataTable.getTableSchema().getName();
+                            Logger.debuggerPrint("Attempting to remove table " + tableName);
+
                             Query q = buildSelect(DynamicDatabase.this.metaDataTable.referencePath).
                                     where(DynamicDatabase.this.metaDataTable.tableName.eq(tableName));
+
+                            Logger.debuggerPrint("Executing select statement " + q.toString());
 
                             Result r = dbAccess.execute(q);
                             String source = null;
@@ -121,8 +135,12 @@ public class DynamicDatabase extends Database
 
                                 if (!keepData)
                                 {
+                                    Logger.debuggerPrint("Attempting to drop table " + tableName);
+
                                     dbAccess.dropTable(oldDataTable.getTableSchema());
                                     metaDataTable.deleteRow(DynamicDatabase.this, source);
+
+                                    Logger.debuggerPrint("Table dropped successfully");
                                 }
 
                             }
@@ -133,6 +151,7 @@ public class DynamicDatabase extends Database
         }
         catch (UpgradeException e)
         {
+            Logger.debuggerPrint("UpgradeException caught...\n\n" + e.getMessage() + "\n\n" + e.getStackTrace().toString());
             throw new DatabaseException("Error adding/removing tables to match new schema", e);
         }
 
