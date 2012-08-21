@@ -59,14 +59,13 @@ $(function()
     $('#collectorStatusLabel').text("Current Status: ");
 
 
-
-
     // Global statistics button to go here
-    $('#view_global_stats_btn').button().bind("click", function()
-    {
-        // get global stats
-        displayStatistics(tableOfAllSources, null);
-    }).button('enable');
+    $('#view_global_stats_btn').button().bind("click",
+            function()
+            {
+                // get global stats
+                displayStatistics(tableOfAllSources, null);
+            }).button('enable');
 
 
     // initialize table here
@@ -134,7 +133,9 @@ $(function()
 
                     return nRow;
                 },
-                "fnInitComplete": function() { }
+                "fnInitComplete": function()
+                {
+                }
             });
 
     function displayStatistics(tableOfAllSources, td)

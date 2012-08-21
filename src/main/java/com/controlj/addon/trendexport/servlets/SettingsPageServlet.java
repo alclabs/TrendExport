@@ -130,7 +130,7 @@ public class SettingsPageServlet extends HttpServlet
             return DatabaseType.PostgreSQL;
         else if (dbType.contains("oracle"))
             return DatabaseType.Oracle;
-        else if (dbType.contains("sql server"))
+        else if (dbType.contains("sqlserver"))
             return DatabaseType.SQLServer;
         else
             return DatabaseType.Derby;

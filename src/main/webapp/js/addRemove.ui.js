@@ -65,7 +65,7 @@ function initializeTree()
                 initAjax: { url: "servlets/treedata" },
                 onPostInit: function(isReloading, isError , XMLHttpRequest, textStatus, errorThrown)
                 {
-                    if (isError)
+                    if (isError && errorThrown.length > 0)
                         alert(errorThrown);
                 },
                 onLazyRead: function(dtnode)
