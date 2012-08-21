@@ -2,21 +2,18 @@
 // and then apply it.
 configurations { gradleScript }
 repositories { mavenRepo url: 'http://repo.alcshare.com' }
-dependencies { gradleScript group: 'com.alcshare', name: 'alclabs-gradle', ext: 'gradle', version: '1.13' }
+dependencies { gradleScript group: 'com.alcshare', name: 'alclabs-gradle', ext: 'gradle', version: '1.16' }
 apply from: configurations.gradleScript.resolve().iterator().next()
 
 info {
   name = 'TrendExport'
-  description = 'Periodically copies trend data into an external database for use in 3rd party applications.'
-  version = '1.0' //+ new Date().format('yyyy/MM/dd kk:mm:ss')
+  description = 'Periodically copies trend data into an external database.'
+  version = '1.0 Beta 2' //+ new Date().format('yyyy/MM/dd kk:mm:ss')
   vendor = 'ALC Labs'
 }
 
 dependencies {
    compile 'org.json:json:20090211'
-   testCompile 'org.spockframework:spock-core:0.5-groovy-1.8', { exclude(org: 'org.codehaus.groovy', module: 'groovy-all') }
-   testCompile 'org.codehaus.groovy:groovy:1.8.3'
-
    providedCompile 'com.controlj.green:addonsupport-api-addon:1.1.+'
    providedCompile 'com.controlj.green:directaccess-api-addon:1.1.+'
    providedCompile 'com.controlj.green:webaccess-api-addon:1.1.+'

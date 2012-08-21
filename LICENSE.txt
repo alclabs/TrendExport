@@ -24,30 +24,12 @@ Several libraries are used in this product.
 Copyright and license information for each library is included below:
 
 -------------------------------------------------------------------------------
-directaccess-api-addon package
+addonsupport-api-addon, directaccess-api-addon, webaccess-api-addon and
+xdatabase-api-addon packages
 -------------------------------------------------------------------------------
 Copyright 2007-2010 Automated Logic Corporation
 Website: http://alcshare.com
 License: http://repo.alcshare.com/licenses/addon-license-1.html
-
--------------------------------------------------------------------------------
-webaccess-api-addon package
--------------------------------------------------------------------------------
-Copyright 2007-2010 Automated Logic Corporation
-Website: http://alcshare.com
-License: http://repo.alcshare.com/licenses/addon-license-1.html
-
--------------------------------------------------------------------------------
-taglibs standard package
--------------------------------------------------------------------------------
-Website: http://tomcat.apache.org/taglibs/standard/
-License: Apache version 2.0 - http://www.apache.org/licenses/LICENSE-2.0.html
-
--------------------------------------------------------------------------------
-jstl package
--------------------------------------------------------------------------------
-Website: http://java.sun.com/products/jsp/jstl/
-License: CDDL 1.0 + GPL 2.0 w/ classpath exception - http://glassfish.java.net/public/CDDL+GPL.html
 
 -------------------------------------------------------------------------------
 json package
@@ -55,28 +37,18 @@ json package
 Website: http://json.org/
 License: http://www.json.org/license.html
 
--------------------------------------------------------------------------------
-groovy package
--------------------------------------------------------------------------------
-Website: http://groovy.codehaus.org/
-License: Apache version 2.0 - http://groovy.codehaus.org/License+Information
-
--------------------------------------------------------------------------------
-spock package
--------------------------------------------------------------------------------
-Website: https://code.google.com/p/spock/
-License: Apache version 2.0 - http://www.apache.org/licenses/LICENSE-2.0.html
--------------------------------------------------------------------------------
 jQuery
 -------------------------------------------------------------------------------
 Website: http://jquery.com/
 License: http://jquery.org/license/
 -------------------------------------------------------------------------------
+
 DataTables
 -------------------------------------------------------------------------------
 Website: http://datatables.net/
 License: http://datatables.net/license_gpl2
 -------------------------------------------------------------------------------
+
 DynaTree
 -------------------------------------------------------------------------------
 Website: http://code.google.com/p/dynatree/
