@@ -39,7 +39,7 @@
 
     <script type="text/javascript" src="js/jquery.dynatree.min.js"></script>
     <script type="text/javascript" src="js/jquery.hyjack.select.min.js"></script>
-    <script type="text/javascript" src="js/jquery.dataTables.js"></script>
+    <script type="text/javascript" src="js/jquery.dataTables.min.js"></script>
     <script type="text/javascript" src="js/jquery.dataTables.fnReloadAjax.js"></script>
     <script type="text/javascript" src="js/jquery.dataTables.fnGetFilteredData.js"></script>
     <script type="text/javascript" src="js/jquery.dataTables.fnGetFilteredNodes.js"></script>
