@@ -11,6 +11,8 @@ public class TrendSourceTypeAndPathResolver
     {
         String path = resolveReferencePath(location, new StringBuilder()).toString();
         Logger.debuggerPrint("referencePath for " + location + " (tree " + location.getTree().getRoot() + ") is \"" + path + '\"');
+
+        // fixes for non-global reference paths
         if (!path.contains("#"))
             path = "/trees/geographic/" + path;
 
@@ -19,6 +21,16 @@ public class TrendSourceTypeAndPathResolver
 
     private static StringBuilder resolveReferencePath(Location location, StringBuilder builder) throws UnresolvableException
     {
+        // we can stop at the first global reference since it must be unique to a server
+        if (location.getReferenceName().charAt(0) == '#')
+        {
+            builder.append(location.getReferenceName());
+            if (!location.getChildren().isEmpty())
+                builder.append('/');
+
+            return builder;
+        }
+
         if (location.hasParent())
         {
             resolveReferencePath(location.getParent(), builder);
